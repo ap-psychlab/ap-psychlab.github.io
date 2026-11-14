@@ -55,9 +55,11 @@ main {
 h1, h2, h3 {
   font-family: var(--font-heading);
   color: var(--heading);
-  margin: 0;
+  margin: 24px 0 8px;
   line-height: 1.2;
 }
+/* No space above a heading that starts the page, a card, or a section */
+:is(h1, h2, h3):first-child { margin-top: 0; }
 h1 { font-size: 2rem; font-weight: 700; }
 h2 { font-size: 1.25rem; font-weight: 600; }
 h3 { font-size: 1.1rem; font-weight: 600; }
@@ -68,8 +70,7 @@ a { color: var(--link); }
 .hint {
   color: var(--muted);
   font-size: .9rem;
-  max-width: 65ch;
-  margin: 4px 0 16px;
+  margin: 8px 0 16px;
 }
 
 /* ---------- Surfaces ---------- */
