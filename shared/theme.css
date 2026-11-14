@@ -1,0 +1,162 @@
+/* ==========================================================
+   AP Psych Demos — shared theme
+   Link from a demo folder with:
+   <link rel="stylesheet" href="../shared/theme.css">
+   Demo-specific styles go in that demo's own style.css.
+   ========================================================== */
+
+:root {
+  /* Core palette */
+  --bg: #FAF6F0;         /* page background */
+  --bg-alt: #EFE6DA;     /* alternate sections, panels */
+  --card: #E3D5C3;       /* cards, tiles, footer */
+  --heading: #3B2A20;    /* headings */
+  --text: #5A4636;       /* body text */
+  --muted: #8A7565;      /* captions, helper text */
+  --btn: #6F4E37;        /* primary button (text: --bg) */
+  --btn-hover: #5A3E2B;  /* primary hover */
+  --btn2: #C8A27C;       /* secondary button (text: --heading) */
+  --link: #8B5E3C;       /* links */
+  --accent: #B9835A;     /* highlights, badges */
+  --sage: #A9B49A;       /* soft accent, positive/correct */
+  --error: #A64B3C;      /* wrong answers, warnings */
+  --border: #D9C9B6;     /* borders, dividers */
+
+  /* Secondary accents: only when the main accents run out */
+  --blue: #6F8FA6;
+  --plum: #8C6B80;
+  --honey: #D1A64A;
+  --teal: #5E8C86;
+
+  /* Non-color tokens */
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06);
+  --radius-card: 12px;
+  --radius-btn: 8px;
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Lato', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 1rem/1.5 var(--font-body);
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 20px 24px;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  color: var(--heading);
+  margin: 0;
+  line-height: 1.2;
+}
+h1 { font-size: 2rem; font-weight: 700; }
+h2 { font-size: 1.25rem; font-weight: 600; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+
+a { color: var(--link); }
+
+/* Helper text under a heading, captions, control hints */
+.hint {
+  color: var(--muted);
+  font-size: .9rem;
+  max-width: 65ch;
+  margin: 4px 0 16px;
+}
+
+/* ---------- Surfaces ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+/* ---------- Buttons ---------- */
+/* .btn = primary, .btn.alt = secondary, .btn.ghost = outline */
+.btn {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: var(--radius-btn);
+  border: 1px solid transparent;
+  font: 700 1rem var(--font-body);
+  cursor: pointer;
+  background: var(--btn);
+  color: var(--bg);
+  transition: background-color .15s, transform .1s;
+}
+.btn:hover { background: var(--btn-hover); }
+.btn:active { transform: scale(.97); }
+
+.btn.alt { background: var(--btn2); color: var(--heading); }
+.btn.alt:hover { background: var(--btn2); filter: brightness(.95); }
+
+.btn.ghost { background: transparent; color: var(--heading); border-color: var(--btn); }
+.btn.ghost:hover { background: var(--bg-alt); }
+
+.btn:disabled { opacity: .5; cursor: default; transform: none; }
+
+/* Centered row of buttons/controls */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* ---------- Stat tiles ---------- */
+/* <div class="stats"><div class="stat"><span>Label</span><strong>0</strong></div>…</div> */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 8px;
+  text-align: center;
+}
+.stat span {
+  display: block;
+  font-size: .85rem;
+  color: var(--muted);
+}
+.stat strong {
+  display: block;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--heading);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* ---------- Accessibility ---------- */
+:is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--heading);
+  outline-offset: 3px;
+}
+
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+  .btn:active { transform: none; }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 420px) {
+  h1 { font-size: 1.6rem; }
+}
