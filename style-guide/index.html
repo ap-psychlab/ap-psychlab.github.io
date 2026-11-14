@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style Guide · theme.css</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/theme.css">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<main>
+  <h1>Style Guide</h1>
+  <p class="hint">Everything on this page is drawn by <code>shared/theme.css</code>. Labels in <code>code</code> are the token or class name to use in a demo. Press Tab to see focus outlines.</p>
+
+  <nav class="toc" aria-label="Sections">
+    <a href="#colors">Colors</a>
+    <a href="#type">Typography</a>
+    <a href="#buttons">Buttons</a>
+    <a href="#cards">Cards</a>
+    <a href="#stats">Stat tiles</a>
+    <a href="#layout">Layout &amp; spacing</a>
+    <a href="#a11y">Accessibility</a>
+  </nav>
+
+  <!-- ============ COLORS ============ -->
+  <section id="colors" class="sg">
+    <h2>Colors</h2>
+    <p class="hint">Hex values are read live from <code>theme.css</code>. Use them in CSS as <code>var(--token)</code>.</p>
+
+    <h3>Core palette</h3>
+    <div class="swatches" data-tokens="
+      bg|Page background
+      bg-alt|Alternate sections, panels
+      card|Cards, tiles, footer
+      border|Borders, dividers
+      heading|Headings
+      text|Body text
+      muted|Captions, helper text
+      link|Links
+      btn|Primary button
+      btn-hover|Primary button hover
+      btn2|Secondary button
+      accent|Highlights, badges
+      sage|Positive / correct
+      error|Wrong answers, warnings"></div>
+
+    <h3>Secondary accents</h3>
+    <p class="hint">Only when <code>--accent</code>, <code>--sage</code>, and <code>--error</code> aren't enough categories.</p>
+    <div class="swatches" data-tokens="
+      blue|Extra category, cool contrast
+      plum|Extra category
+      honey|Highlights, warm emphasis
+      teal|Extra category"></div>
+
+    <h3>Text on fills</h3>
+    <p class="hint">Small text on light accent fills uses <code>--heading</code>. Accents are never used as small text color on light backgrounds.</p>
+    <div class="badges">
+      <span class="badge" data-fill="accent">--accent</span>
+      <span class="badge" data-fill="sage">--sage ✓ Correct</span>
+      <span class="badge" data-fill="btn2">--btn2</span>
+      <span class="badge" data-fill="honey">--honey</span>
+      <span class="badge" data-fill="blue">--blue</span>
+      <span class="badge on-dark" data-fill="error">--error ✗ Wrong (text: --bg)</span>
+    </div>
+  </section>
+
+  <!-- ============ TYPOGRAPHY ============ -->
+  <section id="type" class="sg">
+    <h2>Typography</h2>
+    <div class="specimens">
+      <div class="spec">
+        <h1>Heading 1</h1>
+        <code>h1</code><span class="meta">Playfair Display 700 · 2rem (1.6rem on phones) · --heading</span>
+      </div>
+      <div class="spec">
+        <h2>Heading 2</h2>
+        <code>h2</code><span class="meta">Playfair Display 600 · 1.25rem · --heading</span>
+      </div>
+      <div class="spec">
+        <h3>Heading 3</h3>
+        <code>h3</code><span class="meta">Playfair Display 600 · 1.1rem · --heading</span>
+      </div>
+      <div class="spec">
+        <p class="body-sample">Body text. Short-term memory holds a handful of items for about 20 seconds unless they are rehearsed.</p>
+        <code>p</code><span class="meta">Lato 400 · 1rem · line-height 1.5 · --text</span>
+      </div>
+      <div class="spec">
+        <p class="body-sample"><strong>Bold body text</strong> for emphasis.</p>
+        <code>strong</code><span class="meta">Lato 700 · --text</span>
+      </div>
+      <div class="spec">
+        <p class="hint">Helper text: click the pads or press R, G, Y, B.</p>
+        <code>.hint</code><span class="meta">Lato 400 · 0.9rem · --muted · margin 4px top, 16px bottom</span>
+      </div>
+      <div class="spec">
+        <p class="body-sample">A <a href="#type">sample link</a> in a sentence.</p>
+        <code>a</code><span class="meta">--link</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BUTTONS ============ -->
+  <section id="buttons" class="sg">
+    <h2>Buttons</h2>
+    <p class="hint">Hover, click, and Tab to each to see their states. One primary button per screen.</p>
+    <div class="row">
+      <div class="labeled"><button class="btn">Primary</button><code>.btn</code></div>
+      <div class="labeled"><button class="btn alt">Secondary</button><code>.btn.alt</code></div>
+      <div class="labeled"><button class="btn ghost">Outline</button><code>.btn.ghost</code></div>
+    </div>
+    <div class="row">
+      <div class="labeled"><button class="btn" disabled>Primary</button><code>.btn disabled</code></div>
+      <div class="labeled"><button class="btn alt" disabled>Secondary</button><code>.btn.alt disabled</code></div>
+      <div class="labeled"><button class="btn ghost" disabled>Outline</button><code>.btn.ghost disabled</code></div>
+    </div>
+    <ul class="notes">
+      <li>All buttons: 44px min height, 8px radius (<code>--radius-btn</code>), Lato 700, shrink to 97% when pressed.</li>
+      <li><code>.btn</code>: <code>--btn</code> fill, <code>--bg</code> text, hover <code>--btn-hover</code>.</li>
+      <li><code>.btn.alt</code>: <code>--btn2</code> fill, <code>--heading</code> text, hover darkens 5%.</li>
+      <li><code>.btn.ghost</code>: transparent, <code>--btn</code> border, hover <code>--bg-alt</code>.</li>
+      <li>Disabled: 50% opacity, no hover or press effect.</li>
+    </ul>
+
+    <h3>Button row</h3>
+    <div class="outline-demo">
+      <div class="row">
+        <button class="btn">Start</button>
+        <button class="btn alt">Sound: On</button>
+      </div>
+    </div>
+    <p class="caption"><code>.row</code> centers and wraps its items with an 8px gap and 16px below (dashed outline shows the row).</p>
+  </section>
+
+  <!-- ============ CARDS ============ -->
+  <section id="cards" class="sg">
+    <h2>Cards</h2>
+    <div class="card">
+      <h2>Card title</h2>
+      <p>A card groups related content, like results or instructions. It has a <code>--card</code> background, 1px <code>--border</code>, 12px radius (<code>--radius-card</code>), 16px padding, and a faint <code>--shadow</code>.</p>
+      <div class="row" style="justify-content:flex-start;margin-bottom:0">
+        <button class="btn">Primary action</button>
+        <button class="btn ghost">Secondary</button>
+      </div>
+    </div>
+    <p class="caption"><code>&lt;section class="card"&gt;</code></p>
+
+    <h3>Panel on alternate background</h3>
+    <div class="panel-demo">
+      <p>Alternate sections use <code>--bg-alt</code> to separate them from the page without the weight of a card.</p>
+    </div>
+    <p class="caption">No theme class yet; written per demo with <code>background: var(--bg-alt)</code>.</p>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section id="stats" class="sg">
+    <h2>Stat tiles</h2>
+    <div class="stats">
+      <div class="stat"><span>Round</span><strong>7</strong></div>
+      <div class="stat"><span>Score</span><strong>6</strong></div>
+      <div class="stat"><span>Session best</span><strong>11</strong></div>
+      <div class="stat"><span>Accuracy</span><strong>83%</strong></div>
+    </div>
+    <p class="caption"><code>.stats</code> holds <code>.stat</code> tiles: label in <code>&lt;span&gt;</code> (0.85rem, <code>--muted</code>), value in <code>&lt;strong&gt;</code> (1.6rem, <code>--heading</code>, tabular numbers). Tiles are at least 96px wide and wrap as needed.</p>
+  </section>
+
+  <!-- ============ LAYOUT ============ -->
+  <section id="layout" class="sg">
+    <h2>Layout &amp; spacing</h2>
+    <ul class="notes">
+      <li><code>main</code>: single centered column, max-width 900px, padding 16px top, 20px sides, 24px bottom.</li>
+      <li>Spacing follows an 8px grid. Bars below show the common steps.</li>
+      <li>Headings have no default margin; each demo sets spacing around them.</li>
+    </ul>
+    <div class="spacing">
+      <div><span class="bar" style="width:8px"></span><code>8px</code></div>
+      <div><span class="bar" style="width:16px"></span><code>16px</code></div>
+      <div><span class="bar" style="width:24px"></span><code>24px</code></div>
+      <div><span class="bar" style="width:32px"></span><code>32px</code></div>
+      <div><span class="bar" style="width:48px"></span><code>48px</code></div>
+    </div>
+    <h3>Corner radius</h3>
+    <div class="radii">
+      <div><span class="rbox" style="border-radius:var(--radius-btn)"></span><code>--radius-btn</code> 8px</div>
+      <div><span class="rbox" style="border-radius:var(--radius-card)"></span><code>--radius-card</code> 12px</div>
+    </div>
+  </section>
+
+  <!-- ============ ACCESSIBILITY ============ -->
+  <section id="a11y" class="sg">
+    <h2>Accessibility</h2>
+    <div class="row" style="justify-content:flex-start">
+      <div class="labeled"><button class="btn ghost" id="focusDemo">Focus example</button><code>:focus-visible</code></div>
+    </div>
+    <ul class="notes">
+      <li>Focus outline: 3px <code>--heading</code>, 3px offset. Shows on keyboard focus for buttons, links, and form fields.</li>
+      <li><code>hidden</code> attribute always hides an element, even one with its own <code>display</code> setting.</li>
+      <li>When a device has "reduce motion" on, button transitions and press-shrink are turned off.</li>
+      <li>Don't rely on color alone: pair colors with a label, icon, or pattern.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
