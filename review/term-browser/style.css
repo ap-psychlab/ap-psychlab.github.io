@@ -1,0 +1,94 @@
+/* Term Browser — demo-specific styles (theme comes from ../../shared/theme.css) */
+
+/* Segmented control for the unit system */
+.seg[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
+.seg[aria-pressed="true"]:hover { background: var(--btn-hover); }
+
+/* ---------- Three-column browser ---------- */
+.browser {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.8fr);
+  gap: 8px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+.col { padding: 8px; }
+.col h2 { padding: 4px 8px 0; }
+.empty { color: var(--muted); font-size: .9rem; margin: 0; padding: 0 8px 8px; }
+
+/* Unit and topic pickers */
+.pick { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pick button {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  text-align: left;
+  font: 400 .95rem/1.3 var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+}
+.pick button:hover { border-color: var(--btn); }
+.pick button[aria-pressed="true"] { background: var(--btn); border-color: var(--btn); color: var(--bg); }
+.pick .label { flex: 1; min-width: 0; }
+.pick .label b { display: block; font-weight: 700; }
+.pick .sub, .pick .name { display: block; font-size: .8rem; }
+.pick .count {
+  flex: none;
+  min-width: 2.2em;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  color: var(--heading);
+  font-weight: 700;
+  font-size: .85rem;
+  line-height: 1.6;
+  text-align: center;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.pick button[aria-pressed="true"] .count { background: var(--bg); border-color: var(--bg); }
+.pick .all { font-style: italic; }
+
+/* Terms list */
+.terms { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.term {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-btn);
+  padding: 8px;
+}
+.term-name { font-weight: 700; color: var(--heading); }
+.term .def { margin: 4px 0 0; }
+.term .aka { margin: 4px 0 0; font-size: .85rem; color: var(--muted); }
+.codes { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.chip {
+  border-radius: 999px;
+  padding: 0 8px;
+  font-size: .8rem;
+  font-weight: 700;
+  line-height: 1.7;
+  color: var(--heading);
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+}
+.chip.skill { background: var(--sage); border-color: var(--sage); }
+
+/* Toggles hide content with a class on the list */
+.terms.no-defs .def, .terms.no-defs .aka { display: none; }
+.terms.no-codes .codes, .pick.no-codes .sub { display: none; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* Stack the columns on narrow screens */
+@media (max-width: 760px) {
+  .browser { grid-template-columns: 1fr; }
+}
