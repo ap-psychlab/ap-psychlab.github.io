@@ -72,7 +72,7 @@
 
   // On stacked (phone) layouts, bring the next column into view after a choice.
   function reveal(id) {
-    if (!window.matchMedia || !window.matchMedia("(max-width: 760px)").matches) return;
+    if (!window.matchMedia || !window.matchMedia("(max-width: 759px)").matches) return;
     var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     $(id).scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
   }

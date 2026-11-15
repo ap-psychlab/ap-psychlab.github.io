@@ -172,6 +172,7 @@
     <h2>Layout &amp; spacing</h2>
     <ul class="notes">
       <li><code>main</code>: single centered column, max-width 900px, padding 16px top, 20px sides, 24px bottom.</li>
+      <li><code>main.wide</code>: max-width 1400px, for pages with side-by-side columns. Use it with <code>.split</code> (or a demo's own grid), not for plain text pages.</li>
       <li>Spacing follows an 8px grid. Bars below show the common steps.</li>
       <li>Headings have 24px above and 8px below. A heading that's the first thing in its container (page, card, section) has no space above.</li>
     </ul>
@@ -181,6 +182,12 @@
       <div><span class="bar" style="width:24px"></span><code>24px</code></div>
       <div><span class="bar" style="width:32px"></span><code>32px</code></div>
       <div><span class="bar" style="width:48px"></span><code>48px</code></div>
+    </div>
+    <h3>Two-column layout</h3>
+    <p class="hint"><code>.split</code>: main area and side panel at 2:1 from 1000px wide; stacked below that. Give the side panel <code>class="side"</code> so it stays in view while scrolling. Resize the window to see it stack.</p>
+    <div class="split">
+      <div class="card"><strong>Main area</strong> (first child)<br>The game, chart, or activity.</div>
+      <aside class="card side"><strong>.side</strong><br>Scores, tips, or results.</aside>
     </div>
     <h3>Corner radius</h3>
     <div class="radii">
