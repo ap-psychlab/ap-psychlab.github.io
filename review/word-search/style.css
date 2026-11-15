@@ -13,8 +13,6 @@
   --hl-8: #E0C8EE;
   --hl-9: #F5C6DE;
   --hl-10: #DDEBB0;
-  /* Dims the page behind the topic dialog */
-  --ws-backdrop: rgba(59, 42, 32, .45);
 }
 
 /* ---------- Settings ---------- */
@@ -101,50 +99,6 @@ legend, .legend { display: block; font-weight: 700; color: var(--heading); margi
 }
 .done p { margin: 0 0 12px; }
 .done .row { margin-bottom: 0; }
-
-/* ---------- Topic dialog ---------- */
-#topicDialog {
-  width: min(720px, calc(100% - 24px));
-  max-height: calc(100% - 24px);
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  background: var(--bg);
-  color: var(--text);
-  box-shadow: var(--shadow);
-}
-#topicDialog[open] { display: flex; flex-direction: column; }
-#topicDialog::backdrop { background: var(--ws-backdrop); }
-.dlg-head, .dlg-foot { padding: 16px; background: var(--bg-alt); }
-.dlg-head { border-bottom: 1px solid var(--border); }
-.dlg-head .row:last-child { margin-bottom: 0; }
-.dlg-foot { border-top: 1px solid var(--border); }
-.dlg-foot .row { margin-bottom: 0; }
-.dlg-body { overflow-y: auto; padding: 16px; display: grid; gap: 8px; flex: 1; min-height: 0; }
-.dlg-count { margin: 0 0 8px; text-align: center; font-weight: 700; color: var(--heading); }
-
-.seg-btn[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
-.seg-btn[aria-pressed="true"]:hover { background: var(--btn-hover); }
-
-.unit-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 8px; }
-.check {
-  display: flex; align-items: center; gap: 8px;
-  min-height: 44px; padding: 4px 8px; border-radius: var(--radius-btn);
-  cursor: pointer; color: var(--heading);
-}
-.check:hover { background: var(--bg-alt); }
-.check input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--btn); }
-.check .label { flex: 1; min-width: 0; }
-.check .sub { display: block; font-size: .85rem; color: var(--text); }
-.unit-check { font-weight: 700; }
-.topic-list { list-style: none; margin: 4px 0 0; padding: 0 0 0 24px; display: grid; gap: 2px; }
-@media (min-width: 600px) { .topic-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.count {
-  flex: none; min-width: 2.2em; padding: 0 6px; border-radius: 999px;
-  background: var(--bg); border: 1px solid var(--border);
-  color: var(--heading); font-weight: 700; font-size: .85rem; line-height: 1.6;
-  text-align: center; font-variant-numeric: lining-nums tabular-nums;
-}
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;

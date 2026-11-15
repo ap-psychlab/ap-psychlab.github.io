@@ -1,0 +1,190 @@
+/* Practice Questions — demo-specific styles (theme comes from ../../shared/theme.css) */
+
+:root {
+  /* Dims the page behind this page's dialogs */
+  --pq-backdrop: rgba(59, 42, 32, .45);
+}
+
+.center { text-align: center; }
+
+/* ---------- Setup ---------- */
+.setup { display: grid; gap: 16px; margin-bottom: 16px; }
+.setup h2 { margin-bottom: 0; }
+.setup .row { margin-bottom: 0; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend, .legend { display: block; font-weight: 700; color: var(--heading); margin-bottom: 8px; padding: 0; }
+.field-note { margin: 8px 0 0; font-size: .9rem; color: var(--text); }
+.topic-line, .count-line { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+#topicSummary { color: var(--heading); }
+.custom { display: flex; align-items: center; gap: 8px; color: var(--heading); font-weight: 700; }
+.custom input {
+  width: 5.5em; min-height: 44px; padding: 0 8px;
+  font: 400 1rem var(--font-body); color: var(--heading);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn);
+}
+.setup-note { margin: 0; text-align: center; font-weight: 700; color: var(--heading); }
+.setup-note.warn { color: var(--error); }
+.setup-note:empty { display: none; }
+
+/* Segmented radio buttons */
+.seg {
+  display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-btn);
+  overflow: hidden; background: var(--bg);
+}
+.seg label { position: relative; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seg span {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 44px; min-width: 56px; padding: 8px 16px; cursor: pointer;
+  color: var(--heading); font-weight: 700; font-size: .95rem;
+  border-right: 1px solid var(--border);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.seg label:last-child span { border-right: 0; }
+.seg input:checked + span { background: var(--btn2); }
+.seg input:focus-visible + span { outline: 3px solid var(--heading); outline-offset: -3px; }
+
+/* ---------- Question card ---------- */
+.toolbar { margin-bottom: 8px; }
+.qcard { margin-bottom: 16px; }
+.qmeta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; margin-bottom: 8px; }
+.qmeta h2 { margin: 0; font-size: 1.1rem; }
+.qmeta h2:focus { outline: none; }
+.qmeta h2:focus-visible { outline: 3px solid var(--heading); outline-offset: 3px; }
+#qStatus { font-size: .9rem; font-weight: 700; color: var(--heading); }
+.stem { margin: 0 0 16px; font-size: 1.05rem; color: var(--heading); white-space: pre-line; }
+
+.choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.choice {
+  display: flex; align-items: flex-start; gap: 12px;
+  width: 100%; min-height: 44px; padding: 10px 12px;
+  text-align: left; font: 400 1rem/1.4 var(--font-body); color: var(--text);
+  background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-btn);
+}
+button.choice { cursor: pointer; }
+button.choice:hover { border-color: var(--btn); }
+.letter {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-alt); border: 1px solid var(--border);
+  color: var(--heading); font-weight: 700; font-size: .9rem;
+}
+.cbody { flex: 1; min-width: 0; padding-top: 2px; }
+.ctext { display: block; }
+.tag { display: block; margin-top: 4px; font-size: .85rem; font-weight: 700; color: var(--heading); }
+.tag .icon { display: inline-block; width: 1.1em; }
+
+/* Quiz: the chosen answer */
+.choice[aria-pressed="true"] { border-color: var(--btn); background: var(--bg-alt); }
+.choice[aria-pressed="true"] .letter { background: var(--btn); border-color: var(--btn); color: var(--bg); }
+/* Revealed answers (labels carry the meaning; color only reinforces it) */
+.choice.is-answer { border-color: var(--sage); background: var(--bg-alt); background: color-mix(in srgb, var(--sage) 28%, var(--bg)); }
+.choice.is-answer .letter { background: var(--sage); border-color: var(--sage); }
+.choice.is-wrong { border-color: var(--error); border-style: dashed; }
+.choice.is-wrong .letter { background: var(--error); border-color: var(--error); color: var(--bg); }
+
+/* Feedback under a choice */
+.fb {
+  margin: 4px 0 0 40px; padding: 8px 12px;
+  font-size: .95rem; color: var(--text);
+  background: var(--bg-alt); border-left: 4px solid var(--border); border-radius: 0 var(--radius-btn) var(--radius-btn) 0;
+}
+.fb.good { border-left-color: var(--sage); }
+.fb.bad { border-left-color: var(--error); }
+
+.hint-box, .explain {
+  margin: 16px 0 0; padding: 12px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn);
+}
+.hint-box { border-left: 4px solid var(--accent); }
+.explain p { margin: 0; }
+.explain p + p { margin-top: 8px; }
+
+.nav { margin-bottom: 8px; }
+#playHint:empty { display: none; }
+
+/* ---------- Results ---------- */
+#resH:focus { outline: none; }
+#resNote:empty { display: none; }
+.res-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.res-row {
+  display: grid; grid-template-columns: 2.5em minmax(0, 1fr) auto auto; gap: 12px; align-items: center;
+  width: 100%; min-height: 44px; padding: 8px 12px;
+  text-align: left; font: 400 .95rem var(--font-body); color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); cursor: pointer;
+}
+.res-row:hover { border-color: var(--btn); }
+.res-n { font-weight: 700; color: var(--heading); font-variant-numeric: lining-nums tabular-nums; }
+.res-stem { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-time { font-variant-numeric: lining-nums tabular-nums; color: var(--heading); text-align: right; min-width: 3.5em; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 0 8px; border-radius: 999px; font-size: .8rem; font-weight: 700; line-height: 1.8;
+  color: var(--heading); background: var(--bg-alt); border: 1px solid var(--border);
+}
+.badge.correct { background: var(--sage); border-color: var(--sage); }
+.badge.wrong { background: var(--bg); border: 1px dashed var(--error); }
+.badge.skip { background: transparent; }
+@media (max-width: 520px) {
+  .res-row { grid-template-columns: 2em minmax(0, 1fr) auto; }
+  .res-stem { grid-column: 2 / 4; grid-row: 1; }
+  .res-row .badge { grid-column: 2; }
+  .res-time { grid-column: 3; }
+}
+
+/* ---------- Dialogs ---------- */
+.pq-dialog {
+  width: min(640px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+.pq-dialog.small { width: min(440px, calc(100% - 24px)); }
+.pq-dialog[open] { display: flex; flex-direction: column; }
+.pq-dialog::backdrop { background: var(--pq-backdrop); }
+.pq-dlg-head, .pq-dlg-foot { padding: 16px; background: var(--bg-alt); }
+.pq-dlg-head { border-bottom: 1px solid var(--border); }
+.pq-dlg-head .hint { margin-bottom: 8px; }
+.pq-dlg-foot { border-top: 1px solid var(--border); }
+.pq-dlg-foot .row, .pq-dlg-body .row { margin-bottom: 0; }
+.pq-dlg-body { overflow-y: auto; padding: 16px; flex: 1; min-height: 0; }
+.pq-dlg-body p { margin: 0 0 16px; }
+
+.legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .9rem; color: var(--heading); }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend .qbox { width: 24px; height: 24px; min-height: 0; font-size: .7rem; cursor: default; }
+
+/* Numbered question boxes: filled = answered, outline = unanswered, underline = current */
+.qgrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 8px; }
+.qbox {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 100%; min-height: 48px; padding: 0;
+  font: 700 1rem var(--font-body); font-variant-numeric: lining-nums tabular-nums;
+  color: var(--heading); background: transparent;
+  border: 2px solid var(--btn); border-radius: var(--radius-btn); cursor: pointer;
+}
+.qbox:hover { background: var(--bg-alt); }
+.qbox.done { background: var(--btn); color: var(--bg); }
+.qbox.done:hover { background: var(--btn-hover); }
+.qbox.correct { background: var(--sage); border-color: var(--sage); }
+.qbox.wrong { background: var(--bg); border: 2px dashed var(--error); }
+.qbox.skip { border-color: var(--muted); }
+.qbox .qi { font-size: .75rem; line-height: 1; }
+.qbox[aria-current="true"]::after {
+  content: ""; position: absolute; left: 20%; right: 20%; bottom: -7px;
+  height: 3px; border-radius: 2px; background: var(--heading);
+}
+.legend .qbox.cur::after {
+  content: ""; position: absolute; left: 15%; right: 15%; bottom: -5px;
+  height: 2px; border-radius: 2px; background: var(--heading);
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}

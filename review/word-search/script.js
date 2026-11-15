@@ -225,7 +225,6 @@
   const gridEl = $("grid"), cluesEl = $("clues");
   const noteEl = $("note"), foundV = $("foundV"), levelV = $("levelV");
   const doneEl = $("done"), doneText = $("doneText"), live = $("live");
-  const dialog = $("topicDialog"), treeEl = $("unitTree");
 
   // ---------- Helpers ----------
   const clean = (t) => t.toUpperCase().replace(/[^A-Z]/g, "");
@@ -261,159 +260,15 @@
     .filter((t) => !/[0-9]/.test(t.term) && clean(t.term).length >= 3)
     .map((t) => ({ id: t.id, term: t.term, w: clean(t.term), ced: t.ced, definition: t.definition, clue: maskDefinition(t) }));
 
-  // ---------- Topic selection (same unit systems as the Term Browser) ----------
-  // mode "mine" = class units / topic groups (ids), mode "ced" = CED units / topics (codes)
-  function unitsFor(mode) {
-    if (mode === "ced") {
-      return TOPICS.cedUnits.map((u) => ({
-        title: "Unit " + u.number, name: u.name,
-        items: u.topics.map((t) => ({ id: t.code, title: t.code + " " + t.name, codes: [t.code] }))
-      }));
-    }
-    return TOPICS.teachingUnits.map((u) => ({
-      title: "Unit " + u.number, name: u.name,
-      items: u.groups.map((g) => ({ id: g.id, title: g.name, codes: g.codes }))
-    }));
-  }
-  const allIds = (mode) => unitsFor(mode).flatMap((u) => u.items.map((i) => i.id));
-  function codesFor(mode, ids) {
-    const out = [];
-    unitsFor(mode).forEach((u) => u.items.forEach((i) => { if (ids.has(i.id)) out.push(...i.codes); }));
-    return out;
-  }
-  const termsFor = (codes) => TERMS.filter((t) => TOPICS.matchesCodes(t, codes));
-
-  function readSelection() {
-    const groups = TOPICS.groupsFromUrl();
-    if (groups.length) return { mode: "mine", ids: new Set(groups) };
-    const m = /[?&]ced=([^&#]*)/.exec(location.search);
-    if (m) {
-      const valid = new Set(allIds("ced"));
-      const ids = decodeURIComponent(m[1]).split(",").map((s) => s.trim()).filter((s) => valid.has(s));
-      if (ids.length) return { mode: "ced", ids: new Set(ids) };
-    }
-    return { mode: "mine", ids: new Set(allIds("mine")) };
-  }
-
-  // Keep the address in sync so a teacher can copy a link to a topic set
-  function writeSelection() {
-    const params = location.search.replace(/^\?/, "").split("&")
-      .filter((p) => p && !/^(groups|ced)=/.test(p));
-    if (selection.ids.size < allIds(selection.mode).length) {
-      params.push((selection.mode === "mine" ? "groups=" : "ced=") + Array.from(selection.ids).join(","));
-    }
-    try {
-      history.replaceState(null, "", location.pathname + (params.length ? "?" + params.join("&") : "") + location.hash);
-    } catch (err) { /* some browsers block this on file:// pages */ }
-  }
-
-  let selection = readSelection();
-  let pool = [];          // terms in the selected topics
-  let draft = null;       // selection being edited in the dialog
-
-  function updatePool() {
-    pool = termsFor(codesFor(selection.mode, selection.ids));
-    const total = allIds(selection.mode).length;
-    const names = [];
-    unitsFor(selection.mode).forEach((u) => u.items.forEach((i) => { if (selection.ids.has(i.id)) names.push(i.title); }));
-    let label;
-    if (selection.ids.size === total) label = "All topics";
-    else if (names.length <= 2) label = names.join(", ");
-    else label = names.length + " topics";
-    $("topicSummary").textContent = label + " · " + pool.length + " terms";
-  }
-
-  // ---------- Topic dialog ----------
-  function renderTree() {
-    treeEl.innerHTML = "";
-    $("modeCed").setAttribute("aria-pressed", draft.mode === "ced" ? "true" : "false");
-    $("modeMine").setAttribute("aria-pressed", draft.mode === "mine" ? "true" : "false");
-    unitsFor(draft.mode).forEach((u, ui) => {
-      const box = el("div", "unit-box");
-      const unitCodes = u.items.flatMap((i) => i.codes);
-      const head = checkRow("unit-" + ui, u.title + ": " + u.name, null, termsFor(unitCodes).length, "unit-check");
-      const chosen = u.items.filter((i) => draft.ids.has(i.id)).length;
-      head.input.checked = chosen === u.items.length;
-      head.input.indeterminate = chosen > 0 && chosen < u.items.length;
-      head.input.setAttribute("aria-label", "Select all topics in " + u.title + ": " + u.name);
-      head.input.addEventListener("change", () => {
-        u.items.forEach((i) => { if (head.input.checked) draft.ids.add(i.id); else draft.ids.delete(i.id); });
-        renderTree(); refocus("unit-" + ui);
-      });
-      box.appendChild(head.label);
-      const list = el("ul", "topic-list");
-      u.items.forEach((i) => {
-        const row = checkRow("item-" + i.id, i.title, null, termsFor(i.codes).length);
-        row.input.checked = draft.ids.has(i.id);
-        row.input.addEventListener("change", () => {
-          if (row.input.checked) draft.ids.add(i.id); else draft.ids.delete(i.id);
-          renderTree(); refocus("item-" + i.id);
-        });
-        const li = el("li");
-        li.appendChild(row.label);
-        list.appendChild(li);
-      });
-      box.appendChild(list);
-      treeEl.appendChild(box);
-    });
-    const n = termsFor(codesFor(draft.mode, draft.ids)).length;
-    $("dlgCount").textContent = draft.ids.size === 0 ? "Pick at least one topic." : n + " terms selected";
-    $("doneBtn").disabled = n === 0;
-  }
-
-  function checkRow(id, title, sub, count, extraCls) {
-    const label = el("label", "check" + (extraCls ? " " + extraCls : ""));
-    const input = el("input");
-    input.type = "checkbox";
-    input.dataset.key = id;
-    const text = el("span", "label", title);
-    if (sub) text.appendChild(el("span", "sub", sub));
-    const c = el("span", "count", String(count));
-    c.setAttribute("aria-label", count + (count === 1 ? " term" : " terms"));
-    label.append(input, text, c);
-    return { label, input };
-  }
-
-  // Re-rendering replaces the checkboxes, so put focus back where it was
-  function refocus(k) {
-    const again = treeEl.querySelector('input[data-key="' + k + '"]');
-    if (again) again.focus({ preventScroll: true });
-  }
-
-  function openDialog() {
-    draft = { mode: selection.mode, ids: new Set(selection.ids) };
-    renderTree();
-    if (typeof dialog.showModal === "function") dialog.showModal();
-    else dialog.setAttribute("open", "");
-    treeEl.scrollTop = 0;
-  }
-  function closeDialog() {
-    if (typeof dialog.close === "function") dialog.close();
-    else dialog.removeAttribute("open");
-    $("topicsBtn").focus();
-  }
-  function setDraftMode(mode) {
-    if (draft.mode === mode) return;
-    // Switching unit systems starts from everything selected in the new system
-    draft = { mode, ids: new Set(allIds(mode)) };
-    renderTree();
-  }
-
-  $("topicsBtn").addEventListener("click", openDialog);
-  $("modeCed").addEventListener("click", () => setDraftMode("ced"));
-  $("modeMine").addEventListener("click", () => setDraftMode("mine"));
-  $("selAllBtn").addEventListener("click", () => { draft.ids = new Set(allIds(draft.mode)); renderTree(); });
-  $("selNoneBtn").addEventListener("click", () => { draft.ids = new Set(); renderTree(); });
-  $("cancelBtn").addEventListener("click", closeDialog);
-  $("doneBtn").addEventListener("click", () => {
-    selection = draft;
-    writeSelection();
-    updatePool();
-    closeDialog();
-    newPuzzle();
+  // ---------- Topic selection (shared dialog: ../../shared/topic-picker.js) ----------
+  const picker = window.APPSYCH_TOPIC_PICKER.create({
+    items: TERMS,
+    noun: ["term", "terms"],
+    openButton: $("topicsBtn"),
+    summary: $("topicSummary"),
+    intro: "Terms are drawn from the topics you check.",
+    onChange: () => newPuzzle()
   });
-  // Clicking the dimmed area outside the dialog cancels
-  dialog.addEventListener("click", (e) => { if (e.target === dialog) closeDialog(); });
 
   // ---------- Game state ----------
   let size = 12, letters = [], words = [], cellEls = [], cellColor = [];
@@ -597,7 +452,7 @@
     const diff = document.querySelector('input[name="diff"]:checked').value;
     const lvl = LEVELS[diff];
     size = lvl.size;
-    const fitting = pool.filter((t) => t.w.length <= size);
+    const fitting = picker.pool().filter((t) => t.w.length <= size);
     const target = debugK ? lvl.count : Math.min(lvl.count, fitting.length);
 
     let layout = null, filled = null;
@@ -855,6 +710,5 @@
     $("topicsBtn").disabled = true;
     return;
   }
-  updatePool();
   newPuzzle();
 })();
