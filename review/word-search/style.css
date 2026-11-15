@@ -1,0 +1,156 @@
+/* Psych Vocab Word Search — demo-specific styles (theme comes from ../../shared/theme.css)
+   Page uses <main class="wide"> with .split: grid on the left, definitions on the right (1000px+). */
+
+:root {
+  /* Pastel highlights: one per found word (text on top uses --heading) */
+  --hl-1: #F4C2C2;
+  --hl-2: #F8D8B0;
+  --hl-3: #F2E8A0;
+  --hl-4: #C8E6C0;
+  --hl-5: #B8E0D8;
+  --hl-6: #BFD6F0;
+  --hl-7: #CCCBF2;
+  --hl-8: #E0C8EE;
+  --hl-9: #F5C6DE;
+  --hl-10: #DDEBB0;
+  /* Dims the page behind the topic dialog */
+  --ws-backdrop: rgba(59, 42, 32, .45);
+}
+
+/* ---------- Settings ---------- */
+.settings { display: grid; gap: 16px; margin-bottom: 16px; }
+.settings .row { margin-bottom: 0; }
+.setting-row { display: flex; flex-wrap: wrap; gap: 16px 32px; justify-content: center; align-items: flex-start; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend, .legend { display: block; font-weight: 700; color: var(--heading); margin-bottom: 8px; padding: 0; }
+.topic-line { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+#topicSummary { color: var(--heading); }
+
+.seg {
+  display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-btn);
+  overflow: hidden; background: var(--bg);
+}
+.seg label { position: relative; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seg span {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 8px 20px; cursor: pointer;
+  color: var(--heading); font-weight: 700; font-size: .95rem;
+  border-right: 1px solid var(--border);
+}
+.seg label:last-child span { border-right: 0; }
+.seg input:checked + span { background: var(--btn2); }
+.seg input:focus-visible + span { outline: 3px solid var(--heading); outline-offset: -3px; }
+
+.note { color: var(--muted); font-size: .9rem; margin: 0; text-align: center; }
+.note:empty { display: none; }
+
+/* ---------- Board ---------- */
+.board { padding: 12px; }
+.board .stats { margin: 12px 0 0; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  gap: 2px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: var(--radius-btn);
+}
+.grid [role="row"] { display: contents; }
+.cell {
+  aspect-ratio: 1 / 1;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  border-radius: 4px;
+  color: var(--heading);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.cell.sel { background: var(--btn2); box-shadow: inset 0 0 0 2px var(--btn); }
+.cell.start { box-shadow: inset 0 0 0 3px var(--btn); }
+.cell.wrong { background: var(--error); color: var(--bg); }
+.grid:focus-visible .cell.cursor { outline: 3px solid var(--heading); position: relative; z-index: 1; }
+
+/* ---------- Definitions ---------- */
+.clues { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.clue {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn);
+  padding: 10px 12px; transition: background-color .25s;
+}
+.clue .num {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-alt); color: var(--heading); font-weight: 700; font-size: .9rem;
+}
+.clue .term { display: none; font-weight: 700; color: var(--heading); letter-spacing: .03em; }
+.clue .def { margin: 0; font-size: .95rem; }
+.clue.found .term { display: block; }
+.clue.found .def { color: var(--heading); }
+.clue.found .num { background: var(--bg); }
+
+.done {
+  margin-top: 16px; text-align: center;
+  background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px;
+}
+.done p { margin: 0 0 12px; }
+.done .row { margin-bottom: 0; }
+
+/* ---------- Topic dialog ---------- */
+#topicDialog {
+  width: min(720px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+#topicDialog[open] { display: flex; flex-direction: column; }
+#topicDialog::backdrop { background: var(--ws-backdrop); }
+.dlg-head, .dlg-foot { padding: 16px; background: var(--bg-alt); }
+.dlg-head { border-bottom: 1px solid var(--border); }
+.dlg-head .row:last-child { margin-bottom: 0; }
+.dlg-foot { border-top: 1px solid var(--border); }
+.dlg-foot .row { margin-bottom: 0; }
+.dlg-body { overflow-y: auto; padding: 16px; display: grid; gap: 8px; flex: 1; min-height: 0; }
+.dlg-count { margin: 0 0 8px; text-align: center; font-weight: 700; color: var(--heading); }
+
+.seg-btn[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
+.seg-btn[aria-pressed="true"]:hover { background: var(--btn-hover); }
+
+.unit-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 8px; }
+.check {
+  display: flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 4px 8px; border-radius: var(--radius-btn);
+  cursor: pointer; color: var(--heading);
+}
+.check:hover { background: var(--bg-alt); }
+.check input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--btn); }
+.check .label { flex: 1; min-width: 0; }
+.check .sub { display: block; font-size: .85rem; color: var(--text); }
+.unit-check { font-weight: 700; }
+.topic-list { list-style: none; margin: 4px 0 0; padding: 0 0 0 24px; display: grid; gap: 2px; }
+@media (min-width: 600px) { .topic-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.count {
+  flex: none; min-width: 2.2em; padding: 0 6px; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--heading); font-weight: 700; font-size: .85rem; line-height: 1.6;
+  text-align: center; font-variant-numeric: lining-nums tabular-nums;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clue { transition: none; }
+}
