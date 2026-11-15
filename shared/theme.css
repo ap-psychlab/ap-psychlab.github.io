@@ -51,6 +51,8 @@ main {
   margin: 0 auto;
   padding: 16px 20px 24px;
 }
+/* Wide pages for side-by-side layouts: <main class="wide"> */
+main.wide { max-width: 1400px; }
 
 h1, h2, h3 {
   font-family: var(--font-heading);
@@ -114,6 +116,22 @@ a { color: var(--link); }
   justify-content: center;
   align-items: center;
   margin-bottom: 16px;
+}
+
+/* ---------- Two-column layout ---------- */
+/* <div class="split"><div>main area</div><aside class="side">side panel</aside></div>
+   2:1 columns when there's room (1000px+); stacks top-to-bottom on narrower screens.
+   The side panel stays in view while the page scrolls. */
+.split {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+.split > * { min-width: 0; }
+@media (min-width: 1000px) {
+  .split { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  .split > .side { position: sticky; top: 16px; }
 }
 
 /* ---------- Stat tiles ---------- */

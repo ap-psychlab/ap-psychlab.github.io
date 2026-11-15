@@ -4,10 +4,14 @@
 .seg[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
 .seg[aria-pressed="true"]:hover { background: var(--btn-hover); }
 
-/* ---------- Three-column browser ---------- */
+/* ---------- Browser columns ----------
+   Page uses <main class="wide">.
+   1200px+: Unit | Topic | Terms side by side (terms gets most of the width)
+   760-1199px: Unit and Topic stacked on the left, Terms on the right
+   under 760px: everything stacked */
 .browser {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.8fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   align-items: start;
   margin-bottom: 16px;
@@ -88,7 +92,23 @@
   clip: rect(0 0 0 0); white-space: nowrap;
 }
 
-/* Stack the columns on narrow screens */
-@media (max-width: 760px) {
-  .browser { grid-template-columns: 1fr; }
+@media (min-width: 760px) {
+  .browser {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "unit terms" "topic terms";
+  }
+  #unitCol { grid-area: unit; }
+  #topicCol { grid-area: topic; }
+  #termCol { grid-area: terms; }
+  /* Shorter unit buttons when Unit sits above Topic */
+  #unitList { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
+@media (min-width: 1200px) {
+  .browser {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 3fr);
+    grid-template-rows: auto;
+    grid-template-areas: "unit topic terms";
+  }
+  #unitList { grid-template-columns: minmax(0, 1fr); }
 }

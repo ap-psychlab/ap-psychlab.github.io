@@ -12,16 +12,12 @@
 <script src="script.js" defer></script>
 </head>
 <body>
-<main>
+<main class="wide">
   <h1>Memory Span Test</h1>
   <p class="hint">Watch the colors and tones, then repeat them in order. One color is added each round. Click the pads or press R, G, Y, B (or 1–4).</p>
 
-  <div class="stats" aria-label="Scores">
-    <div class="stat"><span>Round</span><strong id="roundV">0</strong></div>
-    <div class="stat"><span>Score</span><strong id="scoreV">0</strong></div>
-    <div class="stat"><span>Session best</span><strong id="bestV">0</strong></div>
-  </div>
-
+  <div class="split">
+  <div class="play">
   <p id="status" role="status" aria-live="polite">Press Start to begin.</p>
 
   <div class="grid" id="pads">
@@ -45,6 +41,15 @@
     </div>
   </div>
 
+  </div>
+
+  <aside class="side" aria-label="Scores and results">
+  <div class="stats" aria-label="Scores">
+    <div class="stat"><span>Round</span><strong id="roundV">0</strong></div>
+    <div class="stat"><span>Score</span><strong id="scoreV">0</strong></div>
+    <div class="stat"><span>Session best</span><strong id="bestV">0</strong></div>
+  </div>
+
   <section class="card" id="over" hidden aria-live="polite">
     <h2>Game over</h2>
     <p class="final"><span class="big" id="finalV">0</span></p>
@@ -55,6 +60,8 @@
     <div class="seqrow" id="enteredRow"></div>
     <p class="hint">Typical short-term memory span is about 7 ± 2 items. Maintenance rehearsal (silently repeating the sequence) and chunking (grouping, like “RR GG”) can stretch it. Try again using one of those strategies, and notice whether early or late items trip you up (serial position effect).</p>
   </section>
+  </aside>
+  </div>
 </main>
 </body>
 </html>
