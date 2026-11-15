@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Term Browser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<link rel="stylesheet" href="style.css">
+<script src="../../shared/data/terms.js" defer></script>
+<script src="../../shared/data/topics.js" defer></script>
+<script src="script.js" defer></script>
+</head>
+<body>
+<main>
+  <h1>Term Browser</h1>
+  <p class="hint">Pick a unit, then a topic, to see its terms. Switch between the CED's units and our class units, and show or hide definitions and codes.</p>
+
+  <div class="row" role="group" aria-label="Unit system">
+    <button class="btn ghost seg" id="modeCed" aria-pressed="true">CED units</button>
+    <button class="btn ghost seg" id="modeMine" aria-pressed="false">Class units</button>
+  </div>
+  <div class="row">
+    <button class="btn alt" id="defBtn" aria-pressed="true">Definitions: On</button>
+    <button class="btn alt" id="codeBtn" aria-pressed="false">Codes: Off</button>
+  </div>
+
+  <div class="stats" aria-label="Term counts">
+    <div class="stat"><span>All terms</span><strong id="totalV">0</strong></div>
+    <div class="stat"><span>In unit</span><strong id="unitV">–</strong></div>
+    <div class="stat"><span>In topic</span><strong id="topicV">–</strong></div>
+  </div>
+
+  <div class="browser">
+    <section class="card col" aria-labelledby="unitH">
+      <h2 id="unitH">Unit</h2>
+      <ul class="pick" id="unitList"></ul>
+    </section>
+
+    <section class="card col" id="topicCol" aria-labelledby="topicH">
+      <h2 id="topicH">Topic</h2>
+      <p class="empty" id="topicEmpty">Choose a unit first.</p>
+      <ul class="pick" id="topicList"></ul>
+    </section>
+
+    <section class="card col" id="termCol" aria-labelledby="termH">
+      <h2 id="termH">Terms</h2>
+      <p class="empty" id="termEmpty">Choose a topic to see its terms.</p>
+      <ul class="terms" id="termList"></ul>
+    </section>
+  </div>
+
+  <p class="hint">A term that the CED covers in more than one place appears in each of those topics, so topic counts can add up to more than the unit count.</p>
+  <p id="live" class="visually-hidden" role="status" aria-live="polite"></p>
+</main>
+</body>
+</html>
