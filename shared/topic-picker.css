@@ -1,0 +1,50 @@
+/* Shared "Choose topics" dialog (shared/topic-picker.js). Built on theme.css tokens. */
+
+:root {
+  /* Dims the page behind the dialog */
+  --tp-backdrop: rgba(59, 42, 32, .45);
+}
+
+.tp-dialog {
+  width: min(720px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+.tp-dialog[open] { display: flex; flex-direction: column; }
+.tp-dialog::backdrop { background: var(--tp-backdrop); }
+
+.tp-head, .tp-foot { padding: 16px; background: var(--bg-alt); }
+.tp-head { border-bottom: 1px solid var(--border); }
+.tp-head .row:last-child, .tp-foot .row { margin-bottom: 0; }
+.tp-foot { border-top: 1px solid var(--border); }
+.tp-body { overflow-y: auto; padding: 16px; display: grid; gap: 8px; flex: 1; min-height: 0; }
+.tp-count { margin: 0 0 8px; text-align: center; font-weight: 700; color: var(--heading); }
+
+.tp-mode[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
+.tp-mode[aria-pressed="true"]:hover { background: var(--btn-hover); }
+
+.tp-unit { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 8px; }
+.tp-check {
+  display: flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 4px 8px; border-radius: var(--radius-btn);
+  cursor: pointer; color: var(--heading);
+}
+.tp-check:hover { background: var(--bg-alt); }
+.tp-check input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--btn); }
+.tp-label { flex: 1; min-width: 0; }
+.tp-unit-check { font-weight: 700; }
+.tp-check.tp-empty { cursor: default; color: var(--text); opacity: .6; }
+.tp-check.tp-empty:hover { background: transparent; }
+.tp-topics { list-style: none; margin: 4px 0 0; padding: 0 0 0 24px; display: grid; gap: 2px; }
+@media (min-width: 600px) { .tp-topics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tp-num {
+  flex: none; min-width: 2.2em; padding: 0 6px; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--heading); font-weight: 700; font-size: .85rem; line-height: 1.6;
+  text-align: center; font-variant-numeric: lining-nums tabular-nums;
+}
