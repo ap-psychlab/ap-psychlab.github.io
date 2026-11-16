@@ -6,7 +6,6 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var bot = $('bot'), roll = $('roll'), say = $('say');
-  var wheels = [].slice.call(bot.querySelectorAll('.wheel'));
   var nextBtn = $('nextBtn'), redBtn = $('redBtn'), blueBtn = $('blueBtn');
   var soundBtn = $('soundBtn'), restartBtn = $('restartBtn');
   var talkRow = $('talkRow'), guessRow = $('guessRow');
@@ -72,10 +71,8 @@
   /* ---------- Robot ---------- */
   function mood(m) { bot.setAttribute('data-mood', m); }
   function show(pick) { bot.setAttribute('data-pick', pick || ''); }
-  function rollTo(x) {
-    roll.style.transform = 'translateX(' + x + 'px)';
-    var deg = Math.round(x / 17 * 180 / Math.PI);   // wheel radius is 17 units
-    wheels.forEach(function (w) { w.style.transform = 'rotate(' + deg + 'deg)'; });
+  function rollTo(x) {             // drift sideways, leaning a little into the move
+    roll.style.transform = 'translateX(' + x + 'px) rotate(' + (x / 9).toFixed(1) + 'deg)';
   }
   function speak(text, pick, lead) {
     say.textContent = '';
