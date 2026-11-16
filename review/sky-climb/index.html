@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sky Climb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<link rel="stylesheet" href="../../shared/topic-picker.css">
+<link rel="stylesheet" href="style.css">
+<script src="../../shared/data/questions.js" defer></script>
+<script src="../../shared/data/topics.js" defer></script>
+<script src="../../shared/topic-picker.js" defer></script>
+<script src="script.js" defer></script>
+</head>
+<body>
+<main>
+  <h1>Sky Climb</h1>
+  <p class="hint">Climb the floating islands from the forest floor to the treasure at 500 ft. A question waits at each lantern ledge, and the lantern you light becomes your checkpoint. Click the scene, then use ← → (or A / D) to run and Space, W or ↑ to jump: hold for a higher jump, tap for a hop. Hold Shift to walk, and press R to return to your last lantern. On a phone, use the buttons below the scene.</p>
+
+  <section class="card game" aria-label="Game">
+    <div class="hud">
+      <div class="hud-alt"><strong id="alt">0 ft</strong><span id="zone">Forest floor</span></div>
+      <ol class="pips" id="pips" aria-label="Questions: none answered yet"></ol>
+    </div>
+    <div id="view" tabindex="0" role="application" aria-label="Sky Climb game. Left and right arrows run, space jumps, shift walks, R returns to the last lantern.">
+      <canvas id="cv" width="512" height="320"></canvas>
+      <div class="gate" id="gate"><span id="gateText">Loading art…</span></div>
+    </div>
+    <div class="touch" aria-label="Touch controls">
+      <div class="lr">
+        <button type="button" id="tl" aria-label="Move left">◀</button>
+        <button type="button" id="tr" aria-label="Move right">▶</button>
+      </div>
+      <button type="button" id="tj" aria-label="Jump">▲</button>
+    </div>
+    <div class="row controls">
+      <span id="topicSummary">All topics</span>
+      <button class="btn alt" id="topicsBtn" type="button" aria-haspopup="dialog">Choose topics</button>
+      <button class="btn ghost" id="warpBtn" type="button">Back to last lantern</button>
+      <button class="btn ghost" id="restartBtn" type="button">Start over</button>
+      <button class="btn ghost" id="resultsBtn" type="button" hidden>Results</button>
+    </div>
+    <p class="hint" id="note" aria-live="polite"></p>
+    <p class="hint center">Lanterns: a number is a question you haven't reached, ✓ is answered correctly, ✗ is missed.</p>
+  </section>
+
+  <!-- Test tools: shown only with ?dev in the address -->
+  <section class="card dev" id="dev" aria-label="Test tools" hidden>
+    <div class="row" id="devJumps" aria-label="Jump to an altitude"></div>
+    <div class="row">
+      <label><input type="checkbox" id="devNoQ">Questions off</label>
+      <label><input type="checkbox" id="devBox">Collision box and physics</label>
+      <label><input type="checkbox" id="devRim" checked>Moonlit rim</label>
+    </div>
+    <p id="devOut"></p>
+  </section>
+
+  <!-- ---------- Question ---------- -->
+  <dialog class="sc-dialog" id="qDialog" aria-labelledby="qTitle">
+    <div class="sc-dlg-head">
+      <h2 id="qTitle" tabindex="-1">Question 1 of 10</h2>
+      <span id="qWhere"></span>
+    </div>
+    <div class="sc-dlg-body">
+      <p class="stem" id="stem"></p>
+      <ol class="choices" id="choices" aria-label="Answer choices"></ol>
+      <p class="hint-box" id="hintBox" hidden></p>
+      <div class="explain" id="explain" hidden></div>
+    </div>
+    <div class="sc-dlg-foot">
+      <div class="row">
+        <button class="btn ghost" id="hintBtn" type="button" aria-expanded="false" aria-controls="hintBox">Show hint</button>
+        <button class="btn" id="contBtn" type="button" disabled>Keep climbing</button>
+      </div>
+      <p class="hint" id="qTip"></p>
+    </div>
+  </dialog>
+
+  <!-- ---------- Summit results ---------- -->
+  <dialog class="sc-dialog" id="winDialog" aria-labelledby="winH">
+    <div class="sc-dlg-head">
+      <h2 id="winH" tabindex="-1">You reached the summit!</h2>
+    </div>
+    <div class="sc-dlg-body">
+      <p id="winText"></p>
+      <div class="stats" id="winStats" aria-label="Climb results"></div>
+      <ol class="res-list" id="winList" aria-label="Your answers"></ol>
+    </div>
+    <div class="sc-dlg-foot">
+      <div class="row">
+        <button class="btn ghost" id="stayBtn" type="button">Stay at the summit</button>
+        <button class="btn" id="againBtn" type="button">Climb again</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="sr-only" aria-live="polite" id="live"></div>
+</main>
+</body>
+</html>
