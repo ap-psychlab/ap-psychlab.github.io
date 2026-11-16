@@ -618,16 +618,15 @@ const flyRng = rng(41);
 const fireflies = Array.from({ length: 18 }, () => ({ x: flyRng() * W, y: GROUND + 14 + flyRng() * 560, ph: flyRng() * 6.28, sp: .4 + flyRng() * .6 }));
 
 /* ==== SECTION: Camera ==== */
-// The camera holds still while the hero's feet stay inside a band of the screen, so a jump that lands back
-// where it started doesn't move the view down.
+// The camera holds still while the hero's feet stay inside a band of the screen: it rises when they pass
+// CAM_HIGH (standing or mid-jump) and moves down only to keep them out of the CAM_LOW buffer zone.
 const CAM_LOW = 64;                                               // buffer zone: the view moves down only to keep the feet this far above the bottom edge
-const CAM_REST = Math.round(.36 * H) + 14;                        // standing: the view rises until the feet are this far above the bottom edge
-const CAM_AIR = 190;                                              // mid-jump: the view rises only for the part of the jump above this line
+const CAM_HIGH = Math.round(.36 * H) + 14;                        // the view rises until the feet are no more than this far above the bottom edge
 let camY = 0;                                                     // world y at the bottom of the screen
 function updateCam(dt, snap) {
   if (snap) camY = clamp(hero.y - .36 * H, 0, CAM_MAX);
   else {
-    const up = Math.min(hero.y - (hero.onGround ? CAM_REST : CAM_AIR), CAM_MAX);
+    const up = Math.min(hero.y - CAM_HIGH, CAM_MAX - 14);        // (the cap keeps the summit framed the same during a jump there)
     if (up > camY) camY += (up - camY) * Math.min(1, 7 * dt);
   }
   camY = clamp(Math.max(Math.min(camY, hero.y - CAM_LOW), hero.y - H + 64), 0, CAM_MAX + 40);   // keep the feet out of the buffer zone and the head on screen
