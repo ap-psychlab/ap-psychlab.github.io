@@ -1,7 +1,7 @@
 // Sky Climb — a platformer quiz: climb 500 ft of floating islands and answer a question at each lantern ledge.
 // Questions: ../../shared/data/questions.js; topic groups: ../../shared/data/topics.js;
 // topic dialog: ../../shared/topic-picker.js.
-// URL options: ?groups=memory,thinking or ?ced=2.3,2.4 (topics), ?dev (test tools), ?seed=7 (repeat a layout).
+// URL options: ?groups=memory,thinking or ?ced=2.3,2.4 (topics), ?debug or ?dev (test tools), ?seed=7 (repeat a layout).
 //
 // Question rule: the climb is split into ten 50 ft bands. The first time the hero lands on a platform in a band,
 // that band's question is asked (once, even if the hero falls and comes back). The top band (450–500 ft) saves
@@ -21,7 +21,7 @@ const SKY_P = 1 / 3;                    // the sky scrolls at a third of the cli
 const $ = (id) => document.getElementById(id);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const params = new URLSearchParams(location.search);
-const DEV = params.has('dev') || document.documentElement.hasAttribute('data-dev');
+const DEV = params.has('debug') || params.has('dev') || document.documentElement.hasAttribute('data-dev');
 
 /* ==== SECTION: CONFIG (physics and difficulty) ==== */
 const CONFIG = {
@@ -618,16 +618,19 @@ const flyRng = rng(41);
 const fireflies = Array.from({ length: 18 }, () => ({ x: flyRng() * W, y: GROUND + 14 + flyRng() * 560, ph: flyRng() * 6.28, sp: .4 + flyRng() * .6 }));
 
 /* ==== SECTION: Camera ==== */
+// The camera holds still while the hero's feet stay inside a band of the screen, so a jump that lands back
+// where it started doesn't move the view down.
+const CAM_LOW = 64;                                               // buffer zone: the view moves down only to keep the feet this far above the bottom edge
+const CAM_REST = Math.round(.36 * H) + 14;                        // standing: the view rises until the feet are this far above the bottom edge
+const CAM_AIR = 190;                                              // mid-jump: the view rises only for the part of the jump above this line
 let camY = 0;                                                     // world y at the bottom of the screen
 function updateCam(dt, snap) {
-  const drop = hero.onGround ? 0 : clamp((-hero.vy - 320) * .3, 0, 130);   // falling fast: show more of what's below
-  const t = clamp(hero.y - .36 * H - drop, 0, CAM_MAX);
-  if (snap) camY = t;
+  if (snap) camY = clamp(hero.y - .36 * H, 0, CAM_MAX);
   else {
-    const d = t - camY, dz = 14, goal = Math.abs(d) < dz ? camY : t - Math.sign(d) * dz;
-    camY += (goal - camY) * Math.min(1, (d < 0 ? 11 : 7) * dt);   // follows faster on the way down
+    const up = Math.min(hero.y - (hero.onGround ? CAM_REST : CAM_AIR), CAM_MAX);
+    if (up > camY) camY += (up - camY) * Math.min(1, 7 * dt);
   }
-  camY = clamp(Math.max(Math.min(camY, hero.y - 28), hero.y - H + 64), 0, CAM_MAX + 40);   // never lose the hero
+  camY = clamp(Math.max(Math.min(camY, hero.y - CAM_LOW), hero.y - H + 64), 0, CAM_MAX + 40);   // keep the feet out of the buffer zone and the head on screen
 }
 
 /* ==== SECTION: Game state ==== */
@@ -934,7 +937,7 @@ function render(t) {
     px('firefly', fxx, fy, 1, 1); if (Math.sin(t * 3 + f.ph) > .4) px('firefly', fxx - 1, fy, 3, 1);
   }
   for (const p of plats) {
-    const y = H - (p.y - cam); if (y < -8 || y > H + 44) continue;
+    const y = H - (p.y - cam); if (y - UP + p.spr.height <= 0 || y > H + 44) continue;   // skip only when wholly off screen (the rock hangs below the surface)
     g.drawImage(p.spr, Math.round(p.x - p.w / 2), y - UP);
     if (p.kind === 'ledge') drawLantern(lampX(p), p.y, game.lamps[p.band], t);
     else if (p === summit) { drawLantern(p.x - 44, p.y, true, t); drawLantern(p.x + 42, p.y, true, t + .1); drawChest(p, t); }
