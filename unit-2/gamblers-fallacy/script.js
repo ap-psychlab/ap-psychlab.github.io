@@ -74,7 +74,7 @@
   function show(pick) { bot.setAttribute('data-pick', pick || ''); }
   function rollTo(x) {
     roll.style.transform = 'translateX(' + x + 'px)';
-    var deg = Math.round(x / 18 * 180 / Math.PI);   // wheel radius is 18 units
+    var deg = Math.round(x / 17 * 180 / Math.PI);   // wheel radius is 17 units
     wheels.forEach(function (w) { w.style.transform = 'rotate(' + deg + 'deg)'; });
   }
   function speak(text, pick, lead) {

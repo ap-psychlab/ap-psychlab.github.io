@@ -23,61 +23,103 @@
       <p id="say"></p>
     </div>
 
-    <svg id="bot" viewBox="0 0 320 250" data-mood="idle" data-pick="" role="img" aria-label="Chip, a small robot on wheels">
-      <g id="roll">
-        <ellipse class="shadow" cx="160" cy="239" rx="72" ry="6"/>
+    <svg id="bot" viewBox="0 0 320 270" data-mood="idle" data-pick="" role="img" aria-label="Chip, a small round robot on wheels">
+      <defs>
+        <radialGradient id="gShell" cx="34%" cy="22%" r="90%">
+          <stop offset="0" class="s-shell-hi"/><stop offset=".45" class="s-shell"/><stop offset="1" class="s-shell-lo"/>
+        </radialGradient>
+        <linearGradient id="gVisor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" class="s-visor-hi"/><stop offset="1" class="s-visor"/>
+        </linearGradient>
+        <radialGradient id="gAccent" cx="35%" cy="28%" r="80%">
+          <stop offset="0" class="s-accent-hi"/><stop offset=".55" class="s-accent"/><stop offset="1" class="s-accent-lo"/>
+        </radialGradient>
+        <radialGradient id="gTire" cx="38%" cy="30%" r="75%">
+          <stop offset="0" class="s-tire-hi"/><stop offset="1" class="s-tire"/>
+        </radialGradient>
+        <radialGradient id="gShadow">
+          <stop offset="0" class="s-shadow"/><stop offset="1" class="s-shadow-out"/>
+        </radialGradient>
+        <filter id="fGlow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="2.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="fSoft" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4"/></filter>
+      </defs>
 
+      <g id="roll">
+        <ellipse class="shadow" cx="160" cy="254" rx="84" ry="10"/>
+
+        <!-- far-side wheels, then the near wheels that spin -->
+        <circle class="wheel-back" cx="140" cy="228" r="14"/>
+        <circle class="wheel-back" cx="180" cy="228" r="14"/>
         <g class="wheel">
-          <circle class="tire" cx="128" cy="218" r="18"/>
-          <path class="spoke" d="M128 203v30M113 218h30"/>
-          <circle class="hub" cx="128" cy="218" r="5"/>
+          <circle class="tire" cx="124" cy="236" r="17"/>
+          <circle class="hub" cx="124" cy="236" r="9"/>
+          <path class="bolt" d="M124 229v14M117 236h14"/>
         </g>
         <g class="wheel">
-          <circle class="tire" cx="192" cy="218" r="18"/>
-          <path class="spoke" d="M192 203v30M177 218h30"/>
-          <circle class="hub" cx="192" cy="218" r="5"/>
+          <circle class="tire" cx="196" cy="236" r="17"/>
+          <circle class="hub" cx="196" cy="236" r="9"/>
+          <path class="bolt" d="M196 229v14M189 236h14"/>
         </g>
-        <rect class="chassis" x="108" y="194" width="104" height="18" rx="9"/>
 
         <g class="bob">
-          <!-- arms -->
+          <ellipse class="base" cx="160" cy="222" rx="54" ry="12"/>
+
           <g class="arm">
-            <path class="limb" d="M100 150q-24 8 -22 32"/>
-            <circle class="hand" cx="78" cy="185" r="7"/>
+            <path class="limb-edge" d="M110 172q-22 8 -24 30"/>
+            <path class="limb" d="M110 172q-22 8 -24 30"/>
+            <circle class="hand" cx="86" cy="204" r="10"/>
           </g>
           <g class="arm arm-r">
-            <path class="limb" d="M220 150q24 8 22 32"/>
-            <circle class="hand" cx="242" cy="185" r="7"/>
+            <path class="limb-edge" d="M210 172q22 8 24 30"/>
+            <path class="limb" d="M210 172q22 8 24 30"/>
+            <circle class="hand" cx="234" cy="204" r="10"/>
           </g>
 
-          <!-- body with the chest display that shows each pick -->
-          <rect class="neck" x="148" y="112" width="24" height="18"/>
-          <rect class="shell" x="100" y="126" width="120" height="74" rx="18"/>
-          <rect class="panel" x="126" y="139" width="68" height="48" rx="8"/>
-          <text class="chest-q" x="160" y="174" text-anchor="middle">?</text>
-          <circle class="chest-red" cx="160" cy="163" r="15"/>
-          <rect class="chest-blue" x="146" y="149" width="28" height="28" rx="3"/>
+          <!-- body, with the round belly screen that shows each pick -->
+          <rect class="shell" x="104" y="142" width="112" height="84" rx="38"/>
+          <ellipse class="shade" cx="160" cy="152" rx="46" ry="9"/>
+          <circle class="port-rim" cx="160" cy="188" r="25"/>
+          <circle class="port" cx="160" cy="188" r="20"/>
+          <text class="chest-q" x="160" y="198" text-anchor="middle">?</text>
+          <circle class="chest-red" cx="160" cy="188" r="13"/>
+          <rect class="chest-blue" x="148" y="176" width="24" height="24" rx="5"/>
+          <path class="gloss" d="M145 180a17 17 0 0 1 22 -9"/>
 
-          <!-- head -->
-          <path class="antenna" d="M160 42V22"/>
-          <circle class="bulb" cx="160" cy="16" r="8"/>
-          <rect class="ear" x="82" y="66" width="14" height="26" rx="4"/>
-          <rect class="ear" x="224" y="66" width="14" height="26" rx="4"/>
-          <rect class="shell" x="92" y="40" width="136" height="78" rx="22"/>
-          <rect class="screen" x="106" y="52" width="108" height="54" rx="14"/>
+          <g class="head">
+            <path class="antenna" d="M160 48q-7 -9 0 -18"/>
+            <circle class="halo" cx="160" cy="24" r="16"/>
+            <circle class="bulb" cx="160" cy="24" r="9"/>
+            <circle class="glint" cx="157" cy="21" r="2.5"/>
 
-          <g class="eyes-open">
-            <circle cx="138" cy="74" r="8"/>
-            <circle cx="182" cy="74" r="8"/>
+            <circle class="ear" cx="84" cy="98" r="14"/>
+            <circle class="ear" cx="236" cy="98" r="14"/>
+            <rect class="shell" x="82" y="44" width="156" height="108" rx="52"/>
+            <ellipse class="glint big" cx="126" cy="60" rx="30" ry="9" transform="rotate(-14 126 60)"/>
+
+            <rect class="visor" x="100" y="66" width="120" height="64" rx="30"/>
+            <ellipse class="visor-gloss" cx="134" cy="79" rx="30" ry="6" transform="rotate(-10 134 79)"/>
+            <ellipse class="blush" cx="117" cy="113" rx="9" ry="5"/>
+            <ellipse class="blush" cx="203" cy="113" rx="9" ry="5"/>
+
+            <g class="face">
+              <g class="eyes-open">
+                <ellipse cx="137" cy="93" rx="9" ry="12"/>
+                <ellipse cx="183" cy="93" rx="9" ry="12"/>
+              </g>
+              <path class="line eyes-happy" d="M127 98q10 -15 20 0M173 98q10 -15 20 0"/>
+              <g class="eyes-think">
+                <ellipse cx="141" cy="89" rx="7" ry="9"/>
+                <ellipse cx="187" cy="89" rx="7" ry="9"/>
+              </g>
+              <path class="line eyes-flat" d="M128 94h18M174 94h18"/>
+              <path class="line m-smile" d="M152 111q8 8 16 0"/>
+              <path class="line m-flat" d="M153 114h14"/>
+              <circle class="m-o" cx="160" cy="114" r="4"/>
+            </g>
           </g>
-          <path class="eyes-happy" d="M129 78q9 -13 18 0M173 78q9 -13 18 0"/>
-          <g class="eyes-think">
-            <circle cx="142" cy="69" r="6"/>
-            <circle cx="186" cy="69" r="6"/>
-          </g>
-          <path class="mouth m-smile" d="M150 90q10 9 20 0"/>
-          <path class="mouth m-flat" d="M151 93h18"/>
-          <circle class="m-o" cx="160" cy="93" r="4"/>
         </g>
       </g>
     </svg>
