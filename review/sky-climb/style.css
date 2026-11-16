@@ -1,0 +1,194 @@
+/* Sky Climb — demo-specific styles (theme comes from ../../shared/theme.css) */
+
+:root {
+  /* Dims the page behind this page's dialogs */
+  --sc-backdrop: rgba(59, 42, 32, .45);
+
+  /* Game art palette (read once by script.js; never used for page UI).
+     Sky: one sunset from the horizon (0 ft) up to night (500 ft). */
+  --px-sky0: #FFE9AE; --px-sky1: #FFD68E; --px-sky2: #FFBC7D; --px-sky3: #FDA07A; --px-sky4: #F6837F;
+  --px-sky5: #E66C8C; --px-sky6: #CB5E9A; --px-sky7: #A556A3; --px-sky8: #7E4EA3; --px-sky9: #5E479B;
+  --px-sky10: #47418E; --px-sky11: #363B80; --px-sky12: #2A3371; --px-sky13: #212B63; --px-sky14: #1C2558;
+  --px-suncore: #FFFCE8; --px-sunmid: #FFF0B0; --px-sunrim: #FFD978; --px-sunglow: #FFF4C8;
+  --px-moonlit: #F6F2E2; --px-moonmid: #D8D6EA; --px-moonshade: #A7A8D4; --px-moonglow: #7F86C8;
+  --px-star: #F7F3FF; --px-starwarm: #FFE7B0; --px-starcool: #BFD4FF;
+  /* Mountains (far range, near range) */
+  --px-mfarlit: #F3B3A4; --px-mfar: #D48EA0; --px-mfarshade: #AE74A0;
+  --px-mnearlit: #CF86A0; --px-mnear: #A36492; --px-mnearshade: #7C4D86;
+  --px-snow: #FFF4E2; --px-snowshade: #EFC4C8; --px-mist: #FBC6A2;
+  /* Forest silhouettes, far (f1) to near (f6): body and sunlit edge */
+  --px-f1: #A0739C; --px-f1lit: #C592A6; --px-f2: #84629A; --px-f2lit: #A9819F;
+  --px-f3: #68588F; --px-f3lit: #8B76A0; --px-f4: #4C5383; --px-f4lit: #6A7699;
+  --px-f5: #375270; --px-f5lit: #527A86; --px-f6: #2A5058; --px-f6lit: #437C66;
+  /* Giant pines and ground */
+  --px-pinehi: #B2D862; --px-pinelit: #74AA4A; --px-pine: #437F42; --px-pinedark: #2A5E3D; --px-pinedeep: #183F32;
+  --px-trunk: #5E3E34; --px-trunklit: #845A44; --px-trunkdark: #3B2628;
+  --px-dirt: #7D513E; --px-dirtlit: #A0704E; --px-dirtdark: #563630;
+  --px-flowera: #FFE38A; --px-flowerb: #F9A9BA;
+  /* Floating islands: turf and rock at 0, 125, 250, 375, 500 ft (lit and shaded tones are derived) */
+  --px-turf0: #6FA548; --px-turf1: #C6AA48; --px-turf2: #D67F86; --px-turf3: #9482CC; --px-turf4: #BDD0F0;
+  --px-rock0: #8A5A44; --px-rock1: #99624E; --px-rock2: #8A536C; --px-rock3: #5F5090; --px-rock4: #4C5894;
+  /* Clouds at 0, 150, 300, 450 ft */
+  --px-cloud0: #FFF3DA; --px-cloud1: #FFCDBB; --px-cloud2: #CC9ED4; --px-cloud3: #8085C8; --px-cloudlight: #FFFDF2;
+  --px-isle: #3A3468;
+  /* Lanterns, treasure, effects */
+  --px-lampmetal: #33283A; --px-lampoff: #7E88A6; --px-lampcore: #FFF8D0; --px-lampglow: #FFD56E;
+  --px-wood: #8E5838; --px-woodlit: #B67C4A; --px-wooddark: #553024;
+  --px-gold: #F2C14E; --px-goldlit: #FFEDA8; --px-golddark: #AE7C2A;
+  --px-dust: #EDE0CA; --px-rim: #DDE5FF; --px-firefly: #F6FF9A; --px-shadow: #0E0A1E; --px-hitbox: #00E5FF;
+}
+
+.center { text-align: center; }
+
+/* ---------- Game card ---------- */
+.game { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 16px; }
+.game .row { margin-bottom: 0; }
+.hud, .touch, .controls, #note { width: min(100%, 768px); }
+.hud { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; }
+.hud strong { color: var(--heading); font-size: 1.25rem; font-variant-numeric: lining-nums tabular-nums; }
+.hud-alt span { margin-left: 4px; }
+
+/* Question lanterns: number = not answered yet, check = correct, cross = missed */
+.pips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.pips li {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--btn); background: var(--bg);
+  color: var(--heading); font-weight: 700; font-size: .75rem; line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.pips li.correct { background: var(--sage); border-color: var(--sage); }
+.pips li.wrong { border: 2px dashed var(--error); }
+
+#view {
+  position: relative; width: min(100%, 768px); aspect-ratio: 512 / 320;
+  border: 1px solid var(--border); border-radius: var(--radius-btn);
+  overflow: hidden; background: var(--bg-alt); touch-action: none;
+}
+#view:focus-visible { outline: 3px solid var(--heading); outline-offset: 2px; }
+#cv { display: block; width: 100%; height: 100%; }
+.gate { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.gate span {
+  background: var(--bg); color: var(--heading); border: 1px solid var(--border);
+  border-radius: var(--radius-btn); padding: 8px 16px; font-weight: 700; text-align: center;
+}
+
+/* Touch buttons (phones and tablets) */
+.touch { display: none; justify-content: space-between; gap: 8px; }
+.touch button {
+  min-height: 64px; min-width: 72px; padding: 0 16px; font: 700 1.4rem var(--font-body);
+  background: var(--btn2); color: var(--heading); border: 1px solid transparent; border-radius: var(--radius-btn);
+  cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.touch button.on { filter: brightness(.9); }
+.touch .lr { display: flex; gap: 8px; }
+@media (pointer: coarse), (max-width: 600px) { .touch { display: flex; } }
+
+.controls { justify-content: center; }
+#topicSummary { color: var(--heading); }
+#note { margin: 0; text-align: center; }
+#note:empty { display: none; }
+#note.warn { color: var(--error); font-weight: 700; }
+
+/* Test tools (only with ?dev in the address) */
+.dev { display: grid; gap: 8px; margin-bottom: 16px; }
+.dev .row { margin-bottom: 0; }
+.dev label { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.dev input { width: 20px; height: 20px; margin: 0; accent-color: var(--btn); }
+#devOut { margin: 0; min-height: 1.4em; font: .85rem/1.4 ui-monospace, Menlo, Consolas, monospace; text-align: center; }
+
+/* ---------- Dialogs ---------- */
+.sc-dialog {
+  width: min(640px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+.sc-dialog[open] { display: flex; flex-direction: column; }
+.sc-dialog::backdrop { background: var(--sc-backdrop); }
+.sc-dlg-head, .sc-dlg-foot { padding: 12px 16px; background: var(--bg-alt); }
+.sc-dlg-head {
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px;
+}
+.sc-dlg-head h2 { margin: 0; }
+.sc-dlg-head h2:focus { outline: none; }
+.sc-dlg-head span { font-size: .9rem; font-weight: 700; color: var(--heading); }
+.sc-dlg-foot { border-top: 1px solid var(--border); }
+.sc-dlg-foot .row { margin-bottom: 0; }
+.sc-dlg-foot .hint { margin: 8px 0 0; text-align: center; }
+.sc-dlg-foot .hint:empty { display: none; }
+.sc-dlg-body { overflow-y: auto; padding: 16px; flex: 1; min-height: 0; }
+.sc-dlg-body > p { margin: 0 0 16px; }
+.sc-dlg-body .stats { margin-bottom: 16px; }
+
+/* Question card (same look as review/practice-questions) */
+.stem { margin: 0 0 16px; font-size: 1.05rem; color: var(--heading); white-space: pre-line; }
+.choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.choice {
+  display: flex; align-items: flex-start; gap: 12px;
+  width: 100%; min-height: 44px; padding: 10px 12px;
+  text-align: left; font: 400 1rem/1.4 var(--font-body); color: var(--text);
+  background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-btn);
+  cursor: pointer;
+}
+.choice:hover { border-color: var(--btn); }
+.letter {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-alt); border: 1px solid var(--border);
+  color: var(--heading); font-weight: 700; font-size: .9rem;
+}
+.cbody { flex: 1; min-width: 0; padding-top: 2px; }
+.ctext { display: block; }
+.tag { display: block; margin-top: 4px; font-size: .85rem; font-weight: 700; color: var(--heading); }
+.tag .icon { display: inline-block; width: 1.1em; }
+/* Revealed answers (labels carry the meaning; color only reinforces it) */
+.choice.is-answer { border-color: var(--sage); background: var(--bg-alt); background: color-mix(in srgb, var(--sage) 28%, var(--bg)); }
+.choice.is-answer .letter { background: var(--sage); border-color: var(--sage); }
+.choice.is-wrong { border-color: var(--error); border-style: dashed; }
+.choice.is-wrong .letter { background: var(--error); border-color: var(--error); color: var(--bg); }
+.fb {
+  margin: 4px 0 0 40px; padding: 8px 12px;
+  font-size: .95rem; color: var(--text);
+  background: var(--bg-alt); border-left: 4px solid var(--border); border-radius: 0 var(--radius-btn) var(--radius-btn) 0;
+}
+.fb.good { border-left-color: var(--sage); }
+.fb.bad { border-left-color: var(--error); }
+.hint-box, .explain {
+  margin: 16px 0 0; padding: 12px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn);
+}
+.hint-box { border-left: 4px solid var(--accent); }
+.explain p { margin: 0; }
+
+/* Summit results */
+.res-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.res-list details { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); }
+.res-list summary {
+  display: grid; grid-template-columns: 1.6em minmax(0, 1fr) auto; gap: 8px; align-items: center;
+  min-height: 44px; padding: 8px 12px; cursor: pointer; list-style: none; border-radius: var(--radius-btn);
+}
+.res-list summary::-webkit-details-marker { display: none; }
+.res-list summary:hover { background: var(--bg-alt); }
+.res-n { font-weight: 700; color: var(--heading); font-variant-numeric: lining-nums tabular-nums; }
+.res-stem { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-list details[open] .res-stem { white-space: pre-line; color: var(--heading); }
+.res-more { padding: 0 12px 12px; display: grid; gap: 8px; }
+.res-more p { margin: 0; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 0 8px; border-radius: 999px; font-size: .8rem; font-weight: 700; line-height: 1.8;
+  color: var(--heading); background: var(--bg-alt); border: 1px solid var(--border);
+}
+.badge.correct { background: var(--sage); border-color: var(--sage); }
+.badge.wrong { background: var(--bg); border: 1px dashed var(--error); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
