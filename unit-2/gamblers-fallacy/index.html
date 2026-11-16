@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outguess the Robot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<main class="wide">
+  <h1>Outguess the Robot</h1>
+  <p class="hint">Chip the robot picks a color each round. Guess what it will pick: click Red or Blue, or press R / B (or the ← / → arrow keys).</p>
+
+  <div class="split">
+  <div class="play">
+
+    <div class="bubble" id="bubble" role="status" aria-live="polite">
+      <p id="say"></p>
+    </div>
+
+    <svg id="bot" viewBox="0 0 320 250" data-mood="idle" data-pick="" role="img" aria-label="Chip, a small robot on wheels">
+      <g id="roll">
+        <ellipse class="shadow" cx="160" cy="239" rx="72" ry="6"/>
+
+        <g class="wheel">
+          <circle class="tire" cx="128" cy="218" r="18"/>
+          <path class="spoke" d="M128 203v30M113 218h30"/>
+          <circle class="hub" cx="128" cy="218" r="5"/>
+        </g>
+        <g class="wheel">
+          <circle class="tire" cx="192" cy="218" r="18"/>
+          <path class="spoke" d="M192 203v30M177 218h30"/>
+          <circle class="hub" cx="192" cy="218" r="5"/>
+        </g>
+        <rect class="chassis" x="108" y="194" width="104" height="18" rx="9"/>
+
+        <g class="bob">
+          <!-- arms -->
+          <g class="arm">
+            <path class="limb" d="M100 150q-24 8 -22 32"/>
+            <circle class="hand" cx="78" cy="185" r="7"/>
+          </g>
+          <g class="arm arm-r">
+            <path class="limb" d="M220 150q24 8 22 32"/>
+            <circle class="hand" cx="242" cy="185" r="7"/>
+          </g>
+
+          <!-- body with the chest display that shows each pick -->
+          <rect class="neck" x="148" y="112" width="24" height="18"/>
+          <rect class="shell" x="100" y="126" width="120" height="74" rx="18"/>
+          <rect class="panel" x="126" y="139" width="68" height="48" rx="8"/>
+          <text class="chest-q" x="160" y="174" text-anchor="middle">?</text>
+          <circle class="chest-red" cx="160" cy="163" r="15"/>
+          <rect class="chest-blue" x="146" y="149" width="28" height="28" rx="3"/>
+
+          <!-- head -->
+          <path class="antenna" d="M160 42V22"/>
+          <circle class="bulb" cx="160" cy="16" r="8"/>
+          <rect class="ear" x="82" y="66" width="14" height="26" rx="4"/>
+          <rect class="ear" x="224" y="66" width="14" height="26" rx="4"/>
+          <rect class="shell" x="92" y="40" width="136" height="78" rx="22"/>
+          <rect class="screen" x="106" y="52" width="108" height="54" rx="14"/>
+
+          <g class="eyes-open">
+            <circle cx="138" cy="74" r="8"/>
+            <circle cx="182" cy="74" r="8"/>
+          </g>
+          <path class="eyes-happy" d="M129 78q9 -13 18 0M173 78q9 -13 18 0"/>
+          <g class="eyes-think">
+            <circle cx="142" cy="69" r="6"/>
+            <circle cx="186" cy="69" r="6"/>
+          </g>
+          <path class="mouth m-smile" d="M150 90q10 9 20 0"/>
+          <path class="mouth m-flat" d="M151 93h18"/>
+          <circle class="m-o" cx="160" cy="93" r="4"/>
+        </g>
+      </g>
+    </svg>
+
+    <div class="row" id="talkRow">
+      <button class="btn" id="nextBtn">Next</button>
+    </div>
+
+    <div class="row" id="guessRow" hidden>
+      <button class="btn pick pick-red" id="redBtn" aria-label="Guess red, key R">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>Red
+      </button>
+      <button class="btn pick pick-blue" id="blueBtn" aria-label="Guess blue, key B">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Blue
+      </button>
+    </div>
+
+    <div class="row">
+      <button class="btn alt" id="soundBtn" aria-pressed="true">Sound: On</button>
+      <button class="btn ghost" id="restartBtn" hidden>Restart</button>
+    </div>
+
+  </div>
+
+  <aside class="side" aria-label="Scores and results">
+    <div class="stats" aria-label="Scores">
+      <div class="stat"><span>Round</span><strong id="roundV">0 / 40</strong></div>
+      <div class="stat"><span>Correct</span><strong id="correctV">0</strong></div>
+    </div>
+
+    <section class="card" id="historyCard">
+      <h2>Chip's picks so far</h2>
+      <div class="history" id="history"></div>
+      <p class="hint legend">
+        <span class="chip" data-c="red">R</span> red
+        <span class="chip" data-c="blue">B</span> blue
+        &nbsp; ✓ you guessed it &nbsp; ✗ you missed
+      </p>
+    </section>
+
+    <section class="card" id="results" hidden>
+      <h2>Results</h2>
+      <div class="bars" id="bars"></div>
+      <ul class="facts" id="facts"></ul>
+      <h3>What's going on?</h3>
+      <p>Chip has no memory. Every pick is a fresh 70/30 roll, so after any streak the chance of red is still 70%. Believing that blue is “due” after a run of reds is the <strong>gambler's fallacy</strong>.</p>
+      <p>Because red is the more likely pick on every round, the best strategy is to guess red every time (about 70% correct on average). Mixing in blue guesses to match the 70/30 pattern averages only about 58%.</p>
+    </section>
+  </aside>
+  </div>
+</main>
+</body>
+</html>

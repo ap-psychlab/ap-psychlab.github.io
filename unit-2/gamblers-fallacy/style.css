@@ -1,0 +1,145 @@
+/* Outguess the Robot — demo-specific styles (theme comes from ../../shared/theme.css) */
+
+:root {
+  /* Stimulus colors (true colors, used only for the two picks) */
+  --stim-red: #B71C1C;
+  --stim-blue: #1749A8;
+}
+
+.play { text-align: center; }
+
+/* ---------- Speech bubble ---------- */
+.bubble {
+  position: relative;
+  max-width: 520px;
+  min-height: 6.5em;
+  margin: 0 auto 14px;
+  padding: 12px 16px;
+  background: var(--bg-alt);
+  border: 2px solid var(--heading);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bubble::before, .bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  border-style: solid;
+  border-color: transparent;
+  transform: translateX(-50%);
+}
+.bubble::before { bottom: -14px; border-width: 14px 12px 0; border-top-color: var(--heading); }
+.bubble::after  { bottom: -10px; border-width: 11px 9px 0;  border-top-color: var(--bg-alt); }
+#say { margin: 0; color: var(--heading); font-size: 1.05rem; }
+#say strong { display: block; }
+#say .red, #say .blue { padding: 0 6px; border-radius: 4px; color: var(--bg); }
+#say .red { background: var(--stim-red); }
+#say .blue { background: var(--stim-blue); }
+
+/* ---------- Robot ---------- */
+#bot { display: block; width: 100%; max-width: 360px; margin: 0 auto 8px; overflow: visible; }
+
+#bot .shell   { fill: var(--teal); stroke: var(--heading); stroke-width: 3; }
+#bot .screen  { fill: var(--heading); }
+#bot .panel   { fill: var(--bg); stroke: var(--heading); stroke-width: 2; }
+#bot .neck, #bot .chassis { fill: var(--muted); stroke: var(--heading); stroke-width: 3; }
+#bot .ear, #bot .hand { fill: var(--honey); stroke: var(--heading); stroke-width: 3; }
+#bot .limb, #bot .antenna { fill: none; stroke: var(--heading); stroke-width: 5; stroke-linecap: round; }
+#bot .tire    { fill: var(--heading); }
+#bot .spoke   { stroke: var(--bg); stroke-width: 3; stroke-linecap: round; }
+#bot .hub     { fill: var(--honey); }
+#bot .shadow  { fill: var(--border); }
+#bot .bulb    { fill: var(--border); stroke: var(--heading); stroke-width: 3; transition: fill .15s; }
+#bot .eyes-open circle, #bot .eyes-think circle, #bot .m-o { fill: var(--honey); }
+#bot .eyes-happy, #bot .mouth { fill: none; stroke: var(--honey); stroke-width: 4; stroke-linecap: round; }
+#bot .chest-q { font: 700 30px var(--font-body); fill: var(--muted); }
+#bot .chest-red  { fill: var(--stim-red); }
+#bot .chest-blue { fill: var(--stim-blue); }
+
+/* Faces: idle (default), think, happy, flat */
+#bot .eyes-happy, #bot .eyes-think, #bot .m-flat, #bot .m-o { display: none; }
+#bot[data-mood="think"] :is(.eyes-open, .m-smile),
+#bot[data-mood="happy"] .eyes-open,
+#bot[data-mood="flat"] .m-smile { display: none; }
+#bot[data-mood="think"] :is(.eyes-think, .m-o),
+#bot[data-mood="happy"] .eyes-happy,
+#bot[data-mood="flat"] .m-flat { display: inline; }
+
+/* Chest display and antenna bulb show the pick */
+#bot .chest-red, #bot .chest-blue { display: none; }
+#bot[data-pick="red"] .chest-red, #bot[data-pick="blue"] .chest-blue { display: inline; }
+#bot:not([data-pick=""]) .chest-q { display: none; }
+#bot[data-pick="red"] .bulb  { fill: var(--stim-red); }
+#bot[data-pick="blue"] .bulb { fill: var(--stim-blue); }
+
+/* Motion: rolling, idle bob, blink, wave */
+#roll { transition: transform .45s ease-in-out; }
+#bot .wheel { transform-box: fill-box; transform-origin: center; transition: transform .45s ease-in-out; }
+#bot .bob { animation: bob 3s ease-in-out infinite; }
+#bot .eyes-open { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+#bot .arm-r { transform-origin: 220px 150px; transition: transform .25s; }
+#bot[data-mood="happy"] .arm-r { transform: rotate(-115deg); }
+#bot[data-mood="think"] .bulb { animation: pulse .3s linear infinite alternate; }
+
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes pulse { to { fill: var(--honey); } }
+
+/* ---------- Guess buttons ---------- */
+.pick {
+  min-width: 132px;
+  min-height: 56px;
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.pick svg { width: 22px; height: 22px; fill: var(--bg); }
+.pick-red, .pick-red:hover   { background: var(--stim-red); }
+.pick-blue, .pick-blue:hover { background: var(--stim-blue); }
+.pick:hover:not(:disabled) { filter: brightness(1.15); }
+
+/* ---------- History strip ---------- */
+.side .card { margin-bottom: 16px; }
+.history { display: flex; flex-wrap: wrap; gap: 4px; min-height: 44px; }
+.cell { display: flex; flex-direction: column; align-items: center; font-size: .95rem; font-weight: 700; line-height: 1.2; color: var(--heading); }
+.cell .miss { color: var(--error); font-weight: 700; }
+.chip {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .8rem;
+  color: var(--bg);
+}
+.chip[data-c="red"]  { background: var(--stim-red); border-radius: 50%; }
+.chip[data-c="blue"] { background: var(--stim-blue); border-radius: 4px; }
+.legend { margin: 12px 0 0; }
+.legend .chip { width: 20px; height: 20px; vertical-align: middle; }
+
+/* ---------- Results ---------- */
+.bar { margin-bottom: 12px; }
+.bar .lbl { display: flex; justify-content: space-between; gap: 8px; color: var(--heading); font-weight: 700; font-size: .95rem; }
+.bar .track { height: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--accent); }
+.bar.best .fill {
+  background: repeating-linear-gradient(45deg, var(--teal) 0 8px, var(--sage) 8px 12px);
+}
+.facts { margin: 0 0 8px; padding-left: 20px; }
+.facts li { margin-bottom: 4px; }
+#results p { margin: 0 0 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  #roll, #bot .wheel, #bot .arm-r { transition: none; }
+  #bot .bob, #bot .eyes-open, #bot[data-mood="think"] .bulb { animation: none; }
+}
+
+@media (max-width: 420px) {
+  .bubble { min-height: 8em; }
+  .pick { min-width: 116px; }
+}
