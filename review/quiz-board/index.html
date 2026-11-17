@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classroom Quiz Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<link rel="stylesheet" href="../../shared/topic-picker.css">
+<link rel="stylesheet" href="style.css">
+<script src="../../shared/data/questions.js" defer></script>
+<script src="../../shared/data/topics.js" defer></script>
+<script src="../../shared/topic-picker.js" defer></script>
+<script src="script.js" defer></script>
+</head>
+<body>
+<main class="wide">
+  <h1>Classroom Quiz Board</h1>
+  <p class="hint" id="pageHint">A team review game to run from one computer on a projector. Teams pick a topic and a point value; harder questions are worth more.</p>
+
+  <!-- ---------- Setup ---------- -->
+  <section class="card setup" id="setup" aria-labelledby="setupH">
+    <h2 id="setupH">Set up a game</h2>
+
+    <div class="field">
+      <span class="legend">Topics</span>
+      <div class="topic-line">
+        <span id="topicSummary">All topics</span>
+        <button class="btn alt" id="topicsBtn" type="button" aria-haspopup="dialog">Choose topics</button>
+      </div>
+      <p class="field-note">Each column of the board is one topic (up to 6, chosen at random if you check more).</p>
+    </div>
+
+    <fieldset class="field">
+      <legend>Teams</legend>
+      <div class="count-line">
+        <button class="btn ghost step" id="lessBtn" type="button" aria-label="One fewer team">−</button>
+        <output id="teamCount" aria-live="polite">4 teams</output>
+        <button class="btn ghost step" id="moreBtn" type="button" aria-label="One more team">+</button>
+      </div>
+      <ol class="names" id="names"></ol>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>Options</legend>
+      <label class="opt"><input type="checkbox" id="optPenalty"><span>Wrong answers lose points</span></label>
+      <label class="opt"><input type="checkbox" id="optChoices" checked><span>Show answer choices <small>(turn off for open response; choices can still be shown on request)</small></span></label>
+      <label class="opt"><input type="checkbox" id="optPick" checked><span>Mark whose pick it is <small>(the team that last answered correctly)</small></span></label>
+    </fieldset>
+
+    <p class="setup-note" id="setupNote" aria-live="polite"></p>
+    <div class="row">
+      <button class="btn" id="startBtn" type="button">Start game</button>
+    </div>
+  </section>
+
+  <!-- ---------- Game ---------- -->
+  <section id="game" aria-label="Quiz board" hidden>
+    <ul class="scores" id="scores" aria-label="Scoreboard"></ul>
+
+    <div class="board-wrap">
+      <div class="board" id="board" role="grid" aria-label="Question board"></div>
+    </div>
+    <p class="hint center">Arrow keys move between tiles and Enter opens one. In a question: H shows the hint, R reveals the answer, 1–9 award a team, N is no one, and Esc closes.</p>
+
+    <div class="row">
+      <button class="btn ghost" id="reshuffleBtn" type="button">Reshuffle board</button>
+      <button class="btn ghost" id="undoBtn" type="button" disabled>Undo last score</button>
+      <button class="btn ghost" id="soundBtn" type="button" aria-pressed="true">Sound: on</button>
+      <button class="btn alt" id="endBtn" type="button">End game</button>
+    </div>
+  </section>
+
+  <!-- ---------- Final standings ---------- -->
+  <section id="final" aria-labelledby="finalH" hidden>
+    <h2 id="finalH" tabindex="-1">Final standings</h2>
+    <p class="winner" id="winner"></p>
+    <ol class="standings" id="standings"></ol>
+    <div class="row">
+      <button class="btn" id="againBtn" type="button">Play again</button>
+      <button class="btn ghost" id="backBtn" type="button">Back to board</button>
+      <button class="btn ghost" id="newBtn" type="button">New setup</button>
+    </div>
+    <p class="hint center">Play again keeps the same teams and deals a new board.</p>
+  </section>
+
+  <!-- ---------- Question view ---------- -->
+  <dialog class="qb-dialog" id="qDialog" aria-labelledby="qHead">
+    <div class="qb-head">
+      <h2 id="qHead" tabindex="-1"><span id="qCat"></span> <span class="pts" id="qPts"></span></h2>
+    </div>
+    <div class="qb-body">
+      <p class="stem" id="stem"></p>
+      <ol class="choices" id="choices" aria-label="Answer choices"></ol>
+      <p class="hint-box" id="hintBox" hidden></p>
+      <p class="explain" id="explain" hidden></p>
+    </div>
+    <div class="qb-foot">
+      <div class="row" id="askRow">
+        <button class="btn ghost" id="closeBtn" type="button">Back to board</button>
+        <button class="btn ghost" id="hintBtn" type="button" aria-expanded="false" aria-controls="hintBox">Show hint</button>
+        <button class="btn ghost" id="choicesBtn" type="button">Show choices</button>
+        <button class="btn" id="revealBtn" type="button">Reveal answer</button>
+      </div>
+      <div id="awardBox" hidden>
+        <div class="award-group" id="wrongGroup" role="group" aria-labelledby="wrongLabel">
+          <p class="award-label" id="wrongLabel"></p>
+          <div class="row" id="wrongRow"></div>
+        </div>
+        <div class="award-group" role="group" aria-labelledby="rightLabel">
+          <p class="award-label" id="rightLabel"></p>
+          <div class="row" id="rightRow"></div>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="noneBtn" type="button">No one</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="sr-only" aria-live="polite" id="live"></div>
+</main>
+</body>
+</html>
