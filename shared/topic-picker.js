@@ -18,6 +18,7 @@
  *   });
  *   picker.pool()    // items in the selected topics
  *   picker.label()   // "All topics", "Memory, Thinking", or "5 topics"
+ *   picker.codes()   // the content codes of the checked topics, e.g. ["0.1", "2.3"]
  *
  * URL: reads ?groups=<group ids> (class units) or ?ced=<CED topic codes>, and writes
  * the selection back on Done so a teacher can copy a link. Topics with no items show
@@ -259,6 +260,7 @@ window.APPSYCH_TOPIC_PICKER = (function () {
     return {
       pool: function () { return pool; },
       label: label,
+      codes: function () { return codesFor(selection); },
       open: open
     };
   }

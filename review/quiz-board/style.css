@@ -1,0 +1,220 @@
+/* Classroom Quiz Board — demo-specific styles (theme comes from ../../shared/theme.css) */
+
+:root {
+  /* Dims the page behind the question view */
+  --qb-backdrop: rgba(59, 42, 32, .6);
+}
+
+.center { text-align: center; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- Setup ---------- */
+.setup { display: grid; gap: 16px; margin-bottom: 16px; }
+.setup h2 { margin-bottom: 0; }
+.setup .row { margin-bottom: 0; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend, .legend { display: block; font-weight: 700; color: var(--heading); margin-bottom: 8px; padding: 0; }
+.field-note { margin: 8px 0 0; font-size: .9rem; color: var(--text); }
+.topic-line, .count-line { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+#topicSummary { color: var(--heading); }
+.step { min-width: 44px; padding: 0; font-size: 1.25rem; }
+#teamCount { min-width: 5em; text-align: center; font-weight: 700; color: var(--heading); font-variant-numeric: lining-nums tabular-nums; }
+
+.names {
+  list-style: none; margin: 12px 0 0; padding: 0;
+  display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+.names li { display: flex; align-items: center; gap: 8px; }
+.names input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 0 8px;
+  font: 400 1rem var(--font-body); color: var(--heading);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn);
+}
+
+.opt { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; color: var(--heading); }
+.opt input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--btn); }
+.opt small { font-size: .9rem; color: var(--text); }
+
+.setup-note { margin: 0; text-align: center; font-weight: 700; color: var(--heading); }
+.setup-note.warn { color: var(--error); }
+.setup-note:empty { display: none; }
+
+/* ---------- Team badges ---------- */
+/* The number identifies the team; ring color and shape (circle 1–6, square 7–12) reinforce it. */
+.tb {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg); border: 4px solid var(--accent);
+  color: var(--heading); font: 700 .95rem var(--font-body);
+  font-variant-numeric: lining-nums tabular-nums; line-height: 1;
+}
+.tb.sq { border-radius: 6px; }
+.tb.c0 { border-color: var(--accent); }
+.tb.c1 { border-color: var(--teal); }
+.tb.c2 { border-color: var(--honey); }
+.tb.c3 { border-color: var(--plum); }
+.tb.c4 { border-color: var(--sage); }
+.tb.c5 { border-color: var(--blue); }
+
+/* ---------- Scoreboard ---------- */
+.scores {
+  list-style: none; margin: 0 0 16px; padding: 0;
+  display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.team {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 8px; align-items: center;
+  padding: 8px; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius-card);
+}
+.team .tname { font-weight: 700; color: var(--heading); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team strong {
+  grid-column: 1 / -1; text-align: center; color: var(--heading);
+  font: 700 clamp(1.5rem, 1rem + 1.4vw, 2.25rem)/1.1 var(--font-body);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.team .adj { grid-column: 1 / -1; display: flex; gap: 4px; }
+.team .adj button {
+  flex: 1; min-height: 44px; padding: 0 4px; cursor: pointer;
+  font: 700 .9rem var(--font-body); font-variant-numeric: lining-nums tabular-nums;
+  color: var(--heading); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn);
+}
+.team .adj button:hover { border-color: var(--btn); }
+.team .pick {
+  grid-column: 1 / -1; text-align: center; font-size: .85rem; font-weight: 700; color: var(--heading);
+  visibility: hidden;
+}
+.team.has-pick { border-color: var(--btn); background: var(--bg-alt); }
+.team.has-pick .pick { visibility: visible; }
+.scores.no-pick .pick { display: none; }
+
+/* ---------- Board ---------- */
+.board-wrap { overflow-x: auto; padding: 4px; margin: 0 -4px 8px; }
+.board { display: grid; gap: 8px; grid-template-columns: repeat(var(--cols, 5), minmax(104px, 1fr)); }
+.board [role="row"] { display: contents; }
+.cat {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 64px; padding: 8px; border-radius: var(--radius-btn);
+  background: var(--btn); color: var(--bg);
+  font: 700 clamp(.85rem, .65rem + .55vw, 1.2rem)/1.2 var(--font-body);
+  overflow-wrap: anywhere;
+}
+.cell { display: flex; }
+.tile {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: clamp(48px, 9vh, 104px); padding: 4px; cursor: pointer;
+  background: var(--card); color: var(--heading);
+  border: 2px solid var(--border); border-radius: var(--radius-btn);
+  font: 700 clamp(1.3rem, 1rem + 1.5vw, 2.4rem)/1 var(--font-body);
+  font-variant-numeric: lining-nums tabular-nums;
+  transition: border-color .15s, background-color .15s;
+}
+.tile:hover { border-color: var(--btn); background: var(--bg-alt); }
+.tile:focus-visible { outline-offset: 1px; }
+/* Used tiles: labeled "Used" with who scored, outlined instead of filled */
+.tile.used { background: transparent; border-style: dashed; cursor: default; color: var(--text); }
+.tile.used:hover { border-color: var(--border); background: transparent; }
+.tile .tused { font-size: .85rem; font-weight: 700; text-decoration: line-through; }
+.tile .twho { max-width: 100%; font-size: .8rem; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell.none { border: 2px dashed var(--border); border-radius: var(--radius-btn); opacity: .5; }
+
+/* ---------- Final standings ---------- */
+#finalH:focus { outline: none; }
+.winner { margin: 0 0 16px; font-size: 1.25rem; font-weight: 700; color: var(--heading); text-align: center; }
+.standings { list-style: none; margin: 0 auto 16px; padding: 0; max-width: 640px; display: grid; gap: 8px; }
+.standings li {
+  display: grid; grid-template-columns: 4.5em auto minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding: 8px 16px; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius-card);
+  color: var(--heading); font-size: 1.15rem;
+}
+.standings li.first { border-color: var(--btn); background: var(--bg-alt); }
+.standings .place { font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
+.standings .tname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.standings strong { font-size: 1.5rem; font-variant-numeric: lining-nums tabular-nums; }
+
+/* ---------- Question view ---------- */
+.qb-dialog {
+  width: min(1400px, calc(100% - 24px)); max-width: none;
+  max-height: calc(100% - 24px); overflow-y: auto;   /* the whole view scrolls if a screen is short */
+  padding: 0; border: 1px solid var(--border); border-radius: var(--radius-card);
+  background: var(--bg); color: var(--text); box-shadow: var(--shadow);
+}
+.qb-dialog[open] { display: flex; flex-direction: column; }
+.qb-dialog::backdrop { background: var(--qb-backdrop); }
+.qb-head, .qb-foot { padding: 12px 16px; background: var(--bg-alt); }
+.qb-head { border-bottom: 1px solid var(--border); }
+.qb-head h2 {
+  margin: 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px;
+  font-size: clamp(1.1rem, .9rem + .7vw, 1.6rem);
+}
+.qb-head h2:focus { outline: none; }
+.qb-head .pts { font-family: var(--font-body); font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
+.qb-foot { border-top: 1px solid var(--border); }
+.qb-foot .row { margin-bottom: 0; }
+.qb-foot .row + .row, .award-group + .award-group, .award-group + .row { margin-top: 8px; }
+.qb-body { padding: 16px clamp(16px, 3vw, 40px); flex: 1 0 auto; }
+
+.stem {
+  margin: 0 0 16px; color: var(--heading); white-space: pre-line;
+  font-size: clamp(1.2rem, .95rem + 1.25vw, 2.1rem); line-height: 1.35;
+}
+.choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.choice {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; min-height: 44px; padding: 8px 12px;
+  text-align: left; color: var(--heading);
+  font: 400 clamp(1.05rem, .9rem + .8vw, 1.6rem)/1.3 var(--font-body);
+  background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-btn);
+}
+button.choice { cursor: pointer; }
+button.choice:hover { border-color: var(--btn); }
+.letter {
+  flex: none; width: 1.7em; height: 1.7em; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-alt); border: 1px solid var(--border);
+  color: var(--heading); font-weight: 700; font-size: .85em;
+}
+.cbody { flex: 1; min-width: 0; padding-top: .1em; }
+.tag { display: block; margin-top: 2px; font-size: .7em; font-weight: 700; }
+/* The correct choice: check mark and label, plus a sage fill */
+.choice.is-answer { border-color: var(--btn); background: var(--sage); }
+.choice.is-answer .letter { background: var(--bg); border-color: var(--btn); }
+.fb {
+  margin: 4px 0 0 40px; padding: 8px 12px; font-size: 1.05rem; color: var(--text);
+  background: var(--bg-alt); border-left: 4px solid var(--error); border-radius: 0 var(--radius-btn) var(--radius-btn) 0;
+}
+.fb.good { border-left-color: var(--sage); }
+
+.hint-box, .explain {
+  margin: 16px 0 0; padding: 12px; color: var(--heading);
+  font-size: clamp(1rem, .9rem + .5vw, 1.35rem);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn);
+}
+.hint-box { border-left: 4px solid var(--accent); }
+.explain { border-left: 4px solid var(--sage); }
+
+/* Award buttons */
+.award-label { margin: 0 0 4px; text-align: center; font-weight: 700; color: var(--heading); }
+.award {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 4px 12px; cursor: pointer;
+  font: 700 1rem var(--font-body); color: var(--heading);
+  background: var(--bg); border: 2px solid var(--btn); border-radius: var(--radius-btn);
+}
+.award:hover { background: var(--card); }
+.award .tname { max-width: 10em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.award .sc { font-weight: 400; font-variant-numeric: lining-nums tabular-nums; }
+.award.miss { border-style: dashed; border-color: var(--error); }
+.award.miss[aria-pressed="true"] { background: var(--error); color: var(--bg); border-style: solid; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tile { transition: none; }
+}
+
+@media (max-width: 520px) {
+  /* Compact scoreboard: name and score on one line */
+  .team { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .team strong { grid-column: 3; grid-row: 1; font-size: 1.3rem; }
+  .team .pick { font-size: .8rem; }
+  .standings li { grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 8px; padding: 8px; font-size: 1rem; }
+  .fb { margin-left: 0; }
+}
