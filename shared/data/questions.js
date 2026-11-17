@@ -1,5 +1,6 @@
 /* AP Psychology practice questions: window.APPSYCH_QUESTIONS
  * One question per term in terms.js (linked by `term`). Written for this site; no copied exam or textbook items.
+ * difficulty: 1 (one clear cue) to 5 (multi-step reasoning with subtle, partly true distractors).
  * Games shuffle `choices` (keeping `answer` and `feedback` aligned) unless `shuffle` is false.
  */
 window.APPSYCH_QUESTIONS = [
@@ -11,7 +12,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.1"],
     skills: ["1.A"],
     style: "explain",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Mateo tells his friend that psychology is just common sense, because most of its findings seem obvious once people hear them. Which of the following best explains why psychologists still test ideas that seem obvious?",
     choices: [
       "Psychology studies only observable behavior, so common sense about thoughts and feelings does not apply.",
@@ -54,7 +55,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.1", "3.7.A.1"],
     skills: ["1.A"],
     style: "prediction",
-    difficulty: 1,
+    difficulty: 2,
     stem: "Dr. Brennan uses the behavioral perspective to study why 4-year-old Sofia throws tantrums at the grocery store. Which of the following is Dr. Brennan most likely to investigate?",
     choices: [
       "Sofia's beliefs about what is fair when she is told no",
@@ -116,7 +117,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.1", "5.3.B.5"],
     skills: ["1.A"],
     style: "scenario",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Jaylen believes that if he makes a single mistake at his piano recital, everyone in the audience will decide he is a failure. A psychologist explains that this way of interpreting situations is the main cause of Jaylen's anxiety. The psychologist's explanation best reflects which perspective?",
     choices: ["Behavioral", "Psychodynamic", "Humanistic", "Cognitive"],
     answer: 3,
@@ -183,7 +184,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.1", "5.3.A.1", "5.3.A.2"],
     skills: ["1.B"],
     style: "explain",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Before deciding whether a client's behavior is part of a psychological disorder, Dr. Mwangi asks whether the behavior is typical in the client's culture. Which of the following best explains why she does this?",
     choices: [
       "A person's culture determines which psychological disorders the person can inherit.",
@@ -228,7 +229,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.A"],
     style: "compare",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Which of the following statements best distinguishes an experiment from a correlational study?",
     choices: [
       "Only an experiment uses numbers, so its results are more precise.",
@@ -276,7 +277,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.B"],
     style: "scenario",
-    difficulty: 2,
+    difficulty: 3,
     stem: "After reviewing many studies showing that people remember more when practice is spread out, Dr. Lin proposes a broad explanation of why spacing helps memory. She then predicts that students who take weekly quizzes will score higher on a final exam than students who take one review quiz. Dr. Lin's broad explanation and her specific prediction are best described as",
     choices: [
       "a theory and a hypothesis, respectively",
@@ -300,7 +301,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.B"],
     style: "best-example",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Students in Ms. Park's class submitted hypotheses for a research project. Which of the following hypotheses is falsifiable?",
     choices: [
       "Every person has an invisible energy that guides behavior in ways no test can detect.",
@@ -324,7 +325,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.B"],
     style: "research",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Dr. Chen is testing whether 20 minutes of exercise reduces stress in college students. Which of the following is the best operational definition of stress for her study?",
     choices: [
       "How tense, worried, or overwhelmed participants feel in their daily lives",
@@ -348,7 +349,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.B"],
     style: "research",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Dr. Fischer found that students who studied with background music recalled more words than students who studied in silence. Five other research teams then repeated her exact procedure with new participants, and none found a difference between the groups. Which of the following is the most appropriate conclusion?",
     choices: [
       "The original study is still the most accurate because it was published first.",
@@ -372,7 +373,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.A", "2.C"],
     style: "research",
-    difficulty: 3,
+    difficulty: 4,
     stem: "Dr. Lindqvist wants to learn as much as possible about a 12-year-old girl with a rare condition that prevents her from feeling fear. Over two years, he interviews the girl, her family, and her teachers and gives her dozens of tests. Which of the following is the main limitation of this method?",
     choices: [
       "Findings about one person may not apply to other people.",
@@ -396,7 +397,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.C"],
     style: "research",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Researchers surveyed 1,200 teens and found a strong positive correlation between hours spent on social media each day and loneliness scores. Which of the following conclusions is best supported by these results?",
     choices: [
       "Spending time on social media causes teens to feel lonely.",
@@ -463,7 +464,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2", "5.5.A.1"],
     skills: ["2.A"],
     style: "research",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Dr. Russo gathers 85 published studies on whether psychotherapy reduces symptoms of depression. He statistically combines their results and reports one overall estimate of how effective therapy is. Which method did Dr. Russo use?",
     choices: ["Meta-analysis", "Replication", "Correlational study", "Survey"],
     answer: 0,
@@ -482,7 +483,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.B", "2.C"],
     style: "research",
-    difficulty: 3,
+    difficulty: 4,
     stem: "Dr. Nguyen and three assistants will interview first-year teachers at ten schools about their biggest challenges. She wants rich descriptions in the teachers' own words, and she wants answers to be comparable across interviewers. Which approach best meets both goals?",
     choices: [
       "Letting each interviewer choose questions based on how the conversation goes",
@@ -506,7 +507,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.2"],
     skills: ["2.B", "2.C"],
     style: "research",
-    difficulty: 1,
+    difficulty: 2,
     stem: "Dr. Ellis is studying students' experiences after they transfer to a new high school. Which of the following would give her qualitative data?",
     choices: [
       "The number of friends each student lists after one month",
@@ -604,7 +605,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.3"],
     skills: ["2.B"],
     style: "research",
-    difficulty: 1,
+    difficulty: 2,
     stem: "Dr. Soto randomly assigns students to study a list of vocabulary words for 30 minutes, either with flashcards or by rereading their notes. A week later, every student takes the same 20-question quiz, and she records their scores. What is the dependent variable?",
     choices: ["Study method", "Length of the study session", "Random assignment to groups", "Quiz scores"],
     answer: 3,
@@ -623,7 +624,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.3"],
     skills: ["2.B"],
     style: "research",
-    difficulty: 3,
+    difficulty: 4,
     stem: "Dr. Larsen tests whether a new math curriculum raises test scores. The class using the new curriculum meets in the morning with a teacher who has 20 years of experience; the class using the old curriculum meets in the afternoon with a first-year teacher. The new-curriculum class scores higher. Which of the following is the most serious problem with concluding that the curriculum caused the difference?",
     choices: [
       "Test scores are not a valid way to measure math learning.",
@@ -666,7 +667,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.3"],
     skills: ["2.B"],
     style: "explain",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Researchers testing whether a new after-school tutoring program raises grades include a group of students who do not receive tutoring. Which of the following best explains why this group is needed?",
     choices: [
       "It ensures that every student in the study benefits from tutoring equally.",
@@ -690,7 +691,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.3"],
     skills: ["2.A", "2.B"],
     style: "research",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Dr. Iqbal wants to test whether standing desks improve students' attention in class. Which procedure for deciding which students get standing desks is best?",
     choices: [
       "Letting students who want standing desks volunteer to use them",
@@ -757,7 +758,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.3"],
     skills: ["2.B"],
     style: "research",
-    difficulty: 3,
+    difficulty: 5,
     stem: "In Dr. Walker's study of a new sleep aid, participants do not know whether they received the real pill or a placebo. Dr. Walker, who interviews participants and rates their sleep quality, knows which pill each person received. Which of the following best describes this study?",
     choices: [
       "Single-blind, with a risk of experimenter bias",
@@ -781,7 +782,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.3"],
     skills: ["2.B"],
     style: "prediction",
-    difficulty: 3,
+    difficulty: 4,
     stem: "Dr. Amari's antidepressant study is single-blind: participants don't know whether they got the drug or a placebo, but the assistants who rate participants' mood do know. If she changes the study so the assistants also don't know, which outcome is most likely?",
     choices: [
       "The placebo group will stop reporting any improvement in mood.",
@@ -869,7 +870,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.4"],
     skills: ["1.B", "3.A"],
     style: "research",
-    difficulty: 3,
+    difficulty: 4,
     stem: "Dr. Kowalski had 200 students answer trivia questions and rate how sure they were of each answer before seeing the correct answers. The results:\nAnswers rated \"100% sure\": 74% correct\nAnswers rated \"80% sure\": 61% correct\nAnswers rated \"60% sure\": 52% correct\nThese results best demonstrate",
     choices: ["hindsight bias", "overconfidence", "confirmation bias", "social desirability bias"],
     answer: 1,
@@ -888,7 +889,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.4"],
     skills: ["2.B"],
     style: "research",
-    difficulty: 2,
+    difficulty: 3,
     stem: "Dr. Holt believes a new writing program improves students' essays. When scoring essays at the end of the study, she knows which students used the program, and she gives those essays slightly higher scores. Which of the following changes would best reduce this problem?",
     choices: [
       "Giving the writing program to more students",
@@ -912,7 +913,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.4"],
     skills: ["2.C"],
     style: "explain",
-    difficulty: 2,
+    difficulty: 3,
     stem: "A school asks students the same question on two surveys: \"How often have you copied someone else's homework?\" On the version that requires names, 8% report copying; on an anonymous version given to a similar group of students, 41% do. Which of the following best explains the difference?",
     choices: [
       "Students worry less about being judged when answers are anonymous.",
@@ -936,7 +937,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.4"],
     skills: ["2.C"],
     style: "compare",
-    difficulty: 3,
+    difficulty: 5,
     stem: "Which of the following statements about self-report bias is most accurate?",
     choices: [
       "It occurs only when participants are trying to make themselves look good.",
@@ -960,7 +961,7 @@ window.APPSYCH_QUESTIONS = [
     ced: ["0.4"],
     skills: ["2.C"],
     style: "research",
-    difficulty: 3,
+    difficulty: 4,
     stem: "A school randomly split its students into two halves for a survey. Half were asked, \"Should the school forbid phones during lunch?\" and 34% said yes. The other half were asked, \"Should the school not allow phones during lunch?\" and 57% said yes. Which of the following best explains the difference in results?",
     choices: ["Sampling bias", "Wording effect", "Confirmation bias", "Social desirability bias"],
     answer: 1,
