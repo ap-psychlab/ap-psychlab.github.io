@@ -82,6 +82,7 @@
 #bot .flame-in   { fill: var(--bot-flame-hi); opacity: .9; }
 #bot .cyl     { fill: url(#gCyl); stroke: var(--bot-rim); stroke-width: 1.2; }
 #bot .band    { fill: var(--bot-rim); }
+#bot .socket  { fill: url(#gVisor); stroke: var(--bot-rim); stroke-width: 2; }
 #bot .ear, #bot .hand, #bot .joint { fill: url(#gAccent); stroke: var(--bot-accent-lo); stroke-width: 1; }
 #bot .antenna { fill: none; stroke: var(--bot-rim); stroke-width: 4; stroke-linecap: round; }
 #bot .bulb    { fill: var(--bot-shell-lo); stroke: var(--bot-rim); stroke-width: 1.5; transition: fill .15s; }

@@ -56,16 +56,16 @@
         <g class="bob">
           <!-- jet flame -->
           <g class="flame">
-            <path class="flame-glow" d="M141 250Q138 276 160 298Q182 276 179 250Z"/>
+            <path class="flame-glow" d="M141 252Q138 277 160 298Q182 277 179 252Z"/>
             <path class="flame-out" d="M144 250Q141 274 160 294Q179 274 176 250Z"/>
             <path class="flame-in" d="M152 250Q150 264 160 276Q170 264 168 250Z"/>
           </g>
-          <rect class="nozzle" x="140" y="240" width="40" height="12" rx="5"/>
-          <rect class="ring" x="137" y="237" width="46" height="6" rx="3"/>
+          <rect class="nozzle" x="140" y="242" width="40" height="12" rx="5"/>
+          <rect class="ring" x="136" y="240" width="48" height="6" rx="3"/>
 
           <!-- body, with the round belly screen that shows each pick -->
-          <rect class="shell" x="116" y="172" width="88" height="70" rx="34"/>
-          <ellipse class="shade" cx="160" cy="188" rx="38" ry="9"/>
+          <rect class="shell" x="111" y="170" width="98" height="74" rx="30"/>
+          <ellipse class="shade" cx="160" cy="185" rx="42" ry="9"/>
           <circle class="port-rim" cx="160" cy="213" r="20"/>
           <circle class="port" cx="160" cy="213" r="16"/>
           <text class="chest-q" x="160" y="221" text-anchor="middle">?</text>
@@ -73,8 +73,10 @@
           <rect class="chest-blue" x="150.5" y="203.5" width="19" height="19" rx="4"/>
           <path class="gloss" d="M148 207a13 13 0 0 1 17 -7"/>
 
-          <!-- arms: shoulder joint, two cylinders, elbow band, cuff, mitten -->
-          <g transform="translate(119 197) rotate(32) scale(1.25)">
+          <!-- arms: socket on the body, shoulder ball, two cylinders, elbow band, cuff, mitten -->
+          <circle class="socket" cx="115" cy="198" r="13.5"/>
+          <circle class="socket" cx="205" cy="198" r="13.5"/>
+          <g transform="translate(115 198) rotate(30) scale(1.25)">
             <g class="arm">
               <rect class="cyl" x="-9" y="0" width="18" height="17" rx="6"/>
               <rect class="cyl" x="-10" y="17" width="20" height="17" rx="6"/>
@@ -84,7 +86,7 @@
               <circle class="joint" cx="0" cy="0" r="8"/>
             </g>
           </g>
-          <g transform="translate(201 197) rotate(-32) scale(1.25)">
+          <g transform="translate(205 198) rotate(-30) scale(1.25)">
             <g class="arm arm-r">
               <rect class="cyl" x="-9" y="0" width="18" height="17" rx="6"/>
               <rect class="cyl" x="-10" y="17" width="20" height="17" rx="6"/>
@@ -103,7 +105,7 @@
 
             <circle class="ear" cx="81" cy="114" r="13"/>
             <circle class="ear" cx="239" cy="114" r="13"/>
-            <ellipse class="shell" cx="160" cy="108" rx="80" ry="77"/>
+            <rect class="shell" x="80" y="36" width="160" height="144" rx="66" ry="62"/>
             <ellipse class="glint big" cx="124" cy="56" rx="27" ry="9" transform="rotate(-27 124 56)"/>
 
             <rect class="visor" x="101" y="82" width="118" height="74" rx="36"/>
