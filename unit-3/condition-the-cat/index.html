@@ -1,0 +1,2513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Condition the Cat – Operant Conditioning Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<style>
+:root{
+  --bg:#FAF6F0; --bg-alt:#EFE6DA; --card:#E3D5C3; --heading:#3B2A20; --text:#5A4636;
+  --muted:#8A7565; --btn:#6F4E37; --btn-hover:#5A3E2B; --btn2:#C8A27C; --link:#8B5E3C;
+  --accent:#B9835A; --sage:#A9B49A; --error:#A64B3C; --border:#D9C9B6;
+  --blue:#6F8FA6; --plum:#8C6B80; --honey:#D1A64A; --teal:#5E8C86;
+  /* art palette: machine and scene artwork only (every UI part uses the tokens above) */
+  --a-ink:#2B2118; --a-metal:#9AA3AB; --a-metal-lt:#CBD3D9; --a-metal-dk:#5F6A73;
+  --a-wire1:#D9573B; --a-wire1-hi:#F5A58C; --a-wire2:#3F86B8; --a-wire2-hi:#9CD0EE;
+  --a-spark:#FFE04D; --a-spark-hi:#FFF7B8;
+  --a-pad-top:#E8B04A; --a-pad-front:#B07A22; --a-pad-side:#8A5A14;
+  --a-bk:#4F9A93; --a-bk-side:#3A7771; --a-bk-in:#244D49; --a-bk-in2:#34706A; --a-bk-rim:#8CCBC4;
+  --a-red:#D8342C; --a-red-dk:#9E1F19; --a-red-hi:#FF9C92;
+  --a-sail:#F4E7C8; --a-sail-dk:#C9B088; --a-frame:#8A5A33; --a-stock:#5E3B1F;
+  --a-lamp-off:#6E5F52; --a-lamp-on:#7CE06B;
+  --a-cn:#45505C; --a-cn-hi:#8B9AA8; --a-cn-dk:#2C343C; --a-brass:#E0B040; --a-fuse:#8A6A3E; --a-cbase:#9A6A3C;
+  --a-fn-in:#5B4636; --a-fn-in2:#7A624C; --a-fn-glass:#D9B98F;
+  --a-pot-top:#D98A63; --a-pot:#C06A44; --a-pot-side:#8F4A2C; --a-soil:#4A3326;
+  --a-leaf:#86A870; --a-leaf-dk:#5E8150; --a-leaf-bk:#4F6E43; --a-leaf-hi:#B5CFA3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Lato',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:1rem;line-height:1.5}
+main{max-width:900px;margin:0 auto;padding:24px 20px 32px}
+h1{font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-weight:700;font-size:2rem;color:var(--heading);margin:0 0 8px;line-height:1.2}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+svg{display:block;width:100%;height:auto;border-radius:8px}
+.hint{font-size:.9rem;color:var(--muted);margin:8px 0 0}
+#say{margin:12px 0 0;font-weight:700;color:var(--heading);min-height:3em}
+.steps{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.r{display:flex;align-items:center;gap:12px;min-height:44px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;flex-wrap:wrap}
+.r input{width:22px;height:22px;accent-color:var(--btn);flex:none}
+.r input:focus-visible{outline:3px solid var(--heading);outline-offset:2px}
+.n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--heading);font-weight:700;display:grid;place-items:center}
+.nm{flex:1 1 180px;color:var(--heading);font-weight:700}
+.st{min-width:84px;font-size:.95rem}
+.res{min-width:110px;font-size:.95rem;font-weight:700;color:var(--heading)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+button{font:inherit;font-weight:700;min-height:44px;padding:8px 20px;border-radius:8px;border:2px solid var(--btn);cursor:pointer;background:transparent;color:var(--btn);transition:background .15s,transform .1s}
+button:hover{background:var(--btn2);color:var(--heading)}
+button.primary{background:var(--btn);color:var(--bg)}
+button.primary:hover{background:var(--btn-hover)}
+button:active{transform:scale(.97)}
+button:focus-visible{outline:3px solid var(--heading);outline-offset:2px}
+/* svg art */
+.bgp{fill:var(--bg-alt)}
+.rp{stroke:var(--btn);stroke-width:6;stroke-linecap:round;fill:none}
+.wl{stroke:var(--btn2);stroke-width:6;stroke-linecap:round;fill:none}
+.sup{fill:var(--card);stroke:var(--border);stroke-width:2}
+.ball{fill:var(--honey);stroke:var(--heading);stroke-width:2}
+.ys{fill:none;stroke:var(--btn);stroke-width:1.3;stroke-linecap:round;opacity:.8}
+.yt{fill:none;stroke:var(--heading);stroke-width:2;stroke-linecap:round}
+.sf{fill:var(--btn)}
+.stp{fill:var(--btn2);stroke:var(--btn);stroke-width:1.5;stroke-linejoin:round}
+.ssh{fill:var(--heading);opacity:.12}
+.se{fill:var(--btn-hover);stroke:var(--btn-hover);stroke-width:1;stroke-linejoin:round}
+.gr2{stroke:var(--btn);stroke-width:1.2;opacity:.35}
+.shl{stroke:var(--bg);stroke-width:1.5;stroke-linecap:round;opacity:.5}
+.bdg circle{fill:var(--accent)}
+.bdg text{font-weight:700;font-size:15px;fill:var(--heading);text-anchor:middle;font-family:'Lato',sans-serif}
+.gt{fill:none;stroke:var(--btn);stroke-width:5;stroke-dasharray:5.6 5.6}
+.gb{fill:var(--card);stroke:var(--btn);stroke-width:2}
+.spk{stroke:var(--btn);stroke-width:3;stroke-linecap:round}
+.sg{fill:none;stroke:var(--btn2);stroke-width:5;opacity:.55}
+.sb{fill:var(--card);stroke:var(--btn2);stroke-width:1.5;stroke-opacity:.55}
+.ss{stroke:var(--btn2);stroke-width:3;stroke-linecap:round;opacity:.55}
+.sh{fill:var(--btn2);opacity:.6}
+.wo{fill:none;stroke:var(--a-ink);stroke-linecap:round;stroke-linejoin:round}
+.wi,.wh{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.lit{fill:none;stroke:var(--a-spark);stroke-width:3.2;stroke-linecap:butt;stroke-linejoin:round;display:none}
+.clip{fill:var(--a-metal);stroke:var(--a-ink);stroke-width:1.2}
+.scr{fill:var(--a-ink)}
+.padT{fill:var(--a-pad-top);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round}
+.padF{fill:var(--a-pad-front);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round}
+.padS{fill:var(--a-pad-side);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round}
+.obT{fill:var(--btn2);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round}
+.obF{fill:var(--accent);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round}
+.obS{fill:var(--link);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round}
+#wind,#wind2{opacity:0;transition:opacity .3s}
+#wind line,#wind2 line{stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-dasharray:6 8;animation:wnd .4s linear infinite}
+@keyframes wnd{to{stroke-dashoffset:-14}}
+.pawf{fill:var(--heading)}
+#whap{font-weight:700;font-size:20px;fill:var(--heading);font-family:'Lato',sans-serif}
+
+
+.acc{fill:var(--cb,var(--heading))}
+.dk{fill:var(--cl,var(--btn))}
+.lt{fill:var(--bg)}
+.pk{fill:var(--btn)}
+.ink{fill:var(--ey,var(--sage))}
+.pupil{fill:var(--heading)}
+.red{fill:var(--error)}
+.sock{fill:var(--cs,var(--heading))}
+.sock.edge{fill:var(--cs,var(--heading));stroke:var(--btn);stroke-width:2}
+.ear{fill:var(--cb,var(--heading));stroke:var(--cb,var(--heading));stroke-width:5;stroke-linejoin:round}
+.earin{fill:var(--ei,var(--btn));stroke:var(--ei,var(--btn));stroke-width:3;stroke-linejoin:round}
+.lo{fill:none;stroke:var(--cb,var(--heading));stroke-linecap:round;stroke-linejoin:round}
+.edge{fill:none;stroke:var(--btn);stroke-linecap:round}
+.li{fill:none;stroke:var(--cb,var(--heading));stroke-linecap:round}
+.stripe{fill:none;stroke:var(--btn);stroke-width:4;stroke-linecap:round}
+.mouth{fill:none;stroke:var(--btn2);stroke-width:2;stroke-linecap:round}
+.nose{opacity:.9}
+.blush{fill:var(--error);opacity:.3}
+.whisk{fill:none;stroke:var(--cw,var(--btn2));stroke-width:1.6;stroke-linecap:round}
+.shadow{fill:var(--heading);opacity:.16;transition:transform .3s}
+
+.pw,.ps,.pl,.lickpaw,.layPaws,.armp,.cfx>g{opacity:0;transition:opacity .25s;pointer-events:none}
+.cat[data-body="walk"] .pw{opacity:1}
+.cat[data-body="sit"] .ps{opacity:1}
+.cat[data-body="lay"] .pl,.cat[data-body="lay"] .layPaws{opacity:1}
+.cat[data-pose="lick"] .lickpaw{opacity:1}
+.cat[data-pose="lick"] .sitLeg{opacity:0}
+.sitLeg{transition:opacity .25s}
+
+.hd{transition:transform .45s ease}
+.cat[data-body="walk"] .hd{transform:translate(44px,-74px)}
+.cat[data-body="sit"] .hd{transform:translate(14px,-98px)}
+.cat[data-pose="lick"] .hd{transform:translate(12px,-96px) rotate(10deg)}
+.cat[data-body="lay"] .hd{transform:translate(46px,-32px) rotate(8deg)}
+.cat[data-pose="pressButton"] .hd{transform:translate(20px,-104px) rotate(-10deg)}
+.cat[data-pose="pawCrank"] .hd{transform:translate(20px,-104px) rotate(-10deg)}
+.cat[data-pose="pawPlant"] .hd{transform:translate(24px,-96px) rotate(8deg)}
+.cat[data-pose="pressSeesaw"] .hd{transform:translate(42px,-46px) rotate(-6deg)}
+.cat[data-pose="jumpBox"] .hd{transform:translate(12px,-100px)}
+.cat[data-pose="flinch"] .hd{transform:translate(8px,-84px) rotate(-8deg)}
+.cat[data-pose="eat"] .hd{transform:translate(70px,-28px) rotate(26deg)}
+.cat[data-pose="petted"] .hd{transform:translate(18px,-92px) rotate(-14deg)}
+.cat[data-pose="hide"] .hd{transform:translate(26px,-20px) rotate(32deg)}
+.earL,.earR{transition:transform .2s}
+.earL{transform-origin:-18px -8px}.earR{transform-origin:18px -8px}
+.cat[data-pose="flinch"] .earL,.cat[data-pose="hide"] .earL{transform:rotate(-58deg)}
+.cat[data-pose="flinch"] .earR,.cat[data-pose="hide"] .earR{transform:rotate(58deg)}
+.cat[data-pose="petted"] .earL{transform:rotate(-14deg)}.cat[data-pose="petted"] .earR{transform:rotate(14deg)}
+.cat[data-pose="flinch"] .eye{transform:scale(1.15)}
+.cat[data-pose="petted"] .eye{transform:scaleY(.1)}
+.cat[data-pose="hide"] .eye{transform:scaleY(.45)}
+.armp{transform-origin:22px -46px}
+.cat[data-pose="pressButton"] .armp,.cat[data-pose="pawCrank"] .armp,.cat[data-pose="pawPlant"] .armp{opacity:1}
+.cat[data-pose="pressButton"] .armp{transform:rotate(33deg);animation:tapC .45s ease-in-out infinite alternate}
+.cat[data-pose="pawCrank"] .armp{transform:rotate(33deg);animation:tapC .45s ease-in-out infinite alternate}
+.cat[data-pose="pawPlant"] .armp{transform:rotate(30deg);animation:tapC .4s ease-in-out infinite alternate}
+@keyframes tapC{from{transform:rotate(18deg)}to{transform:rotate(48deg)}}
+.cat[data-pose="petted"] .hearts,.cat[data-pose="flinch"] .sweat,.cat[data-pose="hide"] .sweatLow,.cat[data-pose="eat"] .treat{opacity:1}
+.hearts path{fill:var(--error);animation:rise 1.6s ease-out infinite}
+.hearts path:nth-child(2){animation-delay:.5s}.hearts path:nth-child(3){animation-delay:1s}
+@keyframes rise{from{transform:translateY(10px);opacity:0}25%{opacity:1}to{transform:translateY(-14px);opacity:0}}
+.sweat path,.sweatLow path{fill:var(--blue);stroke:var(--heading);stroke-width:1.5;animation:drip .9s ease-in infinite}
+@keyframes drip{from{transform:translateY(-3px)}to{transform:translateY(7px)}}
+.treat *{fill:var(--honey);stroke:var(--heading);stroke-width:1.5}
+.cat[data-pose="eat"] .hdin{animation:chew .28s ease-in-out infinite alternate}
+@keyframes chew{to{transform:translateY(3px)}}
+.cat[data-pose="eat"] .tongue{opacity:1}
+.cat[data-pose="pressSeesaw"] .pl{animation:sq .8s ease-in-out infinite alternate}
+@keyframes sq{to{transform:scale(1.03,.9)}}
+.cat[data-pose="flinch"]{animation:flinch .7s ease-out}
+@keyframes flinch{0%{transform:none}15%{transform:translateY(-18px) scale(1.08,.92)}40%{transform:translateY(0) scale(.94,1.06)}60%{transform:translateX(-3px)}100%{transform:none}}
+.cat[data-pose="hide"]{animation:tremble .12s linear infinite alternate}
+@keyframes tremble{from{transform:translateX(-1.5px)}to{transform:translateX(1.5px)}}
+@media (prefers-reduced-motion:reduce){.cat[data-pose]{animation:none!important}.armp,.hearts path,.sweat path,.sweatLow path,.hdin,.pl{animation:none!important}}
+#m{touch-action:none;user-select:none;-webkit-user-select:none}#m:focus-visible{outline:3px solid var(--heading);outline-offset:2px}
+#laser{pointer-events:none}
+select{font:inherit;min-height:44px;border-radius:8px;border:2px solid var(--btn);background:var(--bg);color:var(--text);padding:0 8px}
+select:focus-visible{outline:3px solid var(--heading);outline-offset:2px}
+.eye{transform-box:fill-box;transform-origin:center;transition:transform .08s}
+.cat.blink .eye,.cat[data-sleepy="1"] .eye{transform:scaleY(.1)}
+.tongue{opacity:0;transition:opacity .15s;transform-box:fill-box;transform-origin:top center}
+.cat.blep .tongue,.cat[data-pose="lick"] .tongue,.cat[data-pose="eat"] .tongue{opacity:1;animation:flick .3s ease-in-out infinite alternate}
+
+.tail{animation:swish 2.2s ease-in-out infinite alternate}
+.pl .tail{animation-duration:3.6s}
+.ps,.pl{animation:breathe 3.2s ease-in-out infinite}
+.cat[data-pose="lick"] .lickpaw{animation:paw .5s ease-in-out infinite alternate}
+.cat[data-pose="lick"] .hdin{animation:nod .5s ease-in-out infinite alternate}
+@keyframes swish{from{transform:rotate(-9deg)}to{transform:rotate(11deg)}}
+@keyframes breathe{50%{transform:scale(1.012,1.03)}}
+@keyframes paw{to{transform:translate(-5px,-7px)}}
+@keyframes nod{to{transform:translateY(3px)}}
+@keyframes flick{to{transform:scaleY(.6)}}
+@media (prefers-reduced-motion:reduce){.tail,.ps,.pl{animation:none}}
+
+[hidden]{display:none!important}
+h2,h3{font-family:'Playfair Display',Georgia,'Times New Roman',serif;color:var(--heading);margin:16px 0 8px;line-height:1.2}
+h2{font-size:1.4rem;margin-top:0}h3{font-size:1.1rem}
+.sub{margin:0}
+.dbgrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#evlog,#dbgInfo,#dbgModel{font-family:inherit;font-size:.85rem;color:var(--muted);white-space:pre-wrap;margin:8px 0 0}
+#dbgModel{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;overflow-x:auto;white-space:pre}
+.dbgt{font-size:12px;font-weight:700;fill:var(--heading);text-anchor:middle;font-family:'Lato',sans-serif}
+.spk2{transform-box:fill-box;transform-origin:center;animation:spkl .2s ease-in-out infinite alternate}
+@keyframes spkl{to{transform:scale(1.4) rotate(40deg)}}
+@media (prefers-reduced-motion:reduce){.spk2{animation:none}}
+/* step 5: tool bar, cooldown wheels, stats panel */
+.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+/* step 10: the tool bar floats in the scene's top-right corner. Only the buttons take pointer events, so the laser can still be dragged between them.
+   The top-left corner of every button is kept free for the Step 12 key badge (.kb). */
+.toolbar{--ts:64px;--ic:28px;position:absolute;top:8px;right:8px;z-index:4;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:flex-start;gap:8px;max-width:calc(100% - 16px);pointer-events:none}
+.tgrp{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.tgrp>span{font-size:.8rem;font-weight:700;line-height:1.3;color:var(--heading);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0 8px}
+.tgrp .tb{display:flex;gap:4px}
+.tool{pointer-events:auto;position:relative;width:var(--ts);height:var(--ts);min-height:var(--ts);padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--card);color:var(--heading);border:2px solid var(--sage);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tool .kb{position:absolute;top:3px;left:4px}
+.tool.pun{border-color:var(--error)}
+.tool .ic{width:var(--ic);height:var(--ic);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;border-radius:0}
+.tool .tl{font-size:.8rem;line-height:1}
+.tool .cnt{position:absolute;top:3px;right:4px;font-size:.75rem;font-weight:700;line-height:1.3;padding:0 5px;border-radius:8px;background:var(--honey);color:var(--heading)}
+.tool .cd{display:none;position:absolute;left:0;top:0;width:100%;height:100%;border-radius:0;pointer-events:none}
+.tool.cool .cd{display:block}
+.tool .cd path{fill:var(--heading);fill-opacity:.7}
+.tool .cd text{fill:var(--bg);font:700 22px 'Lato',system-ui,sans-serif;text-anchor:middle}
+.tool[aria-disabled="true"]{cursor:not-allowed}
+.tool[aria-disabled="true"]:hover{background:var(--card)}
+.tool.out{opacity:.6}
+.statsbox{margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px}
+.statsbox h3{margin:0 0 8px}
+.mt{display:grid;grid-template-columns:minmax(120px,170px) 1fr 44px;align-items:center;gap:8px;margin:4px 0;font-size:.9rem}
+.mt .tr{height:12px;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.mt .fl{height:100%;width:0}
+.mt .fl.task{background:var(--sage)}.mt .fl.dis{background:var(--error);background-image:repeating-linear-gradient(45deg,transparent 0 4px,var(--bg) 4px 6px)}
+.mt .fl.str{background:var(--plum)}.mt .fl.ful{background:var(--honey)}
+.mt .v{text-align:right;font-weight:700;color:var(--heading)}
+.mt .tag{font-size:.8rem;color:var(--muted)}
+.statsbox .cr{margin:8px 0 0;color:var(--heading);font-weight:700}
+/* step 6: cat variants (Mocha is the default art; Latte and Cappuccino only change colours and add a pattern) */
+.cat[data-variant="latte"]{--cb:var(--accent);--cl:var(--link);--cs:var(--bg);--ei:var(--btn2);--ey:var(--honey);--cw:var(--btn);filter:url(#catOutline)}
+.cat[data-variant="cappuccino"]{--cb:url(#patCap);--cl:var(--btn2);--cs:var(--bg);--ei:var(--accent);--ey:var(--blue);--cw:var(--btn);filter:url(#catOutline)}
+/* step 6: scene wrapper and win banner */
+.scene{position:relative}
+.winb{position:absolute;left:0;right:0;top:10%;z-index:5;display:flex;justify-content:center;pointer-events:none}
+.winb span{font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-weight:700;font-size:clamp(1.8rem,7vw,3.2rem);line-height:1.2;color:var(--heading);background:var(--honey);border:3px solid var(--heading);border-radius:16px;padding:8px 28px;animation:popin .5s ease-out}
+@keyframes popin{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.row.tight{margin-top:8px}
+button.small{font-size:.9rem;padding:6px 14px}
+/* step 6: overlay (inside the demo, so it works in a fixed-height Google Sites iframe; it scrolls internally) */
+.ov{position:fixed;inset:0;z-index:1000;display:flex;padding:16px;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.ov::before{content:"";position:fixed;inset:0;background:var(--heading);opacity:.6}
+.dlg{position:relative;margin:auto;width:100%;max-width:680px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.dlg:focus{outline:none}
+.dlg h2{margin:0 0 8px}
+.dlg .row{margin-top:16px}
+.ins{margin:8px 0 0;padding-left:20px}
+.ins li{margin:4px 0}
+.swapnote{display:none;margin:0 0 8px}
+.dlg[data-mode="swap"] .swapnote{display:block}
+.dlg[data-mode="swap"] .ins{display:none}
+.dlg[data-mode="how"] .cagewrap{display:none}
+.cagewrap{margin-top:16px}
+.cagewrap .hint{color:var(--text)}
+/* the cage: bars behind the cats, a floor strip under them, thought bubbles in the space above */
+.cage{position:relative;isolation:isolate;border:3px solid var(--btn);border-radius:12px;background:var(--bg-alt)}
+.cage::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:9px;background:repeating-linear-gradient(90deg,transparent 0 24px,var(--border) 24px 30px)}
+.zone{position:relative;height:150px;margin:0 8px}
+.zhint{position:absolute;left:0;right:0;bottom:16px;margin:0;text-align:center;font-size:.9rem;color:var(--text)}
+.cage.has .zhint{visibility:hidden}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 8px;background:linear-gradient(to top,var(--card) 46px,transparent 46px)}
+.pick{display:flex;flex-direction:column;align-items:center;gap:4px;padding-bottom:8px;transition:opacity .5s}
+.pick.gone{opacity:0}
+.cf{width:100%;max-width:200px;cursor:pointer;border-radius:12px;-webkit-tap-highlight-color:transparent}
+.pick.open .cf{outline:3px solid var(--heading);outline-offset:3px}
+.cf svg{pointer-events:none}
+.ntag{font-weight:700;font-size:.9rem;line-height:1.3;color:var(--heading);background:var(--bg);border:2px solid var(--heading);border-radius:8px;padding:2px 10px;text-align:center}
+.tbub{position:absolute;left:0;right:0;bottom:12px;background:var(--bg);color:var(--heading);border:2px solid var(--heading);border-radius:16px;padding:10px 14px;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s}
+.tbub.open{opacity:1;pointer-events:auto;transform:none;z-index:2}
+.tbub::before,.tbub::after{content:"";position:absolute;background:var(--bg);border:2px solid var(--heading);border-radius:50%}
+.tbub::after{width:12px;height:12px;left:calc(var(--tx,50%) - 6px);bottom:-18px}
+.tbub::before{width:7px;height:7px;left:calc(var(--tx,50%) + 8px);bottom:-30px}
+.tbub p{margin:4px 0 8px;font-size:.95rem}
+.dif{display:inline-block;font-size:.8rem;font-weight:700;line-height:1.5;color:var(--heading);background:var(--bg-alt);border:2px solid var(--border);border-radius:8px;padding:0 8px}
+.dif-easy{border-color:var(--sage)}.dif-medium{border-color:var(--honey)}.dif-hard{border-color:var(--error)}
+.cbtn{width:100%}
+.score{font-size:1.2rem;font-weight:700;color:var(--heading);margin:8px 0 0}
+/* step 7: in-game thought bubbles (reuse .tbub; positioned from JS inside .scene) and the quiz */
+.gbub{right:auto;bottom:auto;left:0;top:0;width:max-content;max-width:min(280px,calc(100% - 8px));padding:8px 12px;z-index:3}
+.gbub,.gbub.open{pointer-events:none}
+.gbub p{margin:0;font-size:.9rem;line-height:1.35}
+#qText{font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:1.25rem;line-height:1.3;margin:8px 0 0;color:var(--heading);outline:none}
+.qopts{display:grid;gap:8px;margin-top:12px}
+.qopt{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;background:var(--bg);color:var(--heading);border:2px solid var(--border);padding:10px 12px;font-weight:400}
+.qopt .ql{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--heading);font-weight:700;display:grid;place-items:center}
+.qopt .qb{flex:1;min-width:0}
+.qopt .qs{display:block;font-size:.85rem;font-weight:700;margin-top:2px}
+.qopt[aria-disabled="true"]{cursor:default}
+.qopt[aria-disabled="true"]:active{transform:none}
+.qopt.right,.qopt.right:hover{background:var(--sage);border-color:var(--heading);color:var(--heading)}
+.qopt.wrong,.qopt.wrong:hover{background:var(--bg);border-color:var(--error);box-shadow:inset 0 0 0 2px var(--error);color:var(--heading)}
+.qopt.wrong .qs{color:var(--error)}
+.qopt.rest,.qopt.rest:hover{background:var(--bg-alt);color:var(--text)}
+.qfb{margin-top:12px;padding:12px;background:var(--bg-alt);border:1px solid var(--border);border-left:8px solid var(--sage);border-radius:8px}
+.qfb.bad{border-left-color:var(--error)}
+.qfb p{margin:0}
+.qfb .qv{font-weight:700;color:var(--heading);font-size:1.05rem}
+.qfb .qw{margin-top:4px}
+.qfb .qc{margin-top:4px;font-size:.85rem;color:var(--muted)}
+/* Step 11 change: the tool bar is always one row of four. 600 px and under: 44 px buttons, no captions; 440 px and under: 40 px buttons. It may cover part of the walls and ramps at the top right. */
+@media (max-width:600px){.toolbar{--ts:44px;--ic:20px;top:4px;right:4px;flex-direction:row;flex-wrap:nowrap;align-items:flex-start;gap:4px;max-width:none}.tgrp{flex-direction:row;gap:4px}.tgrp>span{display:none}.tool{border-radius:10px}.tool .tl{font-size:.72rem}.tool .cnt{top:1px;right:2px;font-size:.7rem;padding:0 4px}}
+@media (max-width:440px){.toolbar{--ts:40px;--ic:18px}.tool .tl{font-size:.68rem}.tool .cnt{padding:0 3px}}
+@media (max-width:520px){.ov{padding:8px}.dlg{padding:16px}.zone{height:230px}.ntag{font-size:.78rem;padding:2px 4px}.tbub{padding:8px 10px}.gbub{padding:6px 10px}}
+@media (prefers-reduced-motion:reduce){.pick,.tbub,.winb span{transition:none!important;animation:none!important}.tbub{transform:none}}
+/* step 11: the cuckoo clock's idle pendulum (swings from its pivot at 716,276 in scene units; still under reduced motion) */
+#ckPend{transform-origin:716px 276px;animation:pend 2.2s ease-in-out infinite alternate}
+@keyframes pend{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+@media (prefers-reduced-motion:reduce){#ckPend{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div class="ttl">
+      <h1>Condition the Cat</h1>
+      <p class="sub">Lead the cat with the laser, then reward or punish what it just did.</p>
+      <p class="hint" id="curCat" style="margin:4px 0 0"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="scene" id="scene">
+    <svg id="m" viewBox="0 0 900 660" tabindex="0" role="img" aria-label="A Rube Goldberg machine with a wall switch, switch pad, crank, see-saw with a cannon, a cuckoo clock that pops the balloon, and a padlocked cage door. The whole room is a cage. A cartoon cat wanders the floor in front, next to a potted plant and a cardboard box.">
+
+      <defs>
+        <g id="sail"><line x1="0" y1="0" x2="36" y2="0" style="stroke:var(--a-stock);stroke-width:3.4;stroke-linecap:round"/><rect x="9" y="-14" width="26" height="12.5" rx="1" style="fill:var(--a-sail);stroke:var(--a-frame);stroke-width:2"/><path d="M15.5 -14V-1.5M22 -14V-1.5M28.5 -14V-1.5M9 -7.7H35" style="fill:none;stroke:var(--a-frame);stroke-width:1.1"/></g>
+        <g id="sailD"><line x1="0" y1="0" x2="36" y2="0" style="stroke:var(--a-stock);stroke-width:3.4;stroke-linecap:round"/><rect x="9" y="-14" width="26" height="12.5" rx="1" style="fill:var(--a-sail-dk);stroke:var(--a-frame);stroke-width:2"/></g>
+        <g id="bolt"><circle r="8" style="fill:var(--a-spark);opacity:.4"/><polyline points="-10,0 -5,-4.5 -1,3.5 3,-4.5 7,2 11,0" style="fill:none;stroke:var(--a-ink);stroke-width:5.6;stroke-linejoin:round;stroke-linecap:round"/><polyline points="-10,0 -5,-4.5 -1,3.5 3,-4.5 7,2 11,0" style="fill:none;stroke:var(--a-spark);stroke-width:2.8;stroke-linejoin:round;stroke-linecap:round"/></g>
+        <g id="flashG"><path d="M0-17V-10M0 10V17M-17 0H-10M10 0H17M-12-12L-7-7M12-12L7-7M-12 12L-7 7M12 12L7 7" style="fill:none;stroke:var(--a-ink);stroke-width:5;stroke-linecap:round"/><path d="M0-17V-10M0 10V17M-17 0H-10M10 0H17M-12-12L-7-7M12-12L7-7M-12 12L-7 7M12 12L7 7" style="fill:none;stroke:var(--a-spark);stroke-width:2.4;stroke-linecap:round"/><circle r="8" style="fill:var(--a-spark-hi);stroke:var(--a-ink);stroke-width:1.5"/><circle r="4" style="fill:var(--a-spark)"/></g>
+        <g id="pawsym"><ellipse cx="0" cy="4" rx="9" ry="7"/><circle cx="-10" cy="-5" r="3.6"/><circle cx="-3.5" cy="-11" r="3.6"/><circle cx="3.5" cy="-11" r="3.6"/><circle cx="10" cy="-5" r="3.6"/></g>
+        <filter id="catOutline" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="2.5" result="d"/><feFlood style="flood-color:var(--heading)" result="c"/><feComposite in="c" in2="d" operator="in" result="o"/><feMerge><feMergeNode in="o"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <pattern id="patCap" patternUnits="userSpaceOnUse" width="96" height="96"><rect width="96" height="96" style="fill:var(--bg)"/><path d="M6 10C22 -4 46 2 44 20C42 36 18 40 8 30C2 24 2 16 6 10Z" style="fill:var(--btn2)"/><path d="M60 52C76 44 96 54 92 70C88 86 66 90 58 78C52 70 52 58 60 52Z" style="fill:var(--btn2)"/><circle cx="64" cy="14" r="8" style="fill:var(--btn2)"/></pattern>
+      </defs>
+      <rect width="900" height="600" class="bgp"/>
+      <!-- the room is a cage: soft bars behind the machine -->
+      <g id="cage" aria-hidden="true" style="fill:none;stroke:var(--border);stroke-linecap:round">
+        <path d="M18 0V584M54 0V584M90 0V584M126 0V584M162 0V584M198 0V584M234 0V584M270 0V584M306 0V584M342 0V584M378 0V584M414 0V584M450 0V584M486 0V584M522 0V584M558 0V584M594 0V584M630 0V584M666 0V584M702 0V584M738 0V584M774 0V584M810 0V584M846 0V584M882 0V584" style="stroke-width:6.5;opacity:.55"/>
+        <path d="M0 8H900" style="stroke-width:12;opacity:.8"/><path d="M0 300H900" style="stroke-width:5;opacity:.45"/>
+      </g>
+      <rect y="584" width="900" height="76" style="fill:var(--card)"/>
+      <path d="M0 606H900M0 630H900M0 654H900" style="fill:none;stroke:var(--border);stroke-width:2"/>
+      <line x1="0" y1="584" x2="900" y2="584" stroke="var(--border)" stroke-width="2"/>
+
+      <!-- gear train from the ground crank up to the fan (behind the ramps) -->
+      <g id="gtrain"></g>
+
+      <!-- walls + ramps -->
+      <!-- ramp walls: same oblique slabs as the ramps (side, front, top) -->
+      <g id="rwalls">
+        <polygon class="se" points="37,98 44,87 44,289 37,300"/><polygon class="sf" points="31,98 37,98 37,300 31,300"/><polygon class="stp" points="31,98 37,98 44,87 38,87"/><line class="shl" x1="32.5" y1="101" x2="32.5" y2="297"/>
+        <polygon class="se" points="80,91 87,80 87,86 80,97"/>
+        <polygon class="sf" points="30,91 80,91 80,97 30,97"/>
+        <polygon class="stp" points="30,91 80,91 87,80 37,80"/>
+        <line class="shl" x1="32" y1="92.5" x2="78" y2="92.5"/>
+      </g>
+      <g id="ramps"></g>
+      <!-- right ramp wall: stands in front of the ramps (perspective); the left wall stays behind them -->
+      <g id="rwallR"><polygon class="se" points="340,98 347,87 347,349 340,360"/><polygon class="sf" points="334,98 340,98 340,360 334,360"/><polygon class="stp" points="334,98 340,98 347,87 341,87"/><line class="shl" x1="335.5" y1="101" x2="335.5" y2="357"/></g>
+      <g id="crk"><circle r="20.3" class="gt" style="stroke-dasharray:5.8 5.8"/><circle r="16.5" class="gb"/><line x1="0" y1="0" x2="11" y2="0" stroke="var(--heading)" stroke-width="5" stroke-linecap="round"/><circle cx="11" cy="0" r="5.5" style="fill:var(--accent);stroke:var(--heading);stroke-width:2"/><circle r="4" style="fill:var(--btn)"/><line class="spk" x1="0" y1="0" x2="0" y2="-12"/></g>
+
+      <!-- gate + lift column -->
+      <g id="gate">
+        <polygon class="obS" points="81,336 86,328 86,398 81,406"/>
+        <polygon class="obF" points="73,336 81,336 81,406 73,406"/>
+        <polygon class="obT" points="73,336 81,336 86,328 78,328"/>
+        <path d="M74.5 352H79.5M74.5 364H79.5M74.5 376H79.5M74.5 388H79.5" style="stroke:var(--heading);stroke-width:1.5;opacity:.4"/>
+        <line x1="74.5" y1="338" x2="74.5" y2="400" class="shl"/>
+      </g>
+      <rect x="68" y="398" width="24" height="84" rx="3" class="sup"/>
+
+      <!-- wires: dark insulation edge, coloured core, light highlight, clips; the glow paths carry the surge -->
+      <g id="wires" aria-hidden="true">
+        <g id="w1"><path id="w1p" class="wo" stroke-width="8" d="M27 538 V104"/><path class="wi" stroke-width="5.2" style="stroke:var(--a-wire1)" d="M27 538 V104"/><path class="wh" stroke-width="1.4" style="stroke:var(--a-wire1-hi)" transform="translate(-1.3 0)" d="M27 538 V104"/><path id="lit1" class="lit" d="M27 538 V104"/></g>
+        <g id="w2"><path id="w2p" class="wo" stroke-width="8" d="M129 572 H128 Q122 572 122 566 V506 Q122 500 116 500 H77 Q71 500 71 494 V486"/><path class="wi" stroke-width="5.2" style="stroke:var(--a-wire2)" d="M129 572 H128 Q122 572 122 566 V506 Q122 500 116 500 H77 Q71 500 71 494 V486"/><path class="wh" stroke-width="1.4" style="stroke:var(--a-wire2-hi)" transform="translate(-1 -1)" d="M129 572 H128 Q122 572 122 566 V506 Q122 500 116 500 H77 Q71 500 71 494 V486"/><path id="lit2" class="lit" d="M129 572 H128 Q122 572 122 566 V506 Q122 500 116 500 H77 Q71 500 71 494 V486"/></g>
+        <g id="clips">
+          <rect class="clip" x="20" y="468" width="14" height="5" rx="1.5"/><circle class="scr" cx="22.5" cy="470.5" r="1.1"/><circle class="scr" cx="31.5" cy="470.5" r="1.1"/>
+          <rect class="clip" x="20" y="360" width="14" height="5" rx="1.5"/><circle class="scr" cx="22.5" cy="362.5" r="1.1"/><circle class="scr" cx="31.5" cy="362.5" r="1.1"/>
+          <rect class="clip" x="20" y="250" width="14" height="5" rx="1.5"/><circle class="scr" cx="22.5" cy="252.5" r="1.1"/><circle class="scr" cx="31.5" cy="252.5" r="1.1"/>
+          <rect class="clip" x="20" y="150" width="14" height="5" rx="1.5"/><circle class="scr" cx="22.5" cy="152.5" r="1.1"/><circle class="scr" cx="31.5" cy="152.5" r="1.1"/>
+          <rect class="clip" x="119.5" y="536" width="5" height="14" rx="1.5"/><circle class="scr" cx="122" cy="538.5" r="1.1"/><circle class="scr" cx="122" cy="547.5" r="1.1"/>
+          <rect class="clip" x="97" y="493.5" width="5" height="14" rx="1.5"/><circle class="scr" cx="99.5" cy="496" r="1.1"/><circle class="scr" cx="99.5" cy="505" r="1.1"/>
+        </g>
+      </g>
+
+      <!-- wall switch (wire 1 starts on top of it) and the spring mount (wire 1 ends under it) -->
+      <g id="btn"><rect x="12" y="541" width="30" height="40" rx="5" class="sup"/><rect x="25" y="548" width="4" height="26" rx="2" style="fill:var(--heading)"/><circle id="swk" cx="27" cy="555" r="7" style="fill:var(--error);stroke:var(--heading);stroke-width:2"/></g>
+      <rect x="24" y="74" width="6" height="24" rx="2" class="sup"/>
+      <path id="spc" fill="none" stroke="var(--btn)" stroke-width="3" stroke-linejoin="round"/>
+      <rect id="spp" y="77" width="4" height="18" rx="1" style="fill:var(--accent);stroke:var(--heading);stroke-width:1.5"/>
+
+      <!-- switch pad: same oblique slab as the ramps (top, front, side), paw print on top; the whole slab sinks when pressed -->
+      <polygon class="ssh" points="150,577 290,577 304,584 164,584"/>
+      <g id="pad">
+        <line x1="144" y1="572" x2="153" y2="572" style="stroke:var(--a-ink);stroke-width:3;stroke-linecap:round"/>
+        <polygon class="padS" points="290,566 297,555 297,566 290,577"/>
+        <polygon class="padF" points="150,566 290,566 290,577 150,577"/>
+        <polygon class="padT" points="150,566 290,566 297,555 157,555"/>
+        <line x1="151.5" y1="567.6" x2="288.5" y2="567.6" style="stroke:var(--bg);stroke-width:1.5;stroke-linecap:round;opacity:.5"/>
+        <use href="#pawsym" class="pawf" transform="matrix(1.2 0 -.45 .55 224 563)" opacity=".45"/>
+      </g>
+      <!-- pad junction box: wire 2 starts here -->
+      <rect x="131" y="562" width="14" height="18" rx="3" style="fill:var(--a-metal-dk);stroke:var(--heading);stroke-width:1.5"/>
+      <rect x="127" y="567" width="7" height="10" rx="2" style="fill:var(--a-metal-lt);stroke:var(--heading);stroke-width:1.2"/><circle class="scr" cx="130.5" cy="572" r="1.4"/>
+      <!-- switch terminal and spring terminal (wire 1 ends) -->
+      <rect x="21" y="535" width="12" height="8" rx="2" style="fill:var(--a-metal-lt);stroke:var(--heading);stroke-width:1.2"/><circle class="scr" cx="27" cy="539" r="1.5"/>
+      <rect x="21" y="98" width="12" height="7" rx="2" style="fill:var(--a-metal-lt);stroke:var(--heading);stroke-width:1.2"/><circle class="scr" cx="27" cy="101.5" r="1.4"/>
+
+      <!-- gate lift: a ram pushes a clamp up the gate; its wheel turns as the gate rises, the lamp lights at the top -->
+      <g id="lift">
+        <line id="rodO" x1="71" y1="454" x2="71" y2="414" style="stroke:var(--a-ink);stroke-width:6.4;stroke-linecap:round"/>
+        <line id="rod" x1="71" y1="454" x2="71" y2="414" style="stroke:var(--a-metal-lt);stroke-width:3.4;stroke-linecap:round"/>
+        <g id="arm" transform="translate(0 68)"><rect x="66" y="342" width="24" height="8" rx="2" style="fill:var(--a-metal);stroke:var(--heading);stroke-width:1.5"/><circle class="scr" cx="71" cy="346" r="2"/><circle class="scr" cx="85" cy="346" r="1.5"/></g>
+        <rect x="57" y="450" width="28" height="32" rx="4" style="fill:var(--a-metal);stroke:var(--heading);stroke-width:2"/>
+        <rect x="60" y="452.5" width="22" height="2.6" rx="1.3" style="fill:var(--a-metal-lt)"/>
+        <circle id="lamp" cx="78" cy="459" r="2.4" style="fill:var(--a-lamp-off);stroke:var(--heading);stroke-width:1"/>
+        <g id="liftWh" transform="translate(71 469)"><circle r="8.5" style="fill:var(--a-metal-lt);stroke:var(--heading);stroke-width:1.5"/><path d="M-7 0H7M-3.5-6.1L3.5 6.1M3.5-6.1L-3.5 6.1" style="stroke:var(--a-metal-dk);stroke-width:1.6;stroke-linecap:round"/><circle cx="0" cy="-5.6" r="1.6" style="fill:var(--a-wire1)"/><circle r="2.4" class="scr"/></g>
+        <rect x="65" y="479" width="12" height="7" rx="2" style="fill:var(--a-metal-lt);stroke:var(--heading);stroke-width:1.2"/><circle class="scr" cx="71" cy="482.5" r="1.4"/>
+      </g>
+
+      <!-- surges and flashes ride on top of the wires -->
+      <g id="surge" aria-hidden="true">
+        <use id="sB1" href="#bolt" style="display:none"/><use id="sB2" href="#bolt" style="display:none"/>
+        <use id="sF1" href="#flashG" style="display:none"/><use id="sF2" href="#flashG" style="display:none"/>
+      </g>
+
+      <!-- second fan (Step 11): above the first and belted to it (same spin). Its wind points down toward the cuckoo clock, so a balloon that has risen past the first fan is pushed along a slope. -->
+      <g id="belt"><line x1="378.7" y1="237" x2="383" y2="112" style="stroke:var(--a-stock);stroke-width:2.6"/><line x1="394.7" y1="237" x2="401" y2="112" style="stroke:var(--a-stock);stroke-width:2.6"/><circle cx="386.7" cy="237" r="8" style="fill:var(--a-metal);stroke:var(--heading);stroke-width:1.5"/><circle cx="392" cy="112" r="8" style="fill:var(--a-metal);stroke:var(--heading);stroke-width:1.5"/></g>
+      <g id="fan2" transform="translate(392 112) scale(.85)"><use href="#sail"/><use href="#sail" transform="rotate(90)"/><use href="#sail" transform="rotate(180)"/><use href="#sail" transform="rotate(270)"/><circle r="6.5" style="fill:var(--a-metal);stroke:var(--heading);stroke-width:1.5"/><circle r="2.5" class="scr"/></g>
+
+      <!-- fan: four lattice sails, spun by the last gear. Step 11b depth: back copies of the sails (class fdp, data-k) are offset along half the oblique depth vector (3.5,-5.5) and turn with the front, forming the sail edges; the axle runs back toward the gear -->
+      <g id="fan"><g class="fdp" data-k="1"><use href="#sailD"/><use href="#sailD" transform="rotate(90)"/><use href="#sailD" transform="rotate(180)"/><use href="#sailD" transform="rotate(270)"/></g><g class="fdp" data-k=".75"><use href="#sailD"/><use href="#sailD" transform="rotate(90)"/><use href="#sailD" transform="rotate(180)"/><use href="#sailD" transform="rotate(270)"/></g><g class="fdp" data-k=".5"><use href="#sailD"/><use href="#sailD" transform="rotate(90)"/><use href="#sailD" transform="rotate(180)"/><use href="#sailD" transform="rotate(270)"/></g><g class="fdp" data-k=".25"><use href="#sailD"/><use href="#sailD" transform="rotate(90)"/><use href="#sailD" transform="rotate(180)"/><use href="#sailD" transform="rotate(270)"/></g><line x1="3.5" y1="-5.5" x2="0" y2="0" style="stroke:var(--a-metal-dk);stroke-width:13;stroke-linecap:round"/><g class="fdp" data-k="0"><use href="#sail"/><use href="#sail" transform="rotate(90)"/><use href="#sail" transform="rotate(180)"/><use href="#sail" transform="rotate(270)"/></g><circle r="6.5" style="fill:var(--a-metal);stroke:var(--heading);stroke-width:1.5"/><circle r="2.5" class="scr"/></g>
+      <g id="wind"><line x1="428" y1="222" x2="444" y2="222"/><line x1="428" y1="237" x2="448" y2="237"/><line x1="428" y1="252" x2="444" y2="252"/></g>
+      <g id="wind2" transform="translate(392 112) rotate(37)"><line x1="40" y1="-15" x2="56" y2="-15"/><line x1="40" y1="0" x2="62" y2="0"/><line x1="40" y1="15" x2="56" y2="15"/></g>
+
+      <!-- bucket stand, platform, funnel, see-saw, cage door -->
+      <line x1="352" y1="522" x2="352" y2="584" stroke="var(--card)" stroke-width="8"/><line x1="472" y1="522" x2="472" y2="584" stroke="var(--card)" stroke-width="8"/>
+      <line x1="560" y1="378" x2="560" y2="584" stroke="var(--card)" stroke-width="8"/>
+      <line x1="812" y1="410" x2="812" y2="584" stroke="var(--card)" stroke-width="6"/>
+      <!-- funnel in two parts: the ball is moved between them while it swirls, so it passes behind the translucent front wall -->
+      <g id="funnelB">
+        <path d="M685 398 A62 13 0 0 0 809 398 L760 462 L734 462 Z" style="fill:var(--a-fn-in)"/>
+        <rect x="734" y="462" width="26" height="22" rx="2" style="fill:var(--a-fn-in)"/>
+        <ellipse cx="747" cy="398" rx="62" ry="13" style="fill:var(--a-fn-in2);stroke:var(--btn);stroke-width:2"/>
+        <ellipse cx="747" cy="401" rx="52" ry="9" style="fill:var(--a-fn-in)"/>
+        <path d="M685 398 A62 13 0 0 1 809 398" style="fill:none;stroke:var(--btn);stroke-width:6;stroke-linecap:round"/>
+        <path d="M685 398 A62 13 0 0 1 809 398" style="fill:none;stroke:var(--btn2);stroke-width:3;stroke-linecap:round"/>
+      </g>
+      <g id="funnelF">
+        <path d="M685 398 A62 13 0 0 0 809 398 L760 462 L734 462 Z" style="fill:var(--a-fn-glass);fill-opacity:.6;stroke:var(--btn);stroke-width:2;stroke-linejoin:round"/>
+        <path d="M700 408 L740 456" style="stroke:var(--bg);stroke-width:3;stroke-linecap:round;opacity:.55"/>
+        <rect x="734" y="462" width="26" height="22" rx="2" style="fill:var(--a-fn-glass);fill-opacity:.6;stroke:var(--btn);stroke-width:2"/>
+        <path d="M685 398 A62 13 0 0 0 809 398" style="fill:none;stroke:var(--btn);stroke-width:6;stroke-linecap:round"/>
+        <path d="M685 398 A62 13 0 0 0 809 398" style="fill:none;stroke:var(--btn2);stroke-width:3;stroke-linecap:round"/>
+      </g>
+      <polygon points="715,555 695,584 735,584" class="sup"/>
+      <g id="plank">
+        <!-- oblique plank like the ramps: side, front, top (front top edge stays at local y=-4, where the cat stands) -->
+        <polygon class="obS" points="80,-4 87,-15 87,-6 80,5"/>
+        <polygon class="obF" points="-80,-4 80,-4 80,5 -80,5"/>
+        <polygon class="obT" points="-80,-4 80,-4 87,-15 -73,-15"/>
+        <line class="gr2" x1="-76.5" y1="-9.5" x2="83.5" y2="-9.5"/>
+        <line class="shl" x1="-78.5" y1="-2.5" x2="78.5" y2="-2.5"/>
+        <!-- cannon cradle: a small triangle fixed to the plank; the cannon pivots on its apex (32,-28) -->
+        <polygon points="17,-4 47,-4 32,-28" style="fill:var(--a-cbase);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+        <polygon points="32,-28 47,-4 32,-4" style="fill:var(--heading);opacity:.2"/>
+        <path d="M23,-12H41" style="fill:none;stroke:var(--heading);stroke-width:2;opacity:.55"/>
+        <g id="cbar" transform="translate(32 -28) rotate(-90)">
+          <path id="fuse" d="M-6,-14 C-6,-22 -16,-22 -16,-30 C-16,-34 -12,-35 -11,-39" style="fill:none;stroke:var(--a-fuse);stroke-width:3;stroke-linecap:round"/>
+          <path d="M2,-8 L12,-6.5 C20,-6.5 27,-8.5 33,-13.5 L33,13.5 C27,8.5 20,6.5 12,6.5 L2,8 Z" style="fill:var(--a-cn);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+          <path d="M14,-3.6 C21,-3.8 26,-5.6 29,-9.2" style="fill:none;stroke:var(--a-cn-hi);stroke-width:2.4;stroke-linecap:round;opacity:.8"/>
+          <circle cx="-6" cy="0" r="12" style="fill:var(--a-cn);stroke:var(--heading);stroke-width:2"/>
+          <path d="M-14.5,-6 A10.5 10.5 0 0 1 -7,-10.6" style="fill:none;stroke:var(--a-cn-hi);stroke-width:2.6;stroke-linecap:round"/>
+          <rect x="8.5" y="-8.4" width="4.5" height="16.8" rx="1.8" style="fill:var(--a-brass);stroke:var(--heading);stroke-width:1.5"/>
+          <rect x="-9.2" y="-15.4" width="6.4" height="4.4" rx="1.6" style="fill:var(--a-brass);stroke:var(--heading);stroke-width:1.3"/>
+          <ellipse cx="33" cy="0" rx="4" ry="13.5" style="fill:var(--a-ink);stroke:var(--a-brass);stroke-width:2.6"/>
+          <circle cx="-8" cy="1" r="6.2" style="fill:var(--a-ink);stroke:var(--a-brass);stroke-width:2"/>
+          <circle id="cball" cx="-8" cy="1" r="4.6" class="ball" style="display:none"/>
+          <circle r="3.4" style="fill:var(--a-metal);stroke:var(--heading);stroke-width:1.5"/>
+          <g id="spark" style="display:none"><g class="spk2"><circle r="4" style="fill:var(--honey)"/><path d="M-7,0H7M0,-7V7M-5,-5L5,5M-5,5L5,-5" style="stroke:var(--error);stroke-width:1.6;stroke-linecap:round"/></g></g>
+        </g></g>
+      <g id="cageDoor">
+        <rect x="828" y="440" width="62" height="144" style="fill:var(--heading);opacity:.1"/>
+        <g id="doorPanel">
+          <rect x="828" y="440" width="62" height="144" rx="3" style="fill:var(--bg-alt);fill-opacity:.55;stroke:var(--btn);stroke-width:4"/>
+          <path d="M843 444V580M859 444V580M875 444V580M830 512H888" style="fill:none;stroke:var(--btn);stroke-width:3;stroke-linecap:round"/>
+          <rect x="872" y="476" width="16" height="30" rx="3" style="fill:var(--btn2);stroke:var(--heading);stroke-width:2"/>
+        </g>
+        <rect x="822" y="456" width="9" height="14" rx="2" style="fill:var(--btn2);stroke:var(--heading);stroke-width:1.5"/><rect x="822" y="552" width="9" height="14" rx="2" style="fill:var(--btn2);stroke:var(--heading);stroke-width:1.5"/>
+        <g id="lock" transform="translate(880 490)"><path d="M-5,-6 v-8 a5,5 0 0 1 10,0 v8" style="fill:none;stroke:var(--heading);stroke-width:3.5;stroke-linecap:round"/><rect x="-9" y="-6" width="18" height="15" rx="3" style="fill:var(--honey);stroke:var(--heading);stroke-width:2"/><circle cy="1" r="2" style="fill:var(--heading)"/></g>
+      </g>
+
+      <!-- cuckoo clock (Step 11): stands right of the balloon's stopping spot, with its door at balloon height. As the balloon drifts closer the hands spin, the door opens, and the bird pops straight out to the left and pins the balloon as it arrives (Step 11b: no plunger).
+           Kept inside x 656-740, y 218-310: below the tool bar (one row, at most y 160 on the widest layouts), above the tipped bucket and the ball's path into the funnel. -->
+      <g id="clock" aria-hidden="true">
+        <g id="ckPend"><line x1="716" y1="276" x2="716" y2="294" style="stroke:var(--a-ink);stroke-width:2.4;stroke-linecap:round"/><circle cx="716" cy="299" r="5" style="fill:var(--a-brass);stroke:var(--heading);stroke-width:1.5"/></g>
+        <polygon class="obS" points="732,232 738,230 738,264 732,276"/>
+        <rect class="obF" x="664" y="232" width="68" height="44" rx="1"/>
+        <polygon points="656,236 698,218 740,236" style="fill:var(--a-stock);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+        <path d="M666 234L698 222.5" style="fill:none;stroke:var(--bg);stroke-width:1.5;stroke-linecap:round;opacity:.35"/>
+        <circle cx="712" cy="254" r="12" style="fill:var(--a-sail);stroke:var(--heading);stroke-width:2"/>
+        <path d="M712 243.5V246.5M712 261.5V264.5M701.5 254H704.5M719.5 254H722.5" style="fill:none;stroke:var(--heading);stroke-width:1.6;stroke-linecap:round"/>
+        <g id="ckH"><line x1="0" y1="0" x2="0" y2="-5.5" style="stroke:var(--a-ink);stroke-width:2.6;stroke-linecap:round"/></g>
+        <g id="ckM"><line x1="0" y1="0" x2="0" y2="-9" style="stroke:var(--a-ink);stroke-width:1.7;stroke-linecap:round"/></g>
+        <circle cx="712" cy="254" r="1.9" class="scr"/>
+        <rect x="672" y="236" width="22" height="32" rx="3" style="fill:var(--a-ink);stroke:var(--heading);stroke-width:1.5"/>
+        <g id="ckDoor"><rect x="672" y="236" width="22" height="32" rx="3" style="fill:var(--a-stock);stroke:var(--heading);stroke-width:1.5"/><path d="M678 242H688M678 248H688" style="fill:none;stroke:var(--bg);stroke-width:1.2;stroke-linecap:round;opacity:.3"/><circle cx="677" cy="257" r="1.7" style="fill:var(--a-brass)"/></g>
+      </g>
+
+      <!-- balloon + bucket -->
+      <line id="str" stroke="var(--muted)" stroke-width="2"/>
+      <ellipse id="bal" style="fill:var(--a-red);stroke:var(--heading);stroke-width:2"/>
+      <circle id="shine" style="fill:var(--a-red-hi)" opacity=".9"/>
+      <polygon id="knot" points="0,0 -4,6 4,6" style="fill:var(--a-red-dk);stroke:var(--heading);stroke-width:1.2;stroke-linejoin:round"/>
+      <!-- cuckoo bird on its spring, in front of the balloon (it flies straight out of the door to the left, beak first, with a pin) -->
+      <g id="ckFront" aria-hidden="true">
+        <path id="ckSpr" d="" style="fill:none;stroke:var(--a-metal-dk);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round;display:none"/>
+        <g id="ckBird" style="display:none">
+          <polygon points="-3.5,-7 3.5,-7 0,-15" style="fill:var(--a-wire2);stroke:var(--heading);stroke-width:1.3;stroke-linejoin:round"/>
+          <ellipse cx="0" cy="-1" rx="8" ry="7" style="fill:var(--a-wire2);stroke:var(--heading);stroke-width:1.5"/>
+          <ellipse cx="-4.5" cy="-1" rx="3" ry="5" style="fill:var(--a-wire2-hi);stroke:var(--heading);stroke-width:1"/>
+          <circle cx="0" cy="8" r="5" style="fill:var(--a-wire2);stroke:var(--heading);stroke-width:1.5"/>
+          <circle cx="2" cy="7.5" r="1.4" style="fill:var(--a-ink)"/>
+          <polygon points="-2.2,12 2.2,12 0,17" style="fill:var(--a-pad-top);stroke:var(--heading);stroke-width:1.2;stroke-linejoin:round"/>
+          <line x1="0" y1="16" x2="0" y2="29" style="stroke:var(--a-ink);stroke-width:3.6;stroke-linecap:round"/><line x1="0" y1="16" x2="0" y2="28.5" style="stroke:var(--a-metal-lt);stroke-width:1.6;stroke-linecap:round"/>
+        </g>
+      </g>
+      <!-- bucket (origin = bottom-right corner, which is the pivot): dark opening, lit back wall, front face, side shade, rim -->
+      <g id="buck">
+        <ellipse cx="-18" cy="-32" rx="21" ry="6" style="fill:var(--a-bk-in)"/>
+        <path d="M-37,-33 A19 5 0 0 1 1,-33 A19 2.5 0 0 0 -37,-33 Z" style="fill:var(--a-bk-in2)"/>
+        <path d="M-39,-32 L-36,0 A18 4 0 0 0 0,0 L3,-32 A21 6 0 0 1 -39,-32 Z" style="fill:var(--a-bk)"/>
+        <path d="M3,-32 L0,0 L-8,3.3 L-7.5,-27 Z" style="fill:var(--a-bk-side)"/>
+        <path d="M-37.8,-16 Q-18,-11.5 1.8,-16" style="fill:none;stroke:var(--a-bk-in);stroke-width:1.6;opacity:.5"/>
+        <path d="M-33,-23 L-31.5,-4" style="fill:none;stroke:var(--a-bk-rim);stroke-width:3;stroke-linecap:round;opacity:.65"/>
+        <path d="M-39,-32 L-36,0 A18 4 0 0 0 0,0 L3,-32 A21 6 0 0 1 -39,-32 Z" style="fill:none;stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+        <ellipse cx="-18" cy="-32" rx="21" ry="6" style="fill:none;stroke:var(--heading);stroke-width:5"/>
+        <ellipse cx="-18" cy="-32" rx="21" ry="6" style="fill:none;stroke:var(--a-bk-rim);stroke-width:2.4"/>
+      </g>
+
+      <!-- spider web (Step 11): catches the rising balloon for MACHINE.WEB.HOLD seconds, then snaps. The spider sits at the hub and drops on a thread when it breaks; it climbs back up if the balloon is blown to the clock, or falls into the rising bucket if not. In front of the balloon, behind the cat. -->
+      <g id="web" aria-hidden="true">
+        <g id="webFull" style="fill:none;stroke:var(--a-metal-dk);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;opacity:.9">
+          <path d="M462 194 L458.5 154.2 M462 194 L483.8 162.9 M462 194 L501.6 183.4 M462 194 L497.3 210.5 M462 194 L478.9 230.3 M462 194 L452.4 229.7 M462 194 L428.4 217.5 M462 194 L424.1 190.7 M462 194 L433.7 165.7"/><path d="M461.2 185.0 Q464.0 186.7 466.9 187.0 Q468.3 189.6 470.9 191.6 Q469.7 194.7 470.0 197.7 Q467.4 199.4 465.8 202.2 Q462.6 201.4 459.8 202.0 Q457.7 200.2 454.4 199.3 Q454.6 196.0 453.5 193.3 Q455.2 190.8 455.6 187.6 Q458.7 187.0 461.2 185.0 M460.5 177.1 Q465.7 180.2 471.3 180.8 Q473.8 185.7 478.8 189.5 Q476.6 195.3 477.0 201.0 Q472.2 204.2 469.2 209.4 Q463.2 208.0 457.9 209.2 Q453.8 205.7 447.7 204.0 Q448.1 197.7 445.9 192.6 Q449.1 188.0 450.0 182.0 Q455.8 180.7 460.5 177.1 M459.8 169.1 Q467.4 173.8 475.6 174.5 Q479.4 181.8 486.8 187.4 Q483.4 195.9 484.1 204.3 Q477.0 209.0 472.6 216.7 Q463.8 214.6 456.0 216.3 Q450.0 211.2 441.0 208.7 Q441.5 199.5 438.3 191.9 Q443.0 185.1 444.3 176.3 Q452.9 174.5 459.8 169.1 M459.1 161.1 Q469.2 167.3 480.0 168.3 Q485.0 177.9 494.7 185.2 Q490.3 196.5 491.2 207.6 Q481.8 213.8 475.9 223.9 Q464.4 221.2 454.1 223.5 Q446.1 216.7 434.3 213.4 Q434.9 201.3 430.8 191.3 Q436.9 182.3 438.7 170.7 Q450.0 168.3 459.1 161.1 M458.7 156.1 Q470.2 163.2 482.7 164.4 Q488.4 175.5 499.6 183.9 Q494.6 196.8 495.6 209.7 Q484.8 216.8 478.1 228.4 Q464.7 225.3 452.9 228.0 Q443.7 220.1 430.1 216.3 Q430.8 202.4 426.0 190.9 Q433.1 180.5 435.1 167.1 Q448.2 164.4 458.7 156.1" style="stroke-width:1"/>
+          <path d="M458.5 154.2 L458 146" /><circle cx="458" cy="145" r="2" style="fill:var(--a-metal-dk)"/>
+        </g>
+        <g id="webTorn" style="fill:none;stroke:var(--a-metal-dk);stroke-width:1.2;stroke-linecap:round;opacity:0"><path d="M458.5 154.2 L459.2 162.1 M483.8 162.9 L475.5 174.7 M501.6 183.4 L486.6 187.4 M497.3 210.5 L490.3 207.2 M478.9 230.3 L472.5 216.5 M452.4 229.7 L456.1 216.2 M428.4 217.5 L435.1 212.8 M424.1 190.7 L438.5 191.9 M433.7 165.7 L444.5 176.5 M458.9 158.1 Q470.7 161.7 480.6 167.5 M494.6 209.2 Q485.7 217.7 475.7 223.4 M452.7 228.8 Q442.8 221.4 435.5 212.6 M426.1 190.9 Q431.7 179.9 439.1 171.1"/><path d="M458.5 154.2 L458 146"/><circle cx="458" cy="145" r="2" style="fill:var(--a-metal-dk)"/></g>
+        <line id="webThr" x1="458" y1="146" x2="458" y2="194" style="stroke:var(--a-metal-dk);stroke-width:1;display:none"/>
+        <g id="webSp" transform="translate(458 194)">
+          <g style="stroke:var(--a-ink);stroke-width:1.2;stroke-linecap:round;fill:none"><path d="M-3 -1 L-9 -6 L-12 -3 M-3 0 L-10 -1 L-13 3 M-3 1 L-9 6 L-11 10 M-2 3 L-6 9 L-7 12 M3 -1 L9 -6 L12 -3 M3 0 L10 -1 L13 3 M3 1 L9 6 L11 10 M2 3 L6 9 L7 12"/></g>
+          <ellipse cx="0" cy="2" rx="4.4" ry="5.2" style="fill:var(--a-ink)"/><circle cx="0" cy="-4" r="3" style="fill:var(--a-ink)"/>
+          <circle cx="-1.2" cy="-4.6" r=".8" style="fill:var(--a-sail)"/><circle cx="1.2" cy="-4.6" r=".8" style="fill:var(--a-sail)"/>
+        </g>
+      </g>
+      <!-- balloon burst (shown for a moment when the cuckoo's pin pops the balloon) -->
+      <g id="popfx" aria-hidden="true" style="display:none"><polygon points="0.0,-34.0 5.4,-20.3 17.0,-29.4 14.8,-14.8 29.4,-17.0 20.3,-5.4 34.0,0.0 20.3,5.4 29.4,17.0 14.8,14.8 17.0,29.4 5.4,20.3 0.0,34.0 -5.4,20.3 -17.0,29.4 -14.8,14.8 -29.4,17.0 -20.3,5.4 -34.0,0.0 -20.3,-5.4 -29.4,-17.0 -14.8,-14.8 -17.0,-29.4 -5.4,-20.3" style="fill:var(--a-spark);stroke:var(--a-ink);stroke-width:3;stroke-linejoin:round"/><text y="6" style="font:700 17px 'Lato',system-ui,sans-serif;fill:var(--a-ink);text-anchor:middle">POP!</text></g>
+
+      <!-- potted plant (distraction), anchor x 490: oblique terracotta pot (side, front, rim with top face and soil) and two-tone leaves with a midrib; the back leaves are darker -->
+      <g id="plant">
+        <polygon points="504,584 507,563 514,552 511,573" style="fill:var(--a-pot-side);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/><polygon points="476,584 504,584 507,563 473,563" style="fill:var(--a-pot);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/><path d="M478 566 L480 581" style="fill:none;stroke:var(--a-pot-top);stroke-width:2.4;stroke-linecap:round;opacity:.7"/><polygon points="471,556 509,556 516,545 478,545" style="fill:var(--a-pot-top);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/><polygon points="476,554 506,554 511,547 481,547" style="fill:var(--a-soil)"/>
+        <g transform="translate(492 550) rotate(-52)"><path d="M0,0 C7.0,-6.6 5.6,-16.5 0,-22.0 C-5.6,-16.5 -7.0,-6.6 0,0Z" style="fill:var(--a-leaf-bk);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round"/><path d="M0,0 C7.0,-6.6 5.6,-16.5 0,-22.0 Q1.4,-11.0 0,0Z" style="fill:var(--a-leaf-dk);opacity:.7"/><path d="M0,-2 Q0.8,-11.0 0,-19.4" style="fill:none;stroke:var(--heading);stroke-width:1;opacity:.45;stroke-linecap:round"/></g><g transform="translate(497 550) rotate(50)"><path d="M0,0 C7.0,-6.6 5.6,-16.5 0,-22.0 C-5.6,-16.5 -7.0,-6.6 0,0Z" style="fill:var(--a-leaf-bk);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round"/><path d="M0,0 C7.0,-6.6 5.6,-16.5 0,-22.0 Q1.4,-11.0 0,0Z" style="fill:var(--a-leaf-dk);opacity:.7"/><path d="M0,-2 Q0.8,-11.0 0,-19.4" style="fill:none;stroke:var(--heading);stroke-width:1;opacity:.45;stroke-linecap:round"/></g><g transform="translate(493 551) rotate(-24)"><path d="M0,0 C8.0,-9.0 6.4,-22.5 0,-30.0 C-6.4,-22.5 -8.0,-9.0 0,0Z" style="fill:var(--a-leaf);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round"/><path d="M0,0 C8.0,-9.0 6.4,-22.5 0,-30.0 Q1.6,-15.0 0,0Z" style="fill:var(--a-leaf-dk);opacity:.85"/><path d="M0,-2 Q1.0,-15.0 0,-26.4" style="fill:none;stroke:var(--heading);stroke-width:1;opacity:.45;stroke-linecap:round"/><path d="M-3.6,-7.5 Q-4.8,-16.5 -1.6,-24.6" style="fill:none;stroke:var(--a-leaf-hi);stroke-width:1.6;stroke-linecap:round;opacity:.8"/></g><g transform="translate(496 551) rotate(22)"><path d="M0,0 C8.0,-8.7 6.4,-21.8 0,-29.0 C-6.4,-21.8 -8.0,-8.7 0,0Z" style="fill:var(--a-leaf);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round"/><path d="M0,0 C8.0,-8.7 6.4,-21.8 0,-29.0 Q1.6,-14.5 0,0Z" style="fill:var(--a-leaf-dk);opacity:.85"/><path d="M0,-2 Q1.0,-14.5 0,-25.5" style="fill:none;stroke:var(--heading);stroke-width:1;opacity:.45;stroke-linecap:round"/><path d="M-3.6,-7.2 Q-4.8,-16.0 -1.6,-23.8" style="fill:none;stroke:var(--a-leaf-hi);stroke-width:1.6;stroke-linecap:round;opacity:.8"/></g><g transform="translate(494 551) rotate(-3)"><path d="M0,0 C8.5,-10.5 6.8,-26.2 0,-35.0 C-6.8,-26.2 -8.5,-10.5 0,0Z" style="fill:var(--a-leaf);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round"/><path d="M0,0 C8.5,-10.5 6.8,-26.2 0,-35.0 Q1.7,-17.5 0,0Z" style="fill:var(--a-leaf-dk);opacity:.85"/><path d="M0,-2 Q1.0,-17.5 0,-30.8" style="fill:none;stroke:var(--heading);stroke-width:1;opacity:.45;stroke-linecap:round"/><path d="M-3.8,-8.8 Q-5.1,-19.2 -1.7,-28.7" style="fill:none;stroke:var(--a-leaf-hi);stroke-width:1.6;stroke-linecap:round;opacity:.8"/></g>
+        <polygon points="509,556 516,545 516,552 509,563" style="fill:var(--a-pot-side);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/><rect x="471" y="556" width="38" height="7" rx="1" style="fill:var(--a-pot);stroke:var(--heading);stroke-width:2"/><line x1="473" y1="557.8" x2="507" y2="557.8" style="stroke:var(--a-pot-top);stroke-width:1.4;stroke-linecap:round;opacity:.8"/>
+      </g>
+      <!-- cardboard box (distraction) -->
+      <g id="box">
+        <!-- open cardboard box in the ramps' oblique style: back flap, side flaps, dark opening, right side face, front face with a folded-down flap -->
+        <polygon points="551,535 603,535 599,521 555,521" style="fill:var(--accent);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+        <polygon points="544,546 551,535 541,526 533,538" style="fill:var(--accent);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+        <polygon points="596,546 603,535 613,526 609,540" style="fill:var(--accent);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+        <polygon points="544,546 596,546 603,535 551,535" style="fill:var(--btn);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+        <polygon points="596,546 603,535 603,573 596,584" style="fill:var(--link);stroke:var(--heading);stroke-width:2;stroke-linejoin:round"/>
+        <rect x="544" y="546" width="52" height="38" rx="2" style="fill:var(--btn2);stroke:var(--heading);stroke-width:2"/><rect x="564" y="546" width="12" height="38" style="fill:var(--bg-alt);stroke:var(--heading);stroke-width:1.5"/><polygon points="544,546 596,546 593,555 547,555" style="fill:var(--accent);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round"/>
+      </g>
+      <!-- ball, paws, markers -->
+      <g id="ball"><path class="yt" d="M4,7 Q9,10 13,6 Q15,4 14,2"/><circle r="8.5" class="ball"/><path class="ys" d="M-7.5,-3.5 Q-1,0 3.5,7.5 M-3.5,-7.8 Q3,-1 7.8,3.5 M-8.3,1.5 Q0,-3 8.3,-1 M-6,-6 Q-4,2 2,8"/></g>
+      <use id="paw1" href="#pawsym" class="pawf" opacity="0"/>
+      <use id="paw2" href="#pawsym" class="pawf" opacity="0"/>
+      <use id="paw3" href="#pawsym" class="pawf" opacity="0"/>
+      <text id="whap" x="52" y="58" opacity="0">WHAP!</text>
+      <g class="bdg">
+        <g transform="translate(27 516)"><circle r="12"/><text y="5">1</text></g>
+        <g transform="translate(220 536)"><circle r="12"/><text y="5">2</text></g>
+        <g transform="translate(364 560)"><circle r="12"/><text y="5">3</text></g>
+        <g transform="translate(624 514)"><circle r="12"/><text y="5">4</text></g>
+      </g>
+      <g id="fx" opacity="0"><circle r="15" style="fill:var(--error)"/><path d="M-6-6 L6 6 M6-6 L-6 6" stroke="var(--bg)" stroke-width="4" stroke-linecap="round"/></g>
+      <g id="catPos">
+        <ellipse class="shadow" cx="0" cy="0" rx="52" ry="8"/>
+        <g class="cat" id="cat" data-pose="sit" data-body="sit">
+
+          <!-- WALK -->
+          <g class="pw">
+            <g class="tail" style="transform-origin:-40px -52px">
+              <path class="lo" stroke-width="15" d="M-40,-52 C-72,-58 -76,-92 -58,-104"/>
+              <path class="li" stroke-width="11" d="M-40,-52 C-72,-58 -76,-92 -58,-104"/>
+            </g>
+            <g class="leg" style="transform-origin:-28px -36px"><rect class="dk" x="-33" y="-38" width="10" height="34" rx="5"/><ellipse class="dk" cx="-27" cy="-4" rx="8" ry="4.5"/></g>
+            <g class="leg" style="transform-origin:26px -36px"><rect class="dk" x="21" y="-38" width="10" height="34" rx="5"/><ellipse class="dk" cx="27" cy="-4" rx="8" ry="4.5"/></g>
+            <ellipse class="acc" cx="0" cy="-48" rx="46" ry="24"/>
+            <g class="leg" style="transform-origin:-36px -36px"><rect class="acc" x="-41" y="-38" width="10" height="34" rx="5"/><ellipse class="sock" cx="-35" cy="-4" rx="8" ry="4.5"/></g>
+            <g class="leg" style="transform-origin:34px -36px"><rect class="acc" x="29" y="-38" width="10" height="34" rx="5"/><ellipse class="sock" cx="35" cy="-4" rx="8" ry="4.5"/></g>
+          </g>
+
+          <!-- SIT / LICK -->
+          <g class="ps">
+            <ellipse class="acc" cx="6" cy="-56" rx="24" ry="38" transform="rotate(10 6 -56)"/>
+            <ellipse class="acc" cx="-16" cy="-26" rx="28" ry="26"/>
+            <ellipse class="sock" cx="0" cy="-4" rx="17" ry="6"/>
+            <g class="tail" style="transform-origin:-32px -8px">
+              <path class="lo" stroke-width="15" d="M-32,-8 C-62,-8 -54,6 -10,3"/>
+              <path class="li" stroke-width="11" d="M-32,-8 C-62,-8 -54,6 -10,3"/>
+            </g>
+            <rect class="acc" x="3" y="-44" width="10" height="40" rx="5"/><ellipse class="sock" cx="8" cy="-4" rx="8" ry="4.5"/>
+            <g class="sitLeg"><rect class="acc" x="17" y="-44" width="10" height="40" rx="5"/><ellipse class="sock" cx="22" cy="-4" rx="8" ry="4.5"/></g>
+          </g>
+
+          <!-- LAY -->
+          <g class="pl">
+            <g class="tail" style="transform-origin:-50px -12px">
+              <path class="lo" stroke-width="15" d="M-50,-12 C-86,-16 -84,-2 -58,-2"/>
+              <path class="li" stroke-width="11" d="M-50,-12 C-86,-16 -84,-2 -58,-2"/>
+            </g>
+            <ellipse class="acc" cx="-4" cy="-20" rx="50" ry="20"/>
+            <ellipse class="acc" cx="-26" cy="-20" rx="26" ry="19"/>
+            <ellipse class="sock" cx="-30" cy="-5" rx="14" ry="5"/>
+          </g>
+
+          <!-- HEAD (shared) -->
+          <g class="hd"><g class="hdin">
+            <g class="earL"><path class="ear" d="M-26,-6 L-27,-45 L-6,-22 Z"/><path class="earin" d="M-21,-15 L-22,-34 L-12,-23 Z"/></g>
+            <g class="earR"><path class="ear" d="M26,-6 L27,-45 L6,-22 Z"/><path class="earin" d="M21,-15 L22,-34 L12,-23 Z"/></g>
+            <ellipse class="acc" cx="0" cy="0" rx="33" ry="27"/>
+            <g class="eye"><ellipse class="ink" cx="-14" cy="0" rx="8" ry="9"/><circle class="pupil" cx="-14" cy="1" r="5"/><circle class="lt" cx="-11.5" cy="-3" r="2.6"/><circle class="lt" cx="-16.5" cy="4" r="1.2"/></g>
+            <g class="eye"><ellipse class="ink" cx="14" cy="0" rx="8" ry="9"/><circle class="pupil" cx="14" cy="1" r="5"/><circle class="lt" cx="16.5" cy="-3" r="2.6"/><circle class="lt" cx="11.5" cy="4" r="1.2"/></g>
+            <circle class="blush" cx="-23" cy="11" r="5"/><circle class="blush" cx="23" cy="11" r="5"/>
+            <ellipse class="red tongue" cx="0" cy="15" rx="4.5" ry="5.5"/>
+            <path class="red nose" d="M-4,7 h8 q0,3.5 -4,5.5 q-4,-2 -4,-5.5 z"/>
+            <path class="whisk" d="M-22,8 l-17,-3 M-22,11 l-17,3 M22,8 l17,-3 M22,11 l17,3"/>
+          </g></g>
+
+          <!-- front overlays -->
+          <g class="lickpaw">
+            <path class="edge" stroke-width="13" d="M22,-46 L28,-76"/>
+            <path class="li" stroke-width="10" d="M22,-46 L28,-76"/>
+            <ellipse class="sock edge" cx="29" cy="-80" rx="8" ry="7"/>
+          </g>
+          <g class="armp"><path class="edge" stroke-width="13" d="M22,-46 L28,-76"/><path class="li" stroke-width="10" d="M22,-46 L28,-76"/><ellipse class="sock edge" cx="29" cy="-80" rx="8" ry="7"/></g>
+          <g class="layPaws">
+            <ellipse class="sock edge" cx="56" cy="-6" rx="13" ry="6"/>
+            <ellipse class="sock edge" cx="74" cy="-5" rx="11" ry="5.5"/>
+          </g>
+          <g class="cfx">
+            <g class="hearts"><path d="M8,-125 C2,-131 5,-136 8,-132 C11,-136 14,-131 8,-125Z"/><path d="M30,-135 C24,-141 27,-146 30,-142 C33,-146 36,-141 30,-135Z"/><path d="M-12,-139 C-18,-145 -15,-150 -12,-146 C-9,-150 -6,-145 -12,-139Z"/></g>
+            <g class="sweat"><path d="M52,-116 C57,-109 57,-105 52,-105 C47,-105 47,-109 52,-116Z"/></g>
+            <g class="sweatLow"><path d="M70,-52 C75,-45 75,-41 70,-41 C65,-41 65,-45 70,-52Z"/></g>
+            <g class="treat"><ellipse cx="96" cy="-9" rx="9" ry="5"/><path d="M104,-9 l8,-5 v10z"/><circle cx="84" cy="-3" r="1.6"/><circle cx="108" cy="-2" r="1.6"/></g>
+          </g>
+        </g>
+      </g>
+      <g id="boxFront" style="display:none"><rect x="544" y="546" width="52" height="38" rx="2" style="fill:var(--btn2);stroke:var(--heading);stroke-width:2"/><rect x="564" y="546" width="12" height="38" style="fill:var(--bg-alt);stroke:var(--heading);stroke-width:1.5"/><polygon points="544,546 596,546 593,555 547,555" style="fill:var(--accent);stroke:var(--heading);stroke-width:1.5;stroke-linejoin:round"/></g>
+      <g id="smoke"></g><g id="dbgA"></g>
+      <g id="conf"></g>
+      <g id="laser" style="display:none"><circle r="14" style="fill:var(--error);fill-opacity:.2;stroke:var(--error);stroke-width:2"/><circle r="5" style="fill:var(--error)"/></g>
+    
+    </svg>
+    <div class="toolbar" id="toolbar" role="toolbar" aria-label="Conditioning tools"></div>
+    <div class="winb" id="winb" hidden aria-hidden="true"><span>Escaped!</span></div>
+    </div>
+    <p id="say" aria-live="polite">Ready.</p>
+    <div class="row" style="margin-top:8px"><button id="laserBtn" aria-pressed="true">Laser: on</button><button id="infoBtn" aria-pressed="false" aria-controls="stats">Show debug info</button><button id="howBtn" type="button">How to play</button><button id="swapBtn" type="button" class="small">Choose another cat</button></div>
+    <div id="stats" class="statsbox" hidden></div>
+    <p class="hint">Tool bar (top right): Treat and Pet reward, Spray and Buzzer punish. A tool counts toward what the cat is doing, or did within the last 5 seconds. Each tool needs time to recharge, and treats run out.</p>
+    <p class="hint">Laser: press and hold the left mouse button on the scene and drag (or touch and drag); the dot disappears when you let go. Keyboard: Tab to the scene, arrow keys move the dot (Shift = faster), Space toggles it, Esc turns it off. The cat only follows when the dot is on the floor and within about 60 px of it; it loses interest if the dot leaves the floor or gets too far away.</p>
+  </div>
+
+  <section class="card" id="dbg" hidden>
+    <h2>Debug panel</h2>
+    <p class="hint">Hidden levels, stress and fullness show in the Conditioning section (players get a smaller version from the Show debug info button). Rings on the scene are station near-radii. This build forces debug on (<code>config.FORCE_DEBUG</code>).</p>
+    <h3>Machine</h3>
+    <p class="hint">Drills reset the machine and start it at that step (earlier steps count as skipped). Step 1 waits for the cat to flip the wall switch.</p>
+    <div class="row" style="margin-top:8px"><button class="primary drill" id="go" data-n="1">Start at step 1</button><button class="drill" data-n="2">Start at step 2</button><button class="drill" data-n="3">Start at step 3</button><button class="drill" data-n="4">Start at step 4</button><button id="rs">Reset</button></div>
+    <label class="r" style="margin-top:8px"><input type="checkbox" id="dbgBrain" checked><span class="nm" id="dbgBrainTxt">Engine brain: the cat rolls at stations it has been near for 1 s, the plant and box after 0.4 s (unticked: it never triggers on its own; rewards and punishments still work)</span></label>
+    <h3>Conditioning (hidden from players)</h3>
+    <p class="hint">Levels L are the chance each behavior triggers on a roll. Reward and punish with the tool bar at the top right (cooldowns apply); these buttons only help testing.</p>
+    <div class="dbgrow" id="dbgTrain"></div>
+    <pre id="dbgModel"></pre>
+    <h3>Make the cat do it</h3>
+    <p class="hint">Debug only: starts the action without a roll, through the same interaction path (so it can be rewarded and punished).</p>
+    <div class="dbgrow" id="dbgDo"></div>
+    <h3>Hidden override: scripted cat (the old toggles)</h3>
+    <label class="r"><input type="checkbox" id="dbgScript"><span class="nm">Scripted cat: the cat performs each step automatically, or deliberately skips it, as ticked below</span></label>
+    <ul class="steps" id="steps" style="margin-top:8px"></ul>
+    <label class="r" style="margin-top:8px"><input type="checkbox" id="dbgLoad" checked><span class="nm">Ball lands in the cannon (unticked: cannon fires empty)</span></label>
+    <h3>Cat</h3>
+    <div class="dbgrow" id="dbgCat"></div>
+    <h3>Force a pose</h3>
+    <div class="dbgrow" id="dbgPose"></div>
+    <label class="r" style="margin-top:8px"><input type="checkbox" id="dbgHold" checked><span class="nm">Hold pose until released (unticked: plays its default length)</span></label>
+    <h3>Walk to station</h3>
+    <div class="dbgrow" id="dbgAnch"></div>
+    <p id="dbgInfo"></p>
+    <h3>Flow (title, win, end screens)</h3>
+    <div class="dbgrow" id="dbgFlow"></div>
+    <h3>Event bus</h3>
+    <pre id="evlog">(no events yet)</pre>
+  </section>
+</main>
+
+<div class="ov" id="ov" hidden>
+  <section class="dlg" id="ovTitle" role="dialog" aria-modal="true" aria-labelledby="ttlH" tabindex="-1" data-mode="title" hidden>
+    <h2 id="ttlH">Condition the Cat</h2>
+    <p class="swapnote" id="swapNote"></p>
+    <ul class="ins">
+      <li>Choose a cat.</li>
+      <li>Your goal is to train the cat to escape the cage.</li>
+      <li>The cat follows the laser. Hold the mouse or a finger on the floor to move the dot (or use the arrow keys).</li>
+      <li>Flip the wall switch (lead the cat to it) before the machine does anything.</li>
+      <li>Reward what you want and punish what you don't.</li>
+      <li>The cat remembers what you reinforce, and treats run out.</li>
+      <li>Win by conditioning the cat to escape.</li>
+    </ul>
+    <div class="cagewrap" id="cageWrap">
+      <div class="cage" id="cage">
+        <div class="zone" id="zone"><p class="zhint">Hover over, tap, or Tab to a cat to meet it.</p></div>
+        <div class="row3" id="row3"></div>
+      </div>
+      <p class="hint">Mouse: hover to preview, click a cat to choose it. Touch or keyboard: tap or Tab to a cat, then press its Choose button.</p>
+    </div>
+    <div class="row"><button class="primary" id="ovClose" type="button" hidden>Back to the game</button></div>
+  </section>
+
+  <section class="dlg" id="ovStats" role="dialog" aria-modal="true" aria-labelledby="stH" tabindex="-1" hidden>
+    <h2 id="stH">Escaped!</h2>
+    <p>A clean run: the cat did all four steps and ignored the plant and box. Here is what your training did to it.</p>
+    <div class="statsbox" id="endStats"></div>
+    <p class="hint">Behavior levels are the chance each behavior triggers when the cat gets the chance. Reinforced tasks climb; distractions you punished or ignored fall.</p>
+    <div class="row"><button class="primary" id="stNext" type="button">Continue</button></div>
+  </section>
+
+  <section class="dlg" id="ovQuiz" role="dialog" aria-modal="true" aria-labelledby="qH" tabindex="-1" hidden>
+    <h2 id="qH">Quick quiz</h2>
+    <p class="hint" id="qProg"></p>
+    <h3 id="qText" tabindex="-1"></h3>
+    <div class="qopts" id="qOpts" role="group" aria-labelledby="qText"></div>
+    <div class="qfb" id="qFb" hidden><p class="qv" id="qVerdict"></p><p class="qw" id="qWhy"></p><p class="qc" id="qCode"></p></div>
+    <div class="row"><button class="primary" id="qNext" type="button" aria-describedby="qFb" hidden>Next question</button></div>
+  </section>
+
+  <section class="dlg" id="ovEnd" role="dialog" aria-modal="true" aria-labelledby="enH" tabindex="-1" hidden>
+    <h2 id="enH">Nice work!</h2>
+    <p id="enMsg"></p>
+    <p class="score" id="enScore" hidden></p>
+    <p class="hint" id="enNote" hidden>No quiz is registered.</p>
+    <div class="row"><button class="primary" id="playAgain" type="button">Play again</button></div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)},NS='http://www.w3.org/2000/svg';
+var lerp=function(a,b,t){return a+(b-a)*t},clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
+
+/* ================= config (all tunables live here) ================= */
+var config={
+  FORCE_DEBUG:true,            /* Step 1 only: set false in Step 8 */
+  ROLL_DELAY:1, ROLL_DELAY_DISTRACT:.4, ROLL_INTERVAL:[10,15],   /* first roll after this long near a station; distractions (plant, box) roll sooner so the cat cannot just run past them (.4 leaves a frame of margin under the 0.5 s limit) */
+  REWARD_WINDOW:5, FUSE_SECONDS:10,
+  BALL_TO_GATE:10, STRESS_HIDE:.85, DT:1/60, SEED:12345,
+  MACHINE:{                    /* Step 3 machine timing (seconds unless noted) */
+    LAUNCH:.7,                 /* switch flip to ball launched (the button action lasts up to 1 s) */
+    GATE_RISE:1.2, GATE_OK:.9, /* gate rise time; fraction it must have reached when the ball arrives */
+    INFLATE:1.8, BALLOON_AWAY:7, /* balloon inflation; rise time until it floats away (crank action = this + 1 s) */
+    CRANK_SPEED:400, CRANK_TAU:.25, BLOW_SPEED:150,  /* deg/s while pawed; spin-up time constant; fan blows above this */
+    PLANK:{rest:9,loaded:14,pressed:-14,speed:60},   /* see-saw angles (deg) and tilt speed (deg/s) */
+    AUTO_RESET:5,              /* a finished run resets itself after this long */
+    FAN2:false,   /* the second (upper) fan from earlier in Step 11 is switched off; its code is kept - set true to bring it back */
+    WEB:{ON:true,HOLD:3,Y:268},   /* a spider web catches the rising balloon at balloon-base height Y for HOLD seconds, then snaps */
+    CLOCK:{BLOW:3.6,WAKE:1.3,FALL:.5,TIP:.8,X:590,Y:280,LAND:301}   /* Step 11b: the fan blows the balloon at a steady speed to the pop point X,Y (BLOW; Y = knot). The clock wakes WAKE s before the balloon gets there and the cuckoo pops out to pin it as it arrives, without the balloon slowing. Then the bucket drops onto the ramp (FALL; LAND = knot height on the ramp) and tips (TIP). The bucket still lands 4.1 s and finishes tipping 4.9 s after the blow starts, as before. */
+  },
+  WORLD:{w:900,h:660,fx:[40,860],fy:[602,648]},   /* shared 900-wide machine coordinates; cat walks the floor band y 584-660 */
+  ZONE:{top:520,bottom:660},   /* near zones are full-height columns (they include the spots the cat hops up to); an anchor may override top/bottom */
+  ANCHORS:{                    /* x,y = where the cat walks to; w = width of the rectangular near zone, centred on x */
+    button:{x:70,y:625,w:60}, pad:{x:220,y:625,w:110}, crank:{x:410,y:625,w:68},
+    plant:{x:490,y:625,w:84}, seesaw:{x:650,y:625,w:68}, box:{x:574,y:625,w:80}   /* Step 11b: zones crank 376-444, plant 448-532, box 534-614, see-saw 616-684 (no overlaps; crank to see-saw crosses plant and box). Plant and box are wide enough that even a full-speed cat (about 170 px/s at the front of the floor) stays in each for more than ROLL_DELAY_DISTRACT */
+  },
+  /* interaction contract: model emits interactionStart(item) / interactionEnd(item,reason);
+     machine emits stepComplete(step); tools emit reward(tool) / punish(tool) */
+  LASER:{STOP:18,KEYSTEP:20,NOTICE:60,LOSE:1.6,FLOOR_TOP:584,FORGIVE:24,STRESS_NOTICE:.5,STRESS_SPEED:.4},  /* full stress shrinks the notice distance by STRESS_NOTICE and slows laser-following by STRESS_SPEED */  /* NOTICE: px, same for every cat; the dot must be on the floor (FORGIVE px above it is allowed); the cat loses interest beyond NOTICE*LOSE */
+  POSES:{                      /* body = rig body shown; spot = where the cat stands/lies; hop = jumps there; dur = default seconds */
+    walk:{body:'walk'},sit:{body:'sit'},lay:{body:'lay'},lick:{body:'sit'},
+    pressButton:{body:'sit',spot:{x:64,y:596,dir:-1},dur:1},
+    lieOnPad:{body:'lay',spot:{x:220,y:573,dir:1},hop:1,dur:11},
+    pawCrank:{body:'sit',spot:{x:394,y:596,dir:1},dur:8},
+    pressSeesaw:{body:'lay',spot:{x:662,y:'plank',dir:1},hop:1,dur:11},
+    pawPlant:{body:'sit',spot:{x:508,y:596,dir:-1},dur:3},
+    jumpBox:{body:'sit',spot:{x:570,y:584,dir:1},hop:1,dur:5},
+    flinch:{body:'sit',dur:.7},eat:{body:'walk',dur:3},petted:{body:'sit',dur:3},
+    hide:{body:'lay',spot:{x:850,y:640,dir:-1},dur:6}
+  },
+  EVENTS:['interactionStart','interactionEnd','stepComplete','reward','punish'],
+  ENGINE:{                     /* Step 4 conditioning engine (all values are starting points for Step 8) */
+    STRESS_DECAY:.02, STRESS_LEARN:.7,   /* stress lost per second; how much full stress cuts reward learning (0.7 = -70%) */
+    HIDE_RELIEF:.5,            /* stress left after the cat has hidden */
+    FULL_DECAY:.004,           /* treat fullness lost per second */
+    EXTINCTION:.04,            /* an interaction with no reward or punishment in its window: L -= EXTINCTION*(L-floor) */
+    PUNISH_RATE:.5,            /* L -= PUNISH_RATE*strength*catSensitivity*(L-floor) */
+    SENS_BASE:.5,              /* catSensitivity = SENS_BASE + (1-SENS_BASE)*cat[spray|buzz]: even a forgiving cat feels a punishment; the stress jump uses the raw cat value */
+    TOOLS:{                    /* reward: value comes from the cat (treat/pet). punish: strength scales L loss, stress scales the stress jump; the cat key is its sensitivity */
+      treat:{kind:'reward',key:'treat'}, pet:{kind:'reward',key:'pet'},
+      spray:{kind:'punish',key:'spray',strength:1,stress:.35}, buzzer:{kind:'punish',key:'buzz',strength:.45,stress:.15}
+    }
+  },
+  TOOLBAR:{                    /* Step 5 tool bar */
+    COOLDOWN:{treat:5,pet:3,spray:12,buzzer:5},   /* seconds before the same tool can be used again */
+    GLOBAL:2,                                     /* seconds before ANY other tool can be used after one is used */
+    TREATS:{max:8,refill:12},                     /* treat supply: starts full, one comes back every REFILL seconds */
+    REACT:{treat:'eat',pet:'petted',spray:'flinch',buzzer:'flinch'},   /* cat reaction pose per tool (skipped while the cat is in a committed action) */
+    FX:{treat:1.2,pet:2.2,spray:1.1,buzzer:.9}    /* seconds each visible tool effect lasts */
+  },
+  HARNESS:{                    /* ?sim only: scripted trainers against a stub cat (no rendering) */
+    SEEDS:[1,2,3,4,5], CAP:2400,       /* seeds per cell; give-up time in simulated seconds */
+    WALK:3, PATIENCE:3.5, REACT:1.2,   /* leading the cat to a station; wait after the first roll before re-leading; trainer reaction delay after an action starts */
+    RUN_RESET:6, IDLE_EVERY:3,         /* extra time after a failed run; spammers act this often when nothing happens */
+    ACTION:{pressButton:1,lieOnPad:8,pawCrank:6,pressSeesaw:10,pawPlant:3,jumpBox:5,hide:6}   /* how long each stub action lasts (the machine ends the real ones early) */
+  },
+  BEHAVIORS:[                  /* data records; the engine has no per-behavior code. L/cap/floor are filled per cat */
+    {id:'button',type:'task',anchor:'button',animation:'pressButton',maxDuration:1},
+    {id:'pad',type:'task',anchor:'pad',animation:'lieOnPad',maxDuration:11},
+    {id:'crank',type:'task',anchor:'crank',animation:'pawCrank',maxDuration:12}   /* 8 s + MACHINE.WEB.HOLD + 1 s for the longer drift to the cuckoo (Step 11b) */,
+    {id:'seesaw',type:'task',anchor:'seesaw',animation:'pressSeesaw',maxDuration:11},
+    {id:'plant',type:'distraction',anchor:'plant',animation:'pawPlant',maxDuration:3},
+    {id:'box',type:'distraction',anchor:'box',animation:'jumpBox',maxDuration:5}
+  ],
+  CATS:{                       /* starting values, tuned in Step 8 */
+    latte:{name:'Latte',cap:.99,floor:.01,start:.15,plant:.4,box:.4,learn:.6,treat:.9,pet:.6,fillRate:.2,spray:.15,buzz:.1,nothing:.02,laser:1,lag:0},
+    cappuccino:{name:'Cappuccino',cap:.96,floor:.04,start:.12,plant:.5,box:.6,learn:.4,treat:.6,pet:.9,fillRate:.12,spray:.5,buzz:.35,nothing:.04,laser:.7,lag:.1},
+    mocha:{name:'Mocha',cap:.9,floor:.1,start:.1,plant:.5,box:.5,learn:.22,treat:.3,pet:.3,fillRate:.06,spray:1,buzz:.7,nothing:.08,laser:.5,lag:.35}
+  },
+  INTRO:{                      /* Step 6 title screen: badge, pose and facing of each cat in the cage, thought-bubble text */
+    latte:{level:'Easy',pose:'sit',dir:1,blurb:"I'm Latte. I'll do almost anything for a snack, and I forgive a squirt of water in about five seconds."},
+    cappuccino:{level:'Medium',pose:'lick',dir:-1,blurb:"Cappuccino, darling. A good pet beats a treat, and I simply adore boxes. Do try to keep up."},
+    mocha:{level:'Hard',pose:'lay',dir:-1,blurb:"Mocha. I do things my way, I get bored fast, and I really, truly hate that spray. Good luck."}
+  },
+  FLOW:{SELECT_FADE:.7,WIN_HOLD:1,WIN_HOLD_FAST:1.8,WIN_WAIT:2.5,WIN_WALK:5,START:{x:300,y:625}}   /* seconds: fade after choosing a cat; pause after the cat leaves; pause for a win that waited for an overlay; longest wait for the cat to be free; longest walk out */,
+  BUBBLES:{                    /* Step 7 thought bubbles. Times in seconds of unlocked play (the clock pauses on overlays, the win moment and while the cat hides) */
+    INTERVAL:[25,35], SHOW:8,  /* random gap between bubbles; how long one stays (a reward or punishment bubble restarts the gap) */
+    GAP:44,                    /* px between the bubble and the top of the cat's head (room for the thought dots) */
+    FULL:.7, STRESS:.5,        /* fullness / stress at or above this enables the "full" / "stressed" lines */
+    PUNISH_WINDOW:45,          /* a spray or buzzer enables the "punished" lines for this long */
+    TAG_WEIGHT:3,              /* an enabled tagged line is this many times as likely as a plain line */
+    /* LINES: each cat has its own list, and the 'any' list is added to every cat's list. A string is always eligible; {tag,text} only in that state.
+       Timed bubbles: tags full, stressed, punished. Instant reaction to a tool (shown the moment it is used): tags treat, pet, spray, buzzer.
+       A punishment reaction can also use 'punished' lines; a treat reaction can also use 'full' lines while fullness is high. */
+    HEAD:{walk:{x:44,y:-120},sit:{x:14,y:-144},lay:{x:46,y:-80}},   /* top of the head in the cat's own coordinates, per body */
+    LINES:{
+      any:[
+        "Am I really the one being conditioned, or is it you?",
+        "I am not lost. I am wandering with purpose.",
+        "This cage has absolutely no ambiance.",
+        "A machine this size just to open a door? How very human.",
+        "Nobody asked me if I wanted to be conditioned.",
+        "Nine lives, and I\u2019m spending one of them in here.",
+        "Somewhere, a cat is napping in a sunbeam. I am not that cat. Yet.",
+        {tag:'full',text:"Full. Finally, a legitimate reason to nap."},
+        {tag:'stressed',text:"Do not look at me. I am having a moment."},
+        {tag:'punished',text:"\u201CWe can judge the heart of a man by his treatment of animals.\u201D \u2013 Immanuel Kant"},
+        {tag:'treat',text:"Treats: the one language every cat speaks."},
+        {tag:'pet',text:"Pets accepted. Payment received."},
+        {tag:'spray',text:"Was that really necessary?"},
+        {tag:'buzzer',text:"Noted. Disliked. Remembered."}
+      ],
+      latte:[
+        "Is that a red dot? I will follow it to the ends of the earth.",
+        "I would like to formally request a snack.",
+        "Plan for today: nap, snack, nap, maybe a snack.",
+        "If I sit very still, maybe a treat will notice me.",
+        "That plant looks delicious. Allegedly it is not.",
+        "Is this a machine or a very elaborate toy? Either way, I\u2019m in.",
+        "I\u2019ve been told I\u2019m a good cat. I\u2019d like that in writing, with snacks.",
+        {tag:'full',text:"My tummy is round and my heart is full. Mostly my tummy."},
+        {tag:'full',text:"Too many treats. Nap time. No regrets."},
+        {tag:'stressed',text:"Too many squirts, not enough snacks. My whiskers are trembling."},
+        {tag:'punished',text:"I\u2019m choosing to believe that was an accident."},
+        {tag:'punished',text:"I\u2019m not mad. I\u2019m just a little damp and a little confused."},
+        {tag:'treat',text:"Yum! Do it again!"},
+        {tag:'treat',text:"Snacks! Best day ever!"},
+        {tag:'pet',text:"Purr purr purr purr purr."},
+        {tag:'pet',text:"Oh, right behind the ears. Perfect."},
+        {tag:'spray',text:"Hey! I was just standing here!"},
+        {tag:'spray',text:"Splash! Okay, okay, I\u2019m over it."},
+        {tag:'buzzer',text:"Bzzt?! What did I do?"},
+        {tag:'buzzer',text:"That noise! My ears!"}
+      ],
+      cappuccino:[
+        "The box is not a hobby, darling. It is a lifestyle.",
+        "A good chin scratch is worth ten treats. Do take notes.",
+        "Cardboard is the finest material known to cats.",
+        "Technically, I could escape. I simply haven\u2019t gotten around to it.",
+        "The dot is beneath me. I will, however, supervise it.",
+        {tag:'full',text:"Another treat? I couldn\u2019t possibly. \u2026Perhaps just the one."},
+        {tag:'full',text:"I am a refined cat with a round, refined belly."},
+        {tag:'stressed',text:"Please keep the drama to a minimum. I\u2019m trying to maintain my composure."},
+        {tag:'punished',text:"I will remember this. I remember everything. Especially the spray."},
+        {tag:'punished',text:"Sprays and buzzers? How terribly rude."},
+        {tag:'treat',text:"Acceptable. You may continue."},
+        {tag:'treat',text:"A treat. How thoughtful of my staff."},
+        {tag:'pet',text:"Yes, there. Exactly there. Do not stop."},
+        {tag:'pet',text:"Adequate petting. Dare I say, excellent."},
+        {tag:'spray',text:"I am MOIST. How dare you."},
+        {tag:'spray',text:"My fur! Do you know what this cost?"},
+        {tag:'buzzer',text:"Must you be so loud?"},
+        {tag:'buzzer',text:"How terribly uncivilized."}
+      ],
+      mocha:[
+        "So much fury. So little floor space.",
+        "Bored. Bored. Bored. Is that a dot? Still bored.",
+        "I could operate the machine. I choose not to. On principle.",
+        "Treats are fine. Respect is better.",
+        "The dot isn\u2019t fooling anyone. I just happen to be walking that way.",
+        "I do things my way. Today, my way is staring at a wall.",
+        {tag:'punished',text:"Spray me once, shame on you. Spray me twice, I\u2019m writing this down."},
+        {tag:'punished',text:"I hate the spray. I hate it. I wanted to say that twice."},
+        {tag:'treat',text:"Fine. A treat. This changes nothing."},
+        {tag:'treat',text:"Hmph. Tasty. Still annoyed."},
+        {tag:'pet',text:"I allow this. For now."},
+        {tag:'pet',text:"Don\u2019t get used to it."},
+        {tag:'spray',text:"I knew it. I KNEW it."},
+        {tag:'spray',text:"Water. My sworn enemy."},
+        {tag:'buzzer',text:"That noise is a personal attack."},
+        {tag:'buzzer',text:"Bzzt yourself."}
+      ]
+    }
+  },
+  QUIZ:[                       /* Step 7 quiz: fixed order; o[0] is the correct answer (options are shuffled when shown); code = CED reference */
+    {q:"Latte flips the wall switch and you give her a treat right away. Which description fits the treat?",
+     o:["Positive reinforcement, using a primary reinforcer","Positive reinforcement, using a secondary reinforcer","Negative reinforcement, using a primary reinforcer","Negative punishment, using a secondary reinforcer"],
+     why:"The treat is added after the behavior and makes it more likely, so it is positive reinforcement. Food meets a biological need, so it is a primary reinforcer. A secondary reinforcer, such as a clicker, has to be learned by pairing it with a primary one.",code:"3.8.A.2"},
+    {q:"The cat paws the plant and you hit Spray. Which pair of statements is correct?",
+     o:["Positive punishment, and pawing the plant becomes less likely","Negative punishment, and pawing the plant becomes less likely","Negative reinforcement, and pawing the plant becomes more likely","Positive reinforcement, and pawing the plant becomes more likely"],
+     why:"The spray adds an unpleasant stimulus, so it is positive punishment (\u201Cpositive\u201D means added, not \u201Cgood\u201D). By the Law of Effect, behaviors followed by punishing consequences are less likely to be repeated.",code:"3.8.A.1 and 3.8.A.2"},
+    {q:"The cat flips the wall switch several times, but you give no treat, pet, spray, or buzzer afterward. What does the Law of Effect predict, and what is it called?",
+     o:["The behavior fades because it no longer earns a reinforcing consequence (extinction)","The behavior fades because it is being punished (positive punishment)","The behavior stays just as strong (habituation)","The behavior gets stronger (spontaneous recovery)"],
+     why:"Behaviors that stop producing reinforcing consequences are less likely to be repeated. Ending reinforcement altogether is extinction. In the game, a behavior with no reward or punishment in its window slowly loses strength.",code:"3.8.A.1"},
+    {q:"Pawing the crank earns treats, and pawing the plant never does. Soon the cat paws only at the crank. Which term fits best?",
+     o:["Discrimination","Generalization","Shaping","Negative reinforcement"],
+     why:"Discrimination means responding only in the situation where the behavior has been reinforced, like acting at the right station. Generalization would be responding in similar situations too, such as pawing the plant as well.",code:"3.8.A.2"},
+    {q:"Imagine you want to negatively punish the cat for pawing the plant. Which of these would do it?",
+     o:["Taking away the toy it is playing with the moment it paws the plant","Giving it a treat the moment it paws the plant","Sounding the buzzer the moment it paws the plant","Stopping a loud hum the moment it paws the plant"],
+     why:"Negative punishment removes something the cat likes (here, a toy) so that the behavior becomes less likely. The treat is positive reinforcement, the buzzer is positive punishment, and stopping an unpleasant hum is negative reinforcement. This hypothetical does not happen in the game.",code:"3.8.A.2"},
+    {q:"Imagine a loud hum plays in the cage until the cat flips the wall switch, and then the hum stops. The cat starts flipping the switch sooner each time. What is this?",
+     o:["Negative reinforcement","Positive punishment","Negative punishment","Positive reinforcement"],
+     why:"Taking away an unpleasant stimulus after a behavior makes that behavior more likely: negative reinforcement. It is not punishment, because punishment makes a behavior less likely. This hypothetical does not happen in the game.",code:"3.8.A.2"}
+  ]
+};
+var CFG=config,Q=location.search;
+var DEBUG=CFG.FORCE_DEBUG||/[?&]debug\b/.test(Q),SIM=/[?&]sim\b/.test(Q);
+
+/* ================= bus ================= */
+var bus=(function(){
+  var h={},log=[];
+  return{
+    on:function(e,f){(h[e]=h[e]||[]).push(f)},
+    emit:function(e,a,b){
+      if(CFG.EVENTS.indexOf(e)<0)console.warn('unknown event',e);
+      (h[e]||[]).forEach(function(f){f(a,b)});
+      log.push(e+(a!==undefined?'('+a+(b!==undefined?', '+b:'')+')':''));
+      if(log.length>6)log.shift();
+      var o=$('#evlog');if(o)o.textContent=log.join('\n');
+    }
+  };
+})();
+
+/* ================= model (pure logic, no DOM, seeded RNG, fixed step) ================= */
+var model=(function(){
+  var E=CFG.ENGINE;
+  function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function delay(b){return b.type==='distraction'?CFG.ROLL_DELAY_DISTRACT:CFG.ROLL_DELAY}
+  function create(catId,seed){
+    var c=CFG.CATS[catId],m={
+      id:catId,cat:c,rand:rng(seed===undefined?CFG.SEED:seed),t:0,stress:0,fullness:0,brain:true,
+      cur:null,last:null,pend:[],items:{},log:[],
+      stats:{treats:0,pets:0,sprays:0,buzzes:0,hides:0,nothing:0,interactions:0,extinct:0},
+      behaviors:CFG.BEHAVIORS.map(function(b){
+        var task=b.type==='task',o={};for(var k in b)o[k]=b[k];
+        o.L=task?c.start:c[b.id];o.cap=task?c.cap:1;o.floor=task?0:c.floor;return o;
+      })
+    };
+    m.behaviors.forEach(function(b){m.items[b.id]={armed:true,rollAt:delay(b),rolls:0}});
+    return m;
+  }
+  /* The engine owns no DOM and no per-behavior code. host = {nearTime(anchorId), play(animation,{dur,done})->bool, busy()->bool};
+     emit(name,a,b) carries interactionStart / interactionEnd. Rewards and punishments arrive through reward(tool) / punish(tool). */
+  function engine(host,emit){
+    var m=null;
+    function beh(id){for(var i=0;i<m.behaviors.length;i++)if(m.behaviors[i].id===id)return m.behaviors[i]}
+    function note(s){m.log.push(m.t.toFixed(1)+'s  '+s);if(m.log.length>8)m.log.shift()}
+    function lerp2(a,b,t){return a+(b-a)*t}
+    function setCat(id,seed){m=create(id,seed);return m}
+    /* the interaction a reward or punishment counts toward: the one running, or one that ended within REWARD_WINDOW */
+    function target(){
+      if(m.cur)return m.cur;
+      var l=m.last;return l&&l.end!==null&&m.t-l.end<=CFG.REWARD_WINDOW?l:null;
+    }
+    function start(b){
+      var it={id:b.id,start:m.t,end:null,credited:false,roll:m.items[b.id].rolls};
+      var ok=host.play(b.animation,{dur:b.maxDuration,done:function(n,why){
+        it.end=m.t;if(m.cur===it)m.cur=null;
+        m.pend.push({it:it,due:m.t+CFG.REWARD_WINDOW});
+        emit('interactionEnd',b.id,why);
+      }});
+      if(!ok)return false;
+      m.cur=it;m.last=it;m.stats.interactions++;
+      emit('interactionStart',b.id);
+      return true;
+    }
+    function reward(tool){
+      var d=E.TOOLS[tool],c=m.cat,v,t,b;
+      if(!d||d.kind!=='reward')return;
+      v=c[d.key];
+      if(tool==='treat'){v*=1-m.fullness;m.fullness=Math.min(1,m.fullness+c.fillRate);m.stats.treats++}else m.stats.pets++;
+      v*=1-E.STRESS_LEARN*m.stress;                       /* stress slows learning */
+      t=target();
+      if(t){
+        b=beh(t.id);t.credited=true;
+        b.L=clamp(b.L+c.learn*v*(b.cap-b.L),b.floor,b.cap);
+        note(tool+' -> '+b.id+'  L '+b.L.toFixed(2));
+      }else{                                              /* reward for nothing: the cat learns to do nothing */
+        m.stats.nothing++;
+        m.behaviors.forEach(function(x){x.L=clamp(x.L-c.nothing*(x.L-x.floor),x.floor,x.cap)});
+        note(tool+' for nothing: every L down');
+      }
+    }
+    function punish(tool){
+      var d=E.TOOLS[tool],c=m.cat,s,sens,t,b;
+      if(!d||d.kind!=='punish')return;
+      s=c[d.key];sens=E.SENS_BASE+(1-E.SENS_BASE)*s;if(tool==='spray')m.stats.sprays++;else m.stats.buzzes++;
+      t=target();
+      if(t){
+        b=beh(t.id);t.credited=true;
+        b.L=clamp(b.L-E.PUNISH_RATE*d.strength*sens*(b.L-b.floor),b.floor,b.cap);
+        note(tool+' -> '+b.id+'  L '+b.L.toFixed(2));
+      }else note(tool+' with nothing to punish: stress only');
+      m.stress=Math.min(1,m.stress+d.stress*s);
+    }
+    function step(dt){
+      var i,b,it,n,due,j,k,p,ok;
+      m.t+=dt;
+      m.stress=Math.max(0,m.stress-E.STRESS_DECAY*dt);
+      m.fullness=Math.max(0,m.fullness-E.FULL_DECAY*dt);
+      for(i=m.pend.length-1;i>=0;i--){                    /* extinction: a closed window with no reward or punishment */
+        p=m.pend[i];
+        if(m.t>=p.due){
+          m.pend.splice(i,1);
+          if(!p.it.credited){b=beh(p.it.id);b.L=clamp(b.L-E.EXTINCTION*(b.L-b.floor),b.floor,b.cap);m.stats.extinct++}
+        }
+      }
+      for(i=0;i<m.behaviors.length;i++){                  /* leaving a zone re-arms the item and resets its roll clock */
+        b=m.behaviors[i];it=m.items[b.id];
+        if(host.nearTime(b.anchor)===0){it.armed=true;it.rollAt=delay(b);it.rolls=0}
+      }
+      if(!m.brain||host.busy())return;
+      if(m.stress>=CFG.STRESS_HIDE){                      /* too stressed: the cat hides for a while */
+        if(host.play('hide',{done:function(){note('came out of hiding')}})){m.stress=E.HIDE_RELIEF;m.stats.hides++;note('hid (stress)')}
+        return;
+      }
+      due=[];
+      for(i=0;i<m.behaviors.length;i++){
+        b=m.behaviors[i];it=m.items[b.id];n=host.nearTime(b.anchor);
+        if(it.armed&&n>0&&n>=it.rollAt)due.push(b);
+      }
+      for(j=due.length-1;j>0;j--){k=Math.floor(m.rand()*(j+1));b=due[j];due[j]=due[k];due[k]=b}   /* random order among rivals */
+      for(i=0;i<due.length;i++){
+        b=due[i];it=m.items[b.id];n=host.nearTime(b.anchor);
+        it.rolls++;ok=m.rand()<b.L;
+        note('roll '+b.id+' #'+it.rolls+'  p '+b.L.toFixed(2)+(ok?'  HIT':'  miss'));
+        if(ok){if(start(b)){it.armed=false;return}}       /* the first success triggers; later rivals do not roll */
+        else it.rollAt=n+lerp2(CFG.ROLL_INTERVAL[0],CFG.ROLL_INTERVAL[1],m.rand());
+      }
+    }
+    /* debug only: start a behavior's action without a roll (still disarms it and is credited like any interaction) */
+    function force(id){
+      var b=beh(id);if(!b||host.busy())return false;
+      if(!start(b))return false;
+      m.items[id].armed=false;note('forced '+id);return true;
+    }
+    /* debug only: 'trained' = tasks at cap, distractions at floor; 'fresh' = the cat's starting values */
+    function preset(kind){
+      if(kind==='fresh'){var id=m.id,br=m.brain;setCat(id,CFG.SEED);m.brain=br;return}
+      m.behaviors.forEach(function(b){b.L=b.type==='task'?b.cap:b.floor});
+      m.stress=0;m.fullness=0;
+    }
+    return{state:function(){return m},setCat:setCat,step:step,reward:reward,punish:punish,force:force,preset:preset,beh:beh,target:target,
+      brain:function(v){m.brain=v},hasBrain:function(){return m.brain}};
+  }
+  return{create:create,rng:rng,engine:engine};
+})();
+
+/* ================= world (stations) ================= */
+var world=(function(){
+  function zone(k){var a=CFG.ANCHORS[k],Z=CFG.ZONE;return{x0:a.x-a.w/2,x1:a.x+a.w/2,y0:a.top!==undefined?a.top:Z.top,y1:a.bottom!==undefined?a.bottom:Z.bottom}}
+  function near(x,y){var o=[],A=CFG.ANCHORS,k,z;for(k in A){z=zone(k);if(x>=z.x0&&x<=z.x1&&y>=z.y0&&y<=z.y1)o.push(k)}return o}
+  return{near:near,zone:zone,anchor:function(id){return CFG.ANCHORS[id]}};
+})();
+
+/* ================= machine (reused art + logic, cannon added) ================= */
+var machine=(function(){
+var $=function(s){return document.querySelector(s)};
+var $=function(s){return document.querySelector(s)};
+var NS='http://www.w3.org/2000/svg';
+var run=0,crank=0,gA=0;
+var R=[[46,110,290,130],[330,190,85,210],[40,270,290,290],[330,350,110,370],[88,430,420,455]];
+function ry(i,x){var r=R[i];return r[1]+(x-r[0])/(r[2]-r[0])*(r[3]-r[1])}
+function ps(x){return 368+(x-555)*14/135}
+var E={l:function(p){return p},i:function(p){return p*p},o:function(p){return 1-(1-p)*(1-p)},io:function(p){return p<.5?2*p*p:1-2*(1-p)*(1-p)}};
+function tw(d,f,e){var id=run;e=e||E.l;return new Promise(function(res,rej){var t0=performance.now();(function s(n){if(id!==run)return rej('x');var p=Math.min(1,(n-t0)/(d*1000));f(e(p),p);if(p<1)requestAnimationFrame(s);else res()})(t0)})}
+function lerp(a,b,t){return a+(b-a)*t}
+
+/* ---- build gears, tube, rows ---- */
+var GN=[11,15,9,33,19,15,9],GA=[70,40,70,112,142,112],GP=11.6,GR=GN.map(function(n){return n*GP/(2*Math.PI)}),GX=[412],GY=[552],GE=[],GL=GN.length;
+(function(){
+  var i;
+  /* crank sits under the bucket platform; each step goes up at angle GA[i] (degrees); gear 3 is the big one (r~61) */
+  for(i=0;i<GL-1;i++){var d=GR[i]+GR[i+1],a=GA[i]*Math.PI/180;GX.push(GX[i]+d*Math.cos(a));GY.push(GY[i]-d*Math.sin(a))}
+  for(i=1;i<GL;i++){
+    var g=document.createElementNS(NS,'g'),r=GR[i],h='';
+    h+='<circle r="'+r.toFixed(1)+'" class="sg" style="stroke-dasharray:'+(GP/2)+' '+(GP/2)+'"/>';
+    h+='<circle r="'+(r-3.5).toFixed(1)+'" class="sb"/>';
+    for(var k=0;k<(i===3?6:4);k++)h+='<line class="ss" x1="0" y1="0" x2="0" y2="'+(r-8).toFixed(1)+'" transform="rotate('+(k*(i===3?60:90))+')"/>';
+    h+='<circle r="4" class="sh"/>';
+    g.innerHTML=h;$('#gtrain').appendChild(g);GE[i]=g;
+  }
+})();
+/* Step 11: extra gears behind the main train. Each turns with the crank (angle = sign x crank x 11 / teeth + phase), so they only move when the crank does.
+   [x, y, teeth, direction, start angle, loose]. The first one (end of the big gear's row) is the "useless" gear: meshed with the big gear, turning, driving nothing.
+   Meshed pairs have their teeth lined up. Positions were checked against the fan, the balloon and bucket path,
+   both platforms and posts, the wires, the lift, the badges and the tool bar zones. */
+var XG=[[528.6,474.3,10,1,222.01,0],[379.9,336.1,19,1,285.68,0],[349.8,395.3,17,-1,277.88,0]],XE=[];   /* Step 11b: the six loose gears on the left were removed */
+XG.forEach(function(q,k){
+  var g=document.createElementNS(NS,'g'),r=q[2]*GP/(2*Math.PI),h='',sp=r>30?6:4,j;
+  h+='<circle r="'+r.toFixed(1)+'" class="sg" style="stroke-dasharray:'+(GP/2)+' '+(GP/2)+'"/><circle r="'+(r-3.5).toFixed(1)+'" class="sb"/>';
+  for(j=0;j<sp;j++)h+='<line class="ss" x1="0" y1="0" x2="0" y2="'+(r-8).toFixed(1)+'" transform="rotate('+(j*360/sp)+')"/>';
+  h+='<circle r="4" class="sh"/>';
+  g.innerHTML=h;if(q[5])g.style.opacity=.8;
+  $('#gtrain').insertBefore(g,$('#gtrain').firstChild);XE[k]=g;
+});
+var FDP=[].slice.call(document.querySelectorAll('#fan .fdp'));   /* fan layers: the front (k 0) and the depth copies behind it */
+function applyGears(){
+  var i,a,q;
+  for(i=0;i<XG.length;i++){q=XG[i];XE[i].setAttribute('transform','translate('+q[0]+' '+q[1]+') rotate('+(q[3]*gA*GN[0]/q[2]+q[4]).toFixed(2)+')')}
+  for(i=0;i<GL;i++){
+    a=(i%2?-1:1)*gA*GN[0]/GN[i];
+    var t='translate('+GX[i].toFixed(1)+' '+GY[i].toFixed(1)+') rotate('+a+')';
+    if(i===0)$('#crk').setAttribute('transform',t);else GE[i].setAttribute('transform',t);
+    if(i===GL-1){$('#fan').setAttribute('transform','translate('+GX[i].toFixed(1)+' '+GY[i].toFixed(1)+')');FDP.forEach(function(e){var k=+e.getAttribute('data-k');e.setAttribute('transform','translate('+(3.5*k)+' '+(-5.5*k)+') rotate('+a+')')});$('#fan2').setAttribute('transform','translate(392 112) scale(.85) rotate('+a+')')}
+  }
+}
+function setSpring(x){
+  var d='M30 86';
+  for(var i=1;i<=12;i++)d+=' L'+(30+(x-30)*i/12).toFixed(1)+' '+(86+(i%2?-6:6));
+  d+=' L'+x+' 86';
+  $('#spc').setAttribute('d',d);$('#spp').setAttribute('x',x);
+}
+function pts(a){return a.map(function(q){return q.join(',')}).join(' ')}
+$('#ramps').innerHTML=R.concat([[555,368,690,382],[342,510,482,510]]).map(function(r){
+  /* oblique slab: front edge F, back edge B = F + depth vector D, front thickness T */
+  var T=9,dx=7,dy=-11,x1=r[0],y1=r[1]+5,x2=r[2],y2=r[3]+5,
+      bx1=x1+dx,by1=y1+dy,bx2=x2+dx,by2=y2+dy,
+      rx=x1>x2?x1:x2,ry2=x1>x2?y1:y2;
+  return '<polygon class="ssh" points="'+pts([[x1,y1+T],[x2,y2+T],[x2+6,y2+T+7],[x1+6,y1+T+7]])+'"/>'+
+    '<polygon class="stp" points="'+pts([[x1,y1],[x2,y2],[bx2,by2],[bx1,by1]])+'"/>'+
+    '<line class="gr2" x1="'+((x1+bx1)/2)+'" y1="'+((y1+by1)/2)+'" x2="'+((x2+bx2)/2)+'" y2="'+((y2+by2)/2)+'"/>'+
+    '<polygon class="sf" points="'+pts([[x1,y1],[x2,y2],[x2,y2+T],[x1,y1+T]])+'"/>'+
+    '<polygon class="se" points="'+pts([[rx,ry2],[rx+dx,ry2+dy],[rx+dx,ry2+dy+T],[rx,ry2+T]])+'"/>'+
+    '<line class="shl" x1="'+x1+'" y1="'+(y1+1.5)+'" x2="'+x2+'" y2="'+(y2+1.5)+'"/>';
+}).join('');
+
+var names=['Cat flips the wall switch','Cat lies on the switch pad','Cat turns the gear crank','Cat presses the see-saw (unticked: shot too flat)'];
+var rows=[];
+names.forEach(function(n,i){
+  var li=document.createElement('li');
+  li.innerHTML='<label class="r"><input type="checkbox" class="tg" checked><span class="n">'+(i+1)+'</span><span class="nm">'+n+'</span><span class="st">✓ Succeeds</span><span class="res"></span></label>';
+  $('#steps').appendChild(li);
+  var inp=li.querySelector('input'),st=li.querySelector('.st');
+  inp.addEventListener('change',function(){st.textContent=inp.checked?'✓ Succeeds':'✕ Fails'});
+  rows.push({inp:inp,res:li.querySelector('.res')});
+});
+function ok(i){return rows[i].inp.checked}
+function say(t){$('#say').textContent=t}
+function now(){return performance.now()/1000}
+
+/* ---- runtime state (everything the cat can change) ---- */
+var MC=CFG.MACHINE,PT=MC.PLANK.rest,phaseCbs=[],runCbs=[],lastRun=null,windOn=0;
+function newState(){return{state:'idle',step:0,res:[null,null,null,null],t:{},btnOn:false,padOn:false,crankOn:false,seesawOn:false,
+  gateP:0,gateLock:false,arrived:false,loaded:false,doneAt:0,outcome:null,failedAt:0,distractions:0}}
+var M=newState();
+function phase(n){phaseCbs.forEach(function(f){f(n)})}
+
+/* ---- parts ---- */
+var ballEl=$('#ball'),bR=0,svgM=$('#m'),fnF=$('#funnelF'),paw1=$('#paw1');
+/* ball layer: normally in front of the machine; while it swirls in the funnel it sits between the funnel's back and front parts */
+function layer(mid){var want=mid?fnF:paw1;if(ballEl.nextElementSibling!==want)svgM.insertBefore(ballEl,want)}
+function ball(x,y,rot){if(rot!==undefined)bR=rot;ballEl.setAttribute('transform','translate('+x+' '+y+') rotate('+bR+')')}
+var B={x:460,yb:438,r:6,th:0,inb:false,pop:false};
+function rb(){
+  var px=B.x+18,py=B.yb+72,r=B.r;
+  var pp=B.pop?'none':'';
+  var bal=$('#bal');bal.style.display=pp;$('#shine').style.display=pp;$('#knot').style.display=pp;
+  bal.setAttribute('cx',B.x);bal.setAttribute('cy',B.yb-r);bal.setAttribute('rx',r*.85);bal.setAttribute('ry',r);
+  var sh=$('#shine');sh.setAttribute('cx',B.x-r*.3);sh.setAttribute('cy',B.yb-r*1.3);sh.setAttribute('r',r*.2);
+  $('#knot').setAttribute('transform','translate('+B.x+' '+B.yb+')');
+  var s=$('#str');s.setAttribute('x1',B.x);s.setAttribute('y1',B.yb);s.setAttribute('x2',B.x);s.setAttribute('y2',B.yb+40);s.style.display=(B.th>0||B.pop)?'none':'';
+  $('#buck').setAttribute('transform','translate('+px+' '+py+') rotate('+B.th+')');
+  if(B.inb&&B.th>0){var a=B.th*Math.PI/180,c=Math.cos(a),sn=Math.sin(a),lx=-8,ly=-12;ballEl.style.display='';ball(px+lx*c-ly*sn,py+lx*sn+ly*c)}
+}
+var PL={th:9};
+function setPlank(t){PL.th=t;$('#plank').setAttribute('transform','translate(715 555) rotate('+t+')')}
+var gateEl=$('#gate'),armEl=$('#arm'),rodEl=$('#rod'),rodOEl=$('#rodO'),whEl=$('#liftWh'),lampEl=$('#lamp');
+function setGate(p){
+  var dy=68*(1-p),y=346+dy;
+  gateEl.setAttribute('transform','translate(0 '+dy+')');armEl.setAttribute('transform','translate(0 '+dy+')');
+  rodEl.setAttribute('y2',y);rodOEl.setAttribute('y2',y);
+  whEl.setAttribute('transform','translate(71 469) rotate('+(p*720)+')');
+  lampEl.style.fill=p>.98?'var(--a-lamp-on)':'var(--a-lamp-off)';
+}
+function bad(x,y){$('#fx').setAttribute('transform','translate('+x+' '+y+')');$('#fx').setAttribute('opacity',1)}
+
+/* ---- wires (Step 8): a bolt travels along the wire and ends in a flash; art only, it never delays the spring or the gate ---- */
+var wires=(function(){
+  var W={1:{p:$('#w1p'),lit:$('#lit1'),b:$('#sB1'),f:$('#sF1'),end:[27,92],fb:434},
+         2:{p:$('#w2p'),lit:$('#lit2'),b:$('#sB2'),f:$('#sF2'),end:[71,469],fb:300}};
+  function rm(){return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}
+  function stop(n){
+    var w=W[n];if(w.raf)cancelAnimationFrame(w.raf);w.raf=0;(w.tm||[]).forEach(clearTimeout);w.tm=[];
+    w.b.style.display='none';w.f.style.display='none';w.lit.style.display='none';
+  }
+  function flash(n){
+    var w=W[n],f=w.f,x=w.end[0],y=w.end[1],t0=performance.now();
+    f.style.display='';
+    if(rm()){f.setAttribute('transform','translate('+x+' '+y+')');f.setAttribute('opacity',.9);w.tm.push(setTimeout(function(){f.style.display='none'},260));return}
+    (function a(now){
+      var p=Math.min(1,(now-t0)/320);
+      f.setAttribute('transform','translate('+x+' '+y+') scale('+(.4+.9*p).toFixed(3)+')');f.setAttribute('opacity',(1-p*p).toFixed(3));
+      if(p<1)w.raf=requestAnimationFrame(a);else{w.raf=0;f.style.display='none'}
+    })(t0);
+  }
+  function surge(n,dur){
+    var w=W[n],L,t0=performance.now();stop(n);
+    try{L=w.p.getTotalLength()||w.fb}catch(e){L=w.fb}
+    w.tm=[];
+    if(rm()){   /* reduced motion: no travel, the whole wire just glows for the travel time, then the flash */
+      w.lit.style.strokeDasharray='none';w.lit.style.display='';
+      w.tm.push(setTimeout(function(){w.lit.style.display='none';flash(n)},dur*1000));
+      return;
+    }
+    w.b.style.display='';w.lit.style.display='';
+    (function f(now){
+      var p=Math.min(1,Math.max(0,(now-t0)/(dur*1000))),l=p*L,s=Math.max(0,l-46),q,q1,q2;
+      try{q=w.p.getPointAtLength(l);q1=w.p.getPointAtLength(Math.max(0,l-1));q2=w.p.getPointAtLength(Math.min(L,l+1))}catch(e){stop(n);flash(n);return}
+      w.b.setAttribute('transform','translate('+q.x.toFixed(1)+' '+q.y.toFixed(1)+') rotate('+(Math.atan2(q2.y-q1.y,q2.x-q1.x)*180/Math.PI).toFixed(1)+')');
+      w.lit.style.strokeDasharray='0 '+s.toFixed(1)+' '+(l-s).toFixed(1)+' '+L.toFixed(1);
+      if(p<1)w.raf=requestAnimationFrame(f);
+      else{w.raf=0;w.b.style.display='none';w.lit.style.display='none';flash(n)}
+    })(t0);
+  }
+  return{surge:surge,reset:function(){stop(1);stop(2)}};
+})();
+
+/* ---- results, cat flags, reset ---- */
+function setRes(i,st,label){M.res[i]={status:st,t:now()};rows[i].res.textContent=label}
+function skip(n){for(var i=0;i<n-1;i++)setRes(i,'skipped','\u2013 skipped')}
+function succeed(i){setRes(i,'success','\u2713 done');bus.emit('stepComplete',i+1)}
+function finishRun(o){
+  M.state='done';M.outcome=o;M.doneAt=now();
+  lastRun={outcome:o,failedAt:M.failedAt,distractions:M.distractions,t0:M.t.start,t1:M.doneAt,
+    steps:M.res.map(function(r){return r?r.status:'not reached'}),times:M.res.map(function(r){return r?r.t:null})};
+  runCbs.forEach(function(f){f(lastRun)});
+}
+function failAt(i,msg){setRes(i,'fail','\u2715 stopped here');M.failedAt=i+1;say(msg);finishRun('fail')}
+function updPT(){PT=M.seesawOn?MC.PLANK.pressed:(M.loaded?MC.PLANK.loaded:MC.PLANK.rest)}
+function applyFlags(){
+  $('#swk').setAttribute('transform',M.btnOn?'translate(0 12)':'');
+  $('#pad').setAttribute('transform',M.padOn?'translate(0 4)':'');
+  updPT();
+}
+function syncCat(){   /* after a reset, pick up whatever the cat is still doing */
+  var s=typeof cat!=='undefined'&&cat&&cat.state&&cat.state(),a=s&&s.act&&s.act.stage==='on'?s.act.name:'';
+  M.btnOn=a==='pressButton';M.padOn=a==='lieOnPad';M.crankOn=a==='pawCrank';M.seesawOn=a==='pressSeesaw';applyFlags();
+}
+function endAction(name,reason){if(typeof cat!=='undefined'&&cat&&cat.end)cat.end(reason,name)}
+function reset(keep){
+  run++;crank=0;gA=0;applyGears();M=newState();
+  layer(false);ballEl.style.display='';bR=0;ball(60,86,0);setSpring(46);wires.reset();
+  B={x:460,yb:438,r:6,th:0,inb:false,pop:false};rb();
+  setPlank(MC.PLANK.rest);setGate(0);
+  ['#paw1','#paw2','#paw3','#whap','#fx'].forEach(function(s){$(s).setAttribute('opacity',0)});
+  $('#conf').innerHTML='';cannon.reset();door.reset();clock.reset();web.reset();
+  if(!keep)rows.forEach(function(r){r.res.textContent=''});
+  $('#wind').style.opacity=0;$('#wind2').style.opacity=0;windOn=0;
+  ['#belt','#fan2','#wind2'].forEach(function(q){$(q).style.display=MC.FAN2?'':'none'});
+  syncCat();
+  say('Ready. The cat can flip the wall switch to start the machine.');
+  phase('reset');
+}
+
+/* ---- motion helpers ---- */
+function roll(i,x0,x1,d){return tw(d,function(p){var q=.6*p+.4*p*p,x=lerp(x0,x1,q);ball(x,ry(i,x)-8,x*7)})}
+function fall(x0,y0,x1,y1,d){return tw(d||.45,function(p){ball(lerp(x0,x1,1-(1-p)*(1-p)),lerp(y0,y1,p*p))})}
+/* the balloon rises until the fan (a spinning crank) blows it over, or it floats away */
+function balloonPhase(rise){
+  var id=run,W=MC.WEB,held=false,broke=!W.ON,t=0;
+  return new Promise(function(res,rej){
+    var last=performance.now();
+    (function f(n){
+      if(id!==run)return rej('x');
+      var dt=Math.min(.05,(n-last)/1000);last=n;
+      if(!broke){
+        if(!held){
+          B.yb-=rise*dt*clamp((B.yb-W.Y)/12,.15,1);rb();
+          if(B.yb<=W.Y+.4){held=true;t=0;B.yb=W.Y;rb();phase('web')}
+        }else{
+          t+=dt;B.x=460+web.hold(t,dt);B.yb=W.Y+(rmq()?0:Math.sin(t*6)*1.5);rb();
+          if(t>=W.HOLD){broke=true;B.x=460;B.yb=W.Y;rb();web.snap();phase('webbreak')}
+        }
+        if(!broke){requestAnimationFrame(f);return}
+      }else{B.yb-=rise*dt;rb();web.bucket(B.x,B.yb+40)}   /* rim of the bucket's opening */
+      if(crank>MC.BLOW_SPEED&&B.yb<=285){web.blown();res('blow');return}
+      if(B.yb<=-70){res('away');return}
+      requestAnimationFrame(f);
+    })(last);
+  });
+}
+function confetti(x,y){
+  var cols=['--accent','--sage','--error','--honey','--blue','--plum','--teal'],ps2=[];
+  for(var i=0;i<44;i++){
+    var e=document.createElementNS(NS,i%2?'rect':'circle');
+    if(i%2){e.setAttribute('width',8);e.setAttribute('height',5);e.setAttribute('x',-4);e.setAttribute('y',-2.5)}else e.setAttribute('r',3.5);
+    e.style.fill='var('+cols[i%7]+')';$('#conf').appendChild(e);
+    var a=-Math.PI/2+(Math.random()-.5)*2.2,v=140+Math.random()*190;
+    ps2.push({e:e,vx:Math.cos(a)*v,vy:Math.sin(a)*v,w:Math.random()*720-360});
+  }
+  return tw(2.4,function(p,q){var t=q*2.4;ps2.forEach(function(o){o.e.setAttribute('transform','translate('+(x+o.vx*t)+' '+(y+o.vy*t+260*t*t)+') rotate('+(o.w*t)+')');o.e.setAttribute('opacity',1-Math.max(0,q-.6)/.4)})});
+}
+
+/* ---- see-saw point, smoke, cannon ---- */
+function pw(lx,ly){var a=PL.th*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return[715+lx*c-ly*s,555+lx*s+ly*c]}
+function puff(x,y,n){
+  var g=$('#smoke'),cs=[],i;
+  for(i=0;i<n;i++){var c=document.createElementNS(NS,'circle');c.style.fill='var(--bg)';c.style.stroke='var(--muted)';c.setAttribute('stroke-width',1.5);g.appendChild(c);cs.push(c)}
+  var pr=tw(.9,function(p){cs.forEach(function(c,i){c.setAttribute('cx',x+(i-(n-1)/2)*10+p*(i-1)*14);c.setAttribute('cy',y-p*26-i*4);c.setAttribute('r',5+p*(10+i*3));c.setAttribute('opacity',1-p)})});
+  pr.catch(function(){});return pr;
+}
+var LK=[880,490];   /* the padlock the cannonball must hit (right side of the door; hinges are on the left at x=828) */
+var door={
+  set:function(sw){$('#doorPanel').setAttribute('transform','translate(828 0) scale('+sw+' 1) translate(-828 0)')},
+  reset:function(){door.set(1);$('#lock').style.display=''},
+  /* the lock shatters into three pieces, then the door swings open */
+  open:function(){
+    var g=$('#conf'),ps=[['M-9,-6 h9 v15 h-9 z',-110,-130,-300],['M0,-6 h9 v15 h-9 z',25,-150,260],['M-5,-6 v-8 a5,5 0 0 1 10,0 v8',-45,-200,420]].map(function(d,i){
+      var e=document.createElementNS(NS,'path');e.setAttribute('d',d[0]);
+      e.style.cssText=i<2?'fill:var(--honey);stroke:var(--heading);stroke-width:2':'fill:none;stroke:var(--heading);stroke-width:3.5;stroke-linecap:round';
+      g.appendChild(e);return{e:e,vx:d[1],vy:d[2],w:d[3]};
+    });
+    $('#lock').style.display='none';
+    tw(.9,function(p,q){var t=q*.9;ps.forEach(function(o){o.e.setAttribute('transform','translate('+(LK[0]+o.vx*t)+' '+(LK[1]+o.vy*t+420*t*t)+') rotate('+(o.w*t)+')');o.e.setAttribute('opacity',1-Math.max(0,q-.6)/.4)})}).catch(function(){});
+    return tw(1.1,function(p){door.set(1-.88*p)},E.io);
+  }
+};
+/* ---- cuckoo clock (Step 11) ---- */
+var CK=MC.CLOCK;
+function rmq(){return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}
+var web=(function(){
+  /* Step 11b: after the web snaps the spider drops on its thread and waits. If the fan blows the balloon away to the clock (blown()), it climbs back to the top anchor
+     and stays there. If not, the balloon keeps rising and the bucket comes up under the spider: it falls into the bucket and is gone (bucket(), called every frame of the rise).
+     mode: 'held' (on the web) | 'drop' | 'hang' | 'up' (climbing / at the top) | 'in' (fell into the bucket) */
+  var g=$('#web'),full=$('#webFull'),torn=$('#webTorn'),sp=$('#webSp'),thr=$('#webThr'),CX=462,CY=194,TOP=-42,DROP=34,W=MC.WEB,s=0,dy=0,mode='held',isBlown=false;   /* TOP: spider offset at the top anchor (458,146): body at y 152 on a short thread */
+  function spSet(y,x){if(mode==='in')return;dy=y;sp.setAttribute('transform','translate('+(458+(x||0)).toFixed(1)+' '+(CY+y).toFixed(1)+')');thr.setAttribute('y2',(CY+y-4).toFixed(1))}
+  function lean(v){g.setAttribute('transform',v>0.001?'translate('+CX+' '+CY+') scale('+(1+.08*v).toFixed(3)+' 1) translate('+(-CX)+' '+(-CY)+')':'')}
+  function until(f){var id=run;return new Promise(function(res,rej){(function k(){if(id!==run)return rej('x');if(f())return res();requestAnimationFrame(k)})()})}
+  function reset(){
+    mode='held';isBlown=false;
+    g.style.display=W.ON?'':'none';full.style.opacity=1;torn.style.opacity=0;thr.style.display='none';sp.style.display='';sp.style.opacity='';s=0;lean(0);spSet(0,0);
+  }
+  /* held: strain follows whether the fan is blowing; the spider fidgets. Returns the balloon's sideways push. */
+  function hold(t,dt){
+    var rm=rmq(),tg=(!rm&&crank>MC.BLOW_SPEED)?1:0;
+    s+=(tg-s)*Math.min(1,dt*7);lean(s);
+    spSet(rm?0:Math.sin(t*13)*1.3,rm?0:Math.sin(t*9)*1.2);
+    return rm?0:5*s;
+  }
+  function snap(){
+    var rm=rmq();lean(0);s=0;
+    full.style.opacity=0;torn.style.opacity=1;thr.style.display='';
+    mode='drop';
+    if(rm){spSet(DROP,0);mode='hang';return}   /* reduced motion: static at the end of its drop until blown() or bucket() decides */
+    (async function(){
+      try{
+        await tw(.3,function(p){spSet(DROP*p,0)},E.i);
+        await tw(.5,function(p){spSet(DROP+3*Math.sin(p*9)*(1-p),0)});
+        if(mode==='in')return;
+        mode='hang';
+        await until(function(){return isBlown||mode==='in'});
+        if(mode==='in')return;
+        mode='up';var y0=dy;
+        await tw(1.2,function(p){spSet(lerp(y0,TOP,p),0)},E.io);   /* climbs back up and stays at the top anchor on its thread until reset() */
+      }catch(e){}
+    })();
+  }
+  /* the fan is blowing the balloon to the clock: the spider is safe and climbs back up */
+  function blown(){isBlown=true;if(rmq()&&mode==='hang'){mode='up';spSet(TOP,0)}}
+  /* the rising bucket's opening (x, rim y): once it reaches the dangling spider, the spider drops in and disappears */
+  function bucket(x,ry){
+    if(mode!=='drop'&&mode!=='hang')return;
+    if(ry>CY+dy+8)return;
+    var x0=458,y0=CY+dy;mode='in';thr.style.display='none';
+    if(rmq()){sp.style.display='none';return}
+    tw(.22,function(p){
+      sp.setAttribute('transform','translate('+lerp(x0,B.x,p).toFixed(1)+' '+lerp(y0,B.yb+42,p).toFixed(1)+') scale('+(1-.5*p).toFixed(2)+')');sp.style.opacity=(1-p).toFixed(2);
+    }).then(function(){sp.style.display='none'}).catch(function(){});
+  }
+  return {reset:reset,hold:hold,snap:snap,blown:blown,bucket:bucket};
+})();
+var clock=(function(){
+  var dr=$('#ckDoor'),hH=$('#ckH'),hM=$('#ckM'),bd=$('#ckBird'),sp=$('#ckSpr'),pf=$('#popfx'),IDLE_M=60,IDLE_H=305,
+      DX=683,DY=252,UX=-1,UY=0,REACH=50,BTH=Math.atan2(-UX,UY)*180/Math.PI;   /* the door's centre; the bird's flight direction (straight left); how far the bird flies; the bird's turn so its beak leads */
+  function seg(u,a,b){return clamp((u-a)/(b-a),0,1)}
+  function hands(m,h){hM.setAttribute('transform','translate(712 254) rotate('+m.toFixed(1)+')');hH.setAttribute('transform','translate(712 254) rotate('+h.toFixed(1)+')')}
+  function doorSet(s){dr.setAttribute('transform','translate(694 0) scale('+s.toFixed(3)+' 1) translate(-694 0)')}
+  /* the bird: e = 0 (inside the door) to 1 (out over the balloon, pin in it); the spring stretches between the door and the bird's tail */
+  function birdSet(e){
+    var t=REACH*e,tl=Math.max(0,t-15),px=-UY,py=UX,d='M'+DX+' '+DY,i,f;
+    bd.style.display=sp.style.display=e>0.01?'':'none';
+    bd.setAttribute('transform','translate('+(DX+UX*t).toFixed(1)+' '+(DY+UY*t).toFixed(1)+') rotate('+BTH.toFixed(1)+')');
+    for(i=1;i<=6;i++){f=tl*i/6;d+=' L'+(DX+UX*f+(i%2?-3.5:3.5)*px).toFixed(1)+' '+(DY+UY*f+(i%2?-3.5:3.5)*py).toFixed(1)}
+    sp.setAttribute('d',d+' L'+(DX+UX*tl).toFixed(1)+' '+(DY+UY*tl).toFixed(1));
+  }
+  function scraps(x,y){
+    var g=$('#conf'),a=[],i,e,ang;
+    for(i=0;i<8;i++){
+      e=document.createElementNS(NS,'path');e.setAttribute('d','M0,0 L8,-3 L10,3 Z');
+      e.style.cssText='fill:var(--a-red);stroke:var(--heading);stroke-width:1.2;stroke-linejoin:round';g.appendChild(e);
+      ang=i/8*Math.PI*2+.3;a.push({e:e,vx:Math.cos(ang)*(70+(i*9)%40),vy:Math.sin(ang)*(70+(i*7)%40)-40,w:(i%2?1:-1)*(240+i*40)});
+    }
+    tw(.8,function(p,q){var t=q*.8;a.forEach(function(o){o.e.setAttribute('transform','translate('+(x+o.vx*t).toFixed(1)+' '+(y+o.vy*t+300*t*t).toFixed(1)+') rotate('+(o.w*t).toFixed(0)+')');o.e.setAttribute('opacity',(1-Math.max(0,q-.5)/.5).toFixed(2))})})
+      .then(function(){a.forEach(function(o){o.e.remove()})}).catch(function(){});
+  }
+  function reset(){hands(IDLE_M,IDLE_H);doorSet(1);birdSet(0);pf.style.display='none'}
+  /* Step 11b: the clock runs on the balloon's drift. wake(t) is called every frame of the blow with t = seconds until the pop:
+     the hands spin from WAKE s out, the door opens .55-.3 s out, and the bird pops out over the last .3 s, so its pin reaches the balloon as it arrives.
+     Reduced motion: no spinning; the door and the bird jump to open / out. */
+  function wake(t){
+    var rm=rmq(),W=CK.WAKE,h;
+    if(t>W)return;
+    if(rm)hands(0,360);else{h=E.io(clamp((W-t)/(W-.2),0,1));hands(lerp(IDLE_M,720,h),lerp(IDLE_H,360,h))}
+    doorSet(rm?(t<=.3?.12:1):1-.88*E.io(clamp((.55-t)/.25,0,1)));
+    birdSet(rm?(t<=.15?1:0):E.o(clamp((.3-t)/.3,0,1)));
+  }
+  /* the pin bursts the balloon; then the bird goes back in and the door shuts while the bucket falls (not awaited) */
+  function pop(){
+    var rm=rmq(),bx=B.x,by=B.yb-B.r;
+    birdSet(1);doorSet(.12);
+    B.pop=true;rb();
+    say('Step 3: POP! The cuckoo’s pin bursts the balloon, and the bucket drops onto the ramp…');
+    pf.setAttribute('transform','translate('+bx+' '+by+')'+(rm?'':' scale(.55)'));pf.style.display='';
+    if(!rm)scraps(bx,by);
+    tw(rm?.4:.6,function(p,q){
+      var u=q*(rm?.4:.6);
+      if(!rm&&u<.12)pf.setAttribute('transform','translate('+bx+' '+by+') scale('+(.55+.55*E.o(u/.12)).toFixed(2)+')');
+      if(u>=.2)pf.style.display='none';
+      if(rm){birdSet(u<.2?1:0);doorSet(u<.2?.12:1)}
+      else{birdSet(1-E.io(clamp((u-.12)/.3,0,1)));doorSet(.12+.88*E.io(clamp((u-.4)/.2,0,1)))}
+    }).then(function(){reset();hands(0,360)}).catch(function(){});
+  }
+  return{reset:reset,wake:wake,pop:pop};
+})();
+/* cannon: pivots on the apex of its cradle (plank coordinates CN.px, CN.py); angle 0 = barrel along the plank, -90 = upright */
+var CN={px:32,py:-28,mz:34,aim:[747,486]};   /* aim: the funnel exit; the upright cannon hangs on its pivot and keeps pointing there whatever the plank tilt */
+var cannon={
+  ang:-90,up:true,
+  aimAng:function(){var q=pw(CN.px,CN.py);return Math.atan2(CN.aim[1]-q[1],CN.aim[0]-q[0])*180/Math.PI-PL.th},
+  track:function(){if(cannon.up)cannon.set(cannon.aimAng())},
+  set:function(a){cannon.ang=a;$('#cbar').setAttribute('transform','translate('+CN.px+' '+CN.py+') rotate('+a+')')},
+  /* a point given in barrel coordinates (lx along the barrel, ly across it) -> world coordinates, at the current plank and barrel angles */
+  pt:function(lx,ly){var a=cannon.ang*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return pw(CN.px+lx*c-ly*s,CN.py+lx*s+ly*c)},
+  tilt:function(){var a0=cannon.ang;cannon.up=false;return tw(.4,function(p){cannon.set(lerp(a0,-24,p))},E.i).then(function(){return tw(.2,function(p){cannon.set(lerp(-24,-30,p))},E.o)})},
+  reset:function(){cannon.up=true;cannon.track();cannon.load(false);cannon.fuse(0);cannon.lit(false);$('#smoke').innerHTML=''},
+  load:function(v){$('#cball').style.display=v?'':'none'},
+  lit:function(v){$('#spark').style.display=v?'':'none'},
+  fuse:function(p){
+    var f=$('#fuse'),L=f.getTotalLength(),l=(1-p)*L,q=f.getPointAtLength(l);
+    f.style.strokeDasharray=l+' '+(2*L);$('#spark').setAttribute('transform','translate('+q.x+' '+q.y+')');
+  },
+  /* a shot is a parabola launched along the barrel's world angle th (degrees above horizontal). Horizontal speed is steady,
+     height = dx*tan(th) - k*dx^2. For a hit k is chosen so the arc ends on the lock; a miss uses the muzzle's own k = G/cos^2(th). */
+  shot:function(x0,y0,th,k,x1,dur){
+    var t=Math.tan(th*Math.PI/180);
+    return tw(dur,function(p){var dx=(x1-x0)*p;ball(x0+dx,y0-(dx*t-k*dx*dx),p*500)});
+  },
+  /* the caller decides the outcome ('hit' | 'miss' | 'empty') from the see-saw state at the moment the fuse burns out */
+  fire:function(out){
+    var m=cannon.pt(CN.mz,0),th=-(cannon.ang+PL.th),rad=th*Math.PI/180,cs=Math.cos(rad);
+    cannon.lit(false);
+    puff(m[0],m[1],out==='empty'?4:2);
+    if(out==='empty'){bad(m[0],m[1]-34);failAt(3,'Step 4 fails: the fuse burns out and the cannon fires\u2026 with nothing inside. Pfft. One sad puff of smoke.');return tw(1,function(){})}
+    cannon.load(false);ballEl.style.display='';ball(m[0],m[1],0);
+    if(out==='hit'){
+      say('Step 4: BANG! The see-saw is pressed, so the cannon is tilted just right and the shot arcs up toward the padlock\u2026');
+      var dx=LK[0]-m[0],k=(dx*Math.tan(rad)-(m[1]-LK[1]))/(dx*dx);
+      return cannon.shot(m[0],m[1],th,k,LK[0],dx/(170*cs)).then(function(){
+        ballEl.style.display='none';succeed(3);say('CRACK! The padlock shatters, the cage door swings open, and the cat is free!');finishRun('success');
+        confetti(LK[0]-24,LK[1]-10).catch(function(){});return door.open()});
+    }
+    say('Step 4: BANG! But the see-saw was not pressed, so the cannon is tilted too flat\u2026');
+    var X=820,dx2=X-m[0],k2=.0044/(cs*cs),yi=m[1]-(dx2*Math.tan(rad)-k2*dx2*dx2);   /* same muzzle speed as a hit; it reaches the door face just left of the hinges, well below the lock */
+    return cannon.shot(m[0],m[1],th,k2,X,Math.max(.2,dx2/(170*cs)))
+      .then(function(){return tw(.4,function(p){ball(lerp(X,X-18,p),lerp(yi,576,p*p)-12*p*(1-p)*4,400+p*300)})})
+      .then(function(){bad(X-18,yi-16);failAt(3,'Step 4 fails: the shot was too flat, slammed into the cage door below the lock and dropped to the floor. The lock is still on.')});
+  }
+};
+
+/* ---- the four steps; each returns true to carry on, false when the run ended ---- */
+async function stepButton(){
+  say('Step 1: CLICK! The signal races up the wire to the spring\u2026');
+  wires.surge(1,MC.LAUNCH-.1);   /* surge + flash finish just before the BOING */
+  await tw(MC.LAUNCH-.1,function(){});
+  await tw(.1,function(p){setSpring(lerp(46,58,p));ball(lerp(60,69,p),86,p*60)});
+  succeed(0);say('Step 1: BOING! The spring launches the ball down the ramps.');phase('launch');
+  return true;
+}
+async function stepPad(n){
+  var rd=(CFG.BALL_TO_GATE-.5-3*.45)/4;   /* launch arc .5 s + three drops .45 s + four rolls = BALL_TO_GATE */
+  if(n===2){skip(2);setSpring(58);ball(69,86,60);say('Step 2: the ball is already rolling. Get the cat onto the switch pad before it reaches the gate!');phase('launch')}
+  else say('Step 2: the ball tumbles down the ramps. The gate must be up before the end of the fourth ramp: the cat has to lie on the switch pad.');
+  await tw(.5,function(p){ball(lerp(69,98,p),lerp(86,106,p*p),60+p*200)});
+  M.step=2;
+  await roll(0,96,290,rd);await fall(290,ry(0,290)-8,322,ry(1,322)-8);
+  await roll(1,322,86,rd);await fall(86,ry(1,86)-8,56,ry(2,56)-8);
+  await roll(2,56,290,rd);await fall(290,ry(2,290)-8,322,ry(3,322)-8);
+  await roll(3,322,110,rd);
+  M.arrived=true;
+  if(M.gateP<MC.GATE_OK){
+    await tw(.85,function(p){var t=p*.85;ball(110-95*t,362+300*t*t,-t*400)});
+    bad(34,540);failAt(1,M.padOn?'Step 2 fails: the cat got onto the pad too late, so the gate was still going up. The ball sails off the edge.':'Step 2 fails: no cat on the pad means no wall. The ball sails off the edge and bounces away.');
+    return false;
+  }
+  M.gateLock=true;
+  say('Step 2: the gate is up! The ball bounces off it and drops onto the last ramp.');
+  await tw(.15,function(p){ball(110-15*p,362+6*p)});   /* bounces off the gate's side face */
+  await fall(95,368,97,422,.35);
+  succeed(1);
+  return true;
+}
+async function stepBalloon(n){
+  if(n===3){skip(3);M.gateLock=true;M.gateP=1;setGate(1);ball(418,447,0);say('Step 3: the ball is about to drop into the bucket. Get the cat to the crank!')}
+  else await roll(4,97,418,1.8);
+  await tw(.45,function(p){ball(418+42*p,447+43*p*p)});
+  ballEl.style.display='none';B.inb=true;M.step=3;phase('bucket');
+  say('Step 3: the ball plops into the bucket and the balloon inflates!');
+  await tw(MC.INFLATE,function(p){B.r=6+28*p;rb()},E.o);
+  say('Step 3: the balloon is rising! A spider web will catch it for a few seconds. The cat has to turn the crank so the fan can blow it over to the cuckoo clock before it floats away\u2026');
+  var out=await balloonPhase((438+70)/MC.BALLOON_AWAY);
+  if(out==='away'){bad(460,40);failAt(2,'Step 3 fails: nobody turned the crank in time, so the fans never started. The balloon and bucket float away into the sky.');return false}
+  var y0=B.yb,x0=B.x,woke=false;
+  say('Step 3: the fans are spinning! They blow the balloon toward the cuckoo clock…');
+  /* a balloon that has risen above the lower fan's wind (centre higher than y 205) is pushed along a straight slope by the upper fan; one still level with the lower fan is pushed across by it */
+  var high=MC.FAN2&&y0-B.r<205;
+  /* Step 11b: steady drift. It eases in over the first 20 % (the wind picks it up), then moves at a constant speed and is still moving when the pin hits */
+  await tw(CK.BLOW,function(p,q){
+    var e=q<.2?q*q/.36:(q-.1)/.9;B.x=lerp(x0,CK.X,e);
+    B.yb=high?lerp(y0,CK.Y,e):lerp(y0,CK.Y,E.o(Math.min(1,q*1.5)))-Math.sin(q*Math.PI)*6;rb();
+    var t=CK.BLOW*(1-q);
+    if(!woke&&t<=CK.WAKE){woke=true;say('Step 3: the cuckoo clock whirs awake as the balloon drifts closer…');phase('clock')}
+    clock.wake(t);
+  });
+  clock.pop();succeed(2);phase('pop');
+  await tw(CK.FALL,function(p){B.yb=p<.8?lerp(CK.Y,CK.LAND+2,E.i(p/.8)):lerp(CK.LAND+2,CK.LAND,(p-.8)/.2);rb()});   /* the bucket drops onto the ramp with a small bounce */
+  say('Step 3: the bucket lands on the ramp and tips\u2026');phase('land');
+  await tw(CK.TIP,function(p){B.th=90*p;rb()},E.io);
+  return true;
+}
+async function stepCannon(n){
+  var px;
+  if(n===4){skip(4);M.gateLock=true;M.gateP=1;setGate(1);B={x:CK.X,yb:CK.LAND,r:8,th:90,inb:false,pop:true};rb();ballEl.style.display='';ball(688,374,0)}
+  else{px=B.x+18;await tw(1.3,function(p){var x=lerp(px+12,688,p*(.5+.5*p));ball(x,ps(x)-8,x*7)})}
+  M.step=4;
+  say('The ball tumbles into the funnel and swirls around\u2026 the fuse is lit! The cat has until it burns out to press the see-saw.');
+  cannon.lit(true);M.t.fuse=now();phase('funnel');
+  var fuseP=tw(CFG.FUSE_SECONDS,function(p){cannon.fuse(p)});fuseP.catch(function(){});
+  layer(true);   /* from here the ball swirls behind the funnel's front wall */
+  await tw(.3,function(p){ball(lerp(688,691,p),lerp(374,399,p*p),p*60)});
+  await tw(4,function(p){
+    var u=.45*p+.55*p*p,w=lerp(54,3,u),yc=400+58*u,f=u*4.2*2*Math.PI;
+    ball(747-w*Math.cos(f),yc+.24*w*Math.sin(f),f*57);
+  });
+  var loaded=$('#dbgLoad').checked,dr=cannon.pt(CN.mz+2,0);
+  if(loaded){
+    say('Step 4: the ball drops into the upright cannon. Its weight tips the barrel over and tilts the see-saw. The fuse is still burning\u2026');
+    await tw(.5,function(p){var y=lerp(460,dr[1],p*p);if(y>486)layer(false);ball(lerp(747,dr[0],p),y,p*200)});
+    ballEl.style.display='none';cannon.load(true);M.loaded=true;updPT();
+    await cannon.tilt();
+  }else{
+    say('Step 4: the ball bounces off the see-saw and misses the cannon\u2026');
+    var d2=pw(4,-12);
+    await tw(.4,function(p){var y=lerp(460,d2[1],p*p);if(y>486)layer(false);ball(lerp(747,d2[0],p),y,p*200)});
+    await tw(.7,function(p){ball(lerp(d2[0],680,p),lerp(d2[1],576,p*p)-50*p*(1-p)*4,p*500)});
+    ballEl.style.display='none';
+  }
+  await fuseP;
+  /* the fuse burns out: is the cat pressing the see-saw down right now? */
+  var pressed=M.seesawOn&&PL.th<=0,out=loaded?(pressed?'hit':'miss'):'empty';
+  var fp=cannon.fire(out);
+  M.loaded=false;updPT();
+  endAction('pressSeesaw','fired');   /* the see-saw action always ends when the cannon fires */
+  await fp;
+}
+async function runFrom(n){
+  try{
+    if(n<=1&&!(await stepButton()))return;
+    if(n<=2&&!(await stepPad(n)))return;
+    if(n<=3&&!(await stepBalloon(n)))return;
+    await stepCannon(n);
+  }catch(e){if(e!=='x')throw e}
+}
+
+/* ---- cat events: the only way the cat touches the machine ---- */
+function startRun(t){
+  if(M.state==='done')reset(false);else rows.forEach(function(r){r.res.textContent=''});
+  M.state='running';M.step=1;M.t.start=t;
+  runFrom(1).catch(function(e){console.error(e)});
+}
+function catEvent(name,on,t){
+  t=t===undefined?now():t;on=on!==false;
+  if(name==='buttonPressed'){
+    M.btnOn=on;M.t.button=t;applyFlags();
+    if(on&&(M.state==='idle'||M.state==='done'))startRun(t);
+  }else if(name==='onPad'){M.padOn=on;if(on){M.t.pad=t;wires.surge(2,.55)}applyFlags()}
+  else if(name==='crankTurn'){M.crankOn=on;if(on)M.t.crank=t}
+  else if(name==='seesawPressed'){M.seesawOn=on;if(on)M.t.seesaw=t;applyFlags()}
+}
+/* start at step n (a drill). Step 1 just readies the machine and waits for the cat. */
+function drill(n){
+  reset(false);n=n||1;
+  if(n<=1)return;
+  M.state='running';M.t.start=now();
+  runFrom(n).catch(function(e){console.error(e)});
+}
+bus.on('interactionStart',function(it){if(M.state==='running'&&(it==='plant'||it==='box'))M.distractions++});
+
+/* ---- per-frame physics: plank, gate, crank and fan ---- */
+function tick(dt){
+  var d=PT-PL.th,k;
+  if(d){k=MC.PLANK.speed*dt;setPlank(Math.abs(d)<=k?PT:PL.th+(d>0?k:-k))}
+  cannon.track();
+  /* step 10: the gate follows the pad at any time (idle, running, done). Only a locked-open gate stays up, and once the ball has arrived the gate no longer moves. */
+  var gt=M.gateLock?1:(M.state==='running'&&M.arrived?M.gateP:(M.padOn?1:0));
+  if(M.gateP!==gt){k=dt/MC.GATE_RISE;M.gateP=gt>M.gateP?Math.min(gt,M.gateP+k):Math.max(gt,M.gateP-k);setGate(M.gateP)}
+  var ct=M.crankOn?MC.CRANK_SPEED:0;
+  crank+=(ct-crank)*(1-Math.exp(-dt/MC.CRANK_TAU));if(!ct&&crank<2)crank=0;
+  if(crank>0){gA+=crank*dt;applyGears()}
+  var w=crank>MC.BLOW_SPEED?1:0;if(w!==windOn){windOn=w;$('#wind').style.opacity=w;$('#wind2').style.opacity=w}
+  if(M.state==='done'&&now()-M.doneAt>MC.AUTO_RESET)reset(true);
+}
+function info(){
+  var on=[M.btnOn&&'button',M.padOn&&'pad',M.crankOn&&'crank',M.seesawOn&&'see-saw'].filter(Boolean).join(', ')||'nobody';
+  return 'machine: '+M.state+(M.state==='running'?' (step '+M.step+')':'')+'   gate '+Math.round(M.gateP*100)+'%   crank '+Math.round(crank)+'\u00b0/s   plank '+PL.th.toFixed(0)+'\u00b0\ncat on: '+on+
+    (lastRun?'\nlast run: '+lastRun.outcome+(lastRun.failedAt?' at step '+lastRun.failedAt:'')+'  ['+lastRun.steps.join(', ')+']  distractions '+lastRun.distractions:'');
+}
+
+setSpring(46);
+$('#rs').addEventListener('click',function(){reset(false)});
+reset(false);
+return{run:drill,reset:function(){reset(false)},tick:tick,plank:function(a){PT=a;setPlank(a);cannon.track()},plankAngle:function(){return PL.th},
+  plankY:function(x){var a=PL.th*Math.PI/180;return 555+(x-715)*Math.tan(a)-4/Math.cos(a)},
+  catEvent:catEvent,abort:function(n,msg){if(M.state!=='done')failAt(n-1,msg)},toggle:ok,info:info,
+  onPhase:function(f){phaseCbs.push(f)},onRunEnd:function(f){runCbs.push(f)},
+  results:function(){return M.res.slice()},lastRun:function(){return lastRun},state:function(){return M}};
+})();
+
+/* ================= cat (rig + animation) ================= */
+var cat=(function(){
+  var el=$('#cat'),pos=$('#catPos'),legs=el.querySelectorAll('.leg'),pupils=el.querySelectorAll('.pupil'),boxFront=$('#boxFront'),
+      W=CFG.WORLD,P=CFG.POSES,A=CFG.ANCHORS,LC=CFG.LASER;
+  var S={x:300,y:625,dir:1,pose:'sit',body:'sit',tx:300,ty:625,t:3,auto:true,phase:0,idle:0,lock:false,eng:false,act:null,move:null,
+    tr:CFG.CATS.latte,stress:0,L:{on:false,x:450,y:625},lx:450,ly:625,rot:0,pp:'',nearT:{},near:[]};
+  var nearCbs=[],actCbs=[],rnd=function(a,b){return lerp(a,b,Math.random())};
+  function fireAct(n,stage,why){actCbs.forEach(function(f){f(n,stage,why)})}
+  function sc(y){return lerp(.5,.74,clamp((y-W.fy[0])/(W.fy[1]-W.fy[0]),0,1))}
+  function setPose(p,d){var q=P[p]||{body:p};S.pose=p;S.body=q.body;S.t=d===undefined?Infinity:d;S.idle=0;
+    el.dataset.pose=p;el.dataset.body=q.body;el.dataset.sleepy='';boxFront.style.display=p==='jumpBox'?'':'none'}
+  function resetLegs(){legs.forEach(function(l){l.style.transform=''})}
+  function walkTo(x,y,raw){S.tx=raw?x:clamp(x,W.fx[0],W.fx[1]);S.ty=raw?y:clamp(y,W.fy[0],W.fy[1]);S.dir=S.tx>=S.x?1:-1;setPose('walk')}
+  /* idle wandering stays local and never ends (or crosses) inside a station radius the cat is not already in */
+  function wander(){
+    var cn=world.near(S.x,S.y),i,j,x,y,ok;
+    for(i=0;i<8;i++){
+      x=clamp(S.x+rnd(-90,90),W.fx[0],W.fx[1]);y=clamp(S.y+rnd(-24,24),W.fy[0],W.fy[1]);ok=true;
+      for(j=1;j<=5;j++)if(!world.near(lerp(S.x,x,j/5),lerp(S.y,y,j/5)).every(function(k){return cn.indexOf(k)>=0}))ok=false;
+      if(ok){walkTo(x,y);return}
+    }
+    setPose('sit',rnd(2,4));
+  }
+  function pickNext(){
+    var r=Math.random();
+    if(S.pose==='sit'){if(r<.3)setPose('lick',rnd(4,6));else if(r<.5)setPose('lay',rnd(8,12));else wander()}
+    else if(S.pose==='lick'){if(r<.5)setPose('sit',rnd(2,4));else wander()}
+    else setPose('sit',rnd(2,4));
+  }
+  function auto(v){S.auto=v;if(S.pose!=='walk'&&!S.lock)S.t=v?1:Infinity}
+  function hop(x,y,dur,h,cb){if(Math.abs(x-S.x)>3)S.dir=x>S.x?1:-1;S.move={x0:S.x,y0:S.y,x1:x,y1:y,t:0,dur:dur,h:h,cb:cb};resetLegs();setPose('walk')}
+  /* committed actions: play(name,{dur,done}) walks/hops to the spot, holds the pose, then returns to idle. end() finishes early. */
+  function play(name,o){
+    var d=P[name];o=o||{};if(!d||!d.dur||S.lock)return false;
+    S.lock=true;S.act={name:name,stage:'go',dur:o.dur===undefined?d.dur:o.dur,done:o.done};
+    var sp=d.spot;if(!sp){begin();return true}
+    var ty=sp.y==='plank'?machine.plankY(sp.x):sp.y;
+    if(d.hop)hop(sp.x,ty,.35+Math.hypot(sp.x-S.x,ty-S.y)/500,40,begin);else walkTo(sp.x,ty,true);
+    return true;
+  }
+  function begin(){
+    var a=S.act;if(!a)return;var sp=P[a.name].spot;a.stage='on';
+    if(sp){S.dir=sp.dir;S.x=sp.x;S.y=sp.y==='plank'?machine.plankY(sp.x):sp.y}
+    resetLegs();setPose(a.name,a.dur);
+    fireAct(a.name,'start');
+  }
+  function finish(reason){
+    var a=S.act;if(!a)return;var wasOn=a.stage==='on';S.act=null;S.move=null;
+    if(wasOn)fireAct(a.name,'end',reason);
+    var after=function(){S.lock=false;setPose('sit',S.eng?Infinity:rnd(1.5,3));if(a.done)a.done(a.name,reason)};
+    if(P[a.name].hop&&S.y<W.fy[0]-10)hop(S.x,W.fy[0]+4,.4,30,after);else after();
+  }
+  function reset(){var a=S.act;S.move=null;S.act=null;S.lock=false;if(S.y<W.fy[0]-10)S.y=W.fy[0]+4;S.rot=0;setPose('sit',S.auto?2:Infinity);
+    if(a){if(a.stage==='on')fireAct(a.name,'end','reset');if(a.done)a.done(a.name,'reset')}}
+  function setLaser(on,x,y){
+    if(on&&!S.L.on){S.lx=S.x;S.ly=S.y}
+    if(!on&&S.eng){S.eng=false;if(!S.lock&&S.pose!=='walk')S.t=rnd(1,2)}
+    S.L.on=on;if(x!==undefined){S.L.x=x;S.L.y=y}
+  }
+  function updNear(dt){
+    var cur=world.near(S.x,S.y),k,was,is;
+    for(k in A){was=S.nearT[k]>0;is=cur.indexOf(k)>=0;S.nearT[k]=is?(S.nearT[k]||0)+dt:0;
+      if(is!==was)nearCbs.forEach(function(f){f(k,is)})}
+    S.near=cur;
+  }
+  function follow(dt){   /* laser: the cat chases the dot's floor projection; lagging cats trail behind it */
+    var tau=S.tr.lag,k=tau>0?1-Math.exp(-dt/tau):1,rg=LC.NOTICE*(1-LC.STRESS_NOTICE*S.stress),onFloor=S.L.y>=LC.FLOOR_TOP-LC.FORGIVE,
+        dd=onFloor?Math.hypot(S.L.x-S.x,clamp(S.L.y,W.fy[0],W.fy[1])-S.y):1e9;
+    if(!S.eng&&onFloor&&dd<=rg){S.eng=true;S.lx=S.x;S.ly=S.y}
+    else if(S.eng&&(!onFloor||dd>rg*LC.LOSE)){S.eng=false;if(!S.lock&&S.pose!=='walk')S.t=rnd(1,2)}
+    if(!S.eng)return;
+    S.lx+=(S.L.x-S.lx)*k;S.ly+=(S.L.y-S.ly)*k;
+    if(S.lock)return;
+    var tx=clamp(S.lx,W.fx[0],W.fx[1]),ty=clamp(S.ly,W.fy[0],W.fy[1]),dz=LC.STOP+(1-S.tr.laser)*30;
+    if(S.pose==='walk'){S.tx=tx;S.ty=ty}
+    else if(Math.hypot(tx-S.x,ty-S.y)>dz)walkTo(tx,ty);
+    else if(S.pose==='lay'||S.pose==='lick'||S.t!==Infinity)setPose('sit');
+  }
+  function update(dt){
+    var bob=0,arc=0,m,p,e,a;
+    if(S.L.on)follow(dt);
+    if(S.move){
+      m=S.move;m.t+=dt;p=Math.min(1,m.t/m.dur);e=p<.5?2*p*p:1-2*(1-p)*(1-p);
+      S.x=lerp(m.x0,m.x1,e);S.y=lerp(m.y0,m.y1,e);arc=4*m.h*p*(1-p);a=Math.sin(p*Math.PI)*35;
+      legs[0].style.transform=legs[3].style.transform='rotate('+a+'deg)';legs[1].style.transform=legs[2].style.transform='rotate('+(-a)+'deg)';
+      if(p>=1){S.move=null;resetLegs();arc=0;if(m.cb)m.cb()}
+    }else if(S.pose==='walk'){
+      var dx=S.tx-S.x,dy=S.ty-S.y,d=Math.sqrt(dx*dx+dy*dy),
+          spd=S.act?(S.act.name==='hide'?2.2:1):(S.eng?(.6+.4*S.tr.laser)*(1-LC.STRESS_SPEED*S.stress):1),step=230*sc(S.y)*dt*spd;
+      if(Math.abs(dx)>3)S.dir=dx>0?1:-1;
+      if(d<=step+1){S.x=S.tx;S.y=S.ty;resetLegs();
+        if(S.act&&S.act.stage==='go')begin();else setPose('sit',S.eng&&!S.lock?Infinity:(S.auto?rnd(2,4):Infinity))}
+      else{
+        S.x+=dx/d*step;S.y+=dy/d*step;S.phase+=dt*10;
+        a=Math.sin(S.phase)*26;
+        legs[0].style.transform=legs[3].style.transform='rotate('+a+'deg)';
+        legs[1].style.transform=legs[2].style.transform='rotate('+(-a)+'deg)';
+        bob=Math.abs(Math.sin(S.phase))*2.5;
+      }
+    }else{
+      if(S.pose==='lay'){S.idle+=dt;if(S.idle>3)el.dataset.sleepy='1'}
+      if(S.t!==Infinity){S.t-=dt;if(S.t<=0){
+        if(S.act&&S.act.stage==='on')finish('done');else if(!S.lock&&S.auto&&!S.eng)pickNext()}}
+    }
+    var onPlank=S.pose==='pressSeesaw'&&S.act&&S.act.stage==='on';
+    if(onPlank)S.y=machine.plankY(S.x);
+    S.rot+=((onPlank?machine.plankAngle():0)-S.rot)*Math.min(1,dt*10);
+    var s=sc(S.y);
+    pos.setAttribute('transform','translate('+S.x.toFixed(1)+' '+(S.y-bob*s-arc).toFixed(1)+') rotate('+S.rot.toFixed(2)+') scale('+(S.dir*s).toFixed(3)+' '+s.toFixed(3)+')');
+    var pp='';   /* pupils track the laser */
+    if(S.eng&&!S.lock){var vx=(S.L.x-S.x)*S.dir,vy=S.L.y-(S.y-50*s),n=Math.hypot(vx,vy)||1;pp='translate('+(vx/n*2.4).toFixed(1)+'px,'+(vy/n*2.2).toFixed(1)+'px)'}
+    if(pp!==S.pp){S.pp=pp;pupils.forEach(function(q){q.style.transform=pp})}
+    updNear(dt);
+  }
+  function setVariant(id){el.dataset.variant=id}
+  /* fresh start: free the cat, forget stations, stand it at (x,y) */
+  function restart(x,y){S.move=null;S.act=null;S.lock=false;S.eng=false;S.nearT={};S.near=[];S.x=x;S.y=y;S.tx=x;S.ty=y;S.rot=0;S.dir=1;S.idle=0;resetLegs();setPose('sit',S.auto?2:Infinity)}
+  /* win moment: walk out through the open door (raw target, off the right edge) and stay there until restart() */
+  function walkOut(){S.lock=true;S.act=null;S.move=null;S.eng=false;resetLegs();S.dir=1;S.tx=W.w+100;S.ty=clamp(S.y,W.fy[0],W.fy[1]);setPose('walk')}
+  (function blink(){el.classList.add('blink');setTimeout(function(){el.classList.remove('blink')},140);setTimeout(blink,rnd(2200,5200))})();
+  setTimeout(function blep(){el.classList.add('blep');setTimeout(function(){el.classList.remove('blep')},1100);setTimeout(blep,rnd(5000,11000))},4000);
+  setPose('sit',3);
+  return{update:update,play:play,end:function(r,name){if(S.act&&S.act.stage==='on'&&(!name||S.act.name===name))finish(r||'early')},onAction:function(f){actCbs.push(f)},release:function(){finish('released');if(!S.act&&S.lock&&!S.move)S.lock=false},
+    reset:reset,restart:restart,walkOut:walkOut,out:function(){return S.x>W.w+40},setVariant:setVariant,walkTo:function(x,y){if(!S.lock)walkTo(x,y)},wander:function(){if(!S.lock)wander()},
+    setPose:function(p,d){reset();setPose(p,d)},auto:auto,laser:setLaser,setStress:function(v){S.stress=v},
+    setTraits:function(t){S.tr=t},near:function(){return S.near.slice()},nearTime:function(id){return S.nearT[id]||0},
+    onNear:function(f){nearCbs.push(f)},state:function(){return S}};
+})();
+
+/* ================= tools / audio / ui (stubs filled in Step 5) ================= */
+var tools=(function(){
+  var TB=CFG.TOOLBAR,W=CFG.WORLD,order=['treat','pet','spray','buzzer'],S={},supply=TB.TREATS.max,refill=0,list=[],locked=false,bar=$('#toolbar'),
+      RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),mo=RM?0:1,svg=$('#m'),g=document.createElementNS(NS,'g');
+  g.setAttribute('id','toolfx');g.setAttribute('pointer-events','none');$('#laser').parentNode.insertBefore(g,$('#laser'));
+  var INFO={
+    treat:{label:'Treat',pun:false,icon:'<ellipse cx="14" cy="16" rx="10" ry="6.5"/><path d="M24 16l6-5.5v11z"/><circle cx="8.5" cy="14.5" r="1" fill="currentColor"/><path d="M13 11.5l3 9"/>'},
+    pet:{label:'Pet',pun:false,icon:'<path d="M9 16V8a2 2 0 014 0v6M13 13V5.5a2 2 0 014 0V13M17 13V7a2 2 0 014 0v7M21 13a2 2 0 014 0v7c0 5-3.5 8-8.5 8h-1c-3.5 0-5.5-1.5-7.5-4.5l-3-4.5a2 2 0 013.2-2.3L9 19.5"/>'},
+    spray:{label:'Spray',pun:true,icon:'<rect x="7" y="15" width="12" height="13" rx="2.5"/><path d="M10 15v-4h9l2 2v2M19 17l4 2M21 8.5h-3"/><circle cx="25" cy="9" r="1" fill="currentColor"/><circle cx="27.5" cy="12" r="1" fill="currentColor"/><circle cx="25" cy="15" r="1" fill="currentColor"/>'},
+    buzzer:{label:'Buzzer',pun:true,icon:'<circle cx="16" cy="19" r="8"/><circle cx="16" cy="19" r="3" fill="currentColor"/><path d="M5 9l3 2.5M27 9l-3 2.5M16 3v4"/>'}
+  };
+  function grp(title,ids){
+    var d=document.createElement('div'),t=document.createElement('span'),r=document.createElement('div');
+    d.className='tgrp';t.textContent=title;r.className='tb';r.setAttribute('role','group');r.setAttribute('aria-label',title+' tools');
+    d.appendChild(t);d.appendChild(r);bar.appendChild(d);ids.forEach(function(id){mkBtn(id,r)});
+  }
+  function mkBtn(id,par){
+    var i=INFO[id],b=document.createElement('button');
+    b.type='button';b.className='tool'+(i.pun?' pun':'');b.dataset.tool=id;b.setAttribute('aria-disabled','false');
+    b.innerHTML='<svg class="ic" viewBox="0 0 32 32" aria-hidden="true">'+i.icon+'</svg><span class="tl">'+i.label+'</span>'+(id==='treat'?'<span class="cnt"></span>':'')+
+      '<svg class="cd" viewBox="-36 -36 72 72" aria-hidden="true"><path d=""/><text x="0" y="8"></text></svg>';
+    b.addEventListener('click',function(){use(id)});
+    par.appendChild(b);
+    S[id]={rem:0,total:1,b:b,path:b.querySelector('.cd path'),txt:b.querySelector('.cd text'),cnt:b.querySelector('.cnt'),key:''};
+  }
+  grp('Reward',['treat','pet']);grp('Punish',['spray','buzzer']);
+  function pieD(f){var a=clamp(f,0,.9995)*Math.PI*2,r=34;return 'M0 0 L0 '+(-r)+' A'+r+' '+r+' 0 '+(a>Math.PI?1:0)+' 1 '+(r*Math.sin(a)).toFixed(2)+' '+(-r*Math.cos(a)).toFixed(2)+' Z'}
+  function paint(id){
+    var s=S[id],cool=s.rem>0,out=id==='treat'&&supply<1,key=(cool?Math.ceil(s.rem*10):'r')+'|'+supply+'|'+out;
+    if(key===s.key)return;s.key=key;
+    s.b.classList.toggle('cool',cool);s.b.classList.toggle('out',out&&!cool);
+    s.b.setAttribute('aria-disabled',cool||out?'true':'false');
+    s.b.setAttribute('aria-label',INFO[id].label+(id==='treat'?', '+supply+' left':'')+(cool?', ready in '+Math.ceil(s.rem)+' seconds':out?', none left':''));
+    if(cool){s.path.setAttribute('d',pieD(s.rem/s.total));s.txt.textContent=Math.ceil(s.rem)}
+    if(s.cnt)s.cnt.textContent=supply;
+  }
+  function use(id){
+    var s=S[id];if(locked||!s||s.rem>0)return false;
+    if(id==='treat'&&supply<1){ui.say('Out of treats. They come back slowly.');return false}
+    s.rem=s.total=TB.COOLDOWN[id];
+    order.forEach(function(o){if(o!==id&&S[o].rem<TB.GLOBAL){S[o].rem=S[o].total=TB.GLOBAL}});
+    if(id==='treat')supply--;
+    bus.emit(CFG.ENGINE.TOOLS[id].kind,id);     /* the engine does the conditioning */
+    if(!cat.state().lock)cat.play(TB.REACT[id]);
+    fxStart(id);
+    order.forEach(paint);
+    return true;
+  }
+  /* ---- visible effects, drawn in cat space (x offsets are multiplied by the facing direction so text never mirrors) ---- */
+  function mk(tag,a,par){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);(par||g).appendChild(e);return e}
+  var HEART='M0,0 C-7,-7 -3,-13 0,-8 C3,-13 7,-7 0,0Z',DROP='M0,-9 C5,-2 5,3 0,3 C-5,3 -5,-2 0,-9Z';
+  function fxStart(id){
+    var f={id:id,t:0,dur:TB.FX[id],root:mk('g',{}),p:[]},r=f.root,i;
+    if(id==='treat'){f.p.push(mk('ellipse',{rx:10,ry:6,style:'fill:var(--honey);stroke:var(--heading);stroke-width:2'},r),mk('path',{d:'M9,0 l8,-5 v10z',style:'fill:var(--honey);stroke:var(--heading);stroke-width:2'},r))}
+    else if(id==='pet'){
+      var h=mk('g',{},r);mk('rect',{x:-17,y:-8,width:34,height:22,rx:9,style:'fill:var(--btn2);stroke:var(--heading);stroke-width:2'},h);
+      for(i=0;i<3;i++)mk('rect',{x:-16+i*11.5,y:-24,width:9,height:20,rx:4.5,style:'fill:var(--btn2);stroke:var(--heading);stroke-width:2'},h);
+      f.p.push(h);for(i=0;i<3;i++)f.p.push(mk('path',{d:HEART,style:'fill:var(--error);stroke:var(--heading);stroke-width:1'},r));
+    }else if(id==='spray'){
+      var bt=mk('g',{},r);mk('rect',{x:-6,y:-4,width:20,height:34,rx:4,style:'fill:var(--blue);stroke:var(--heading);stroke-width:2'},bt);
+      mk('path',{d:'M-6,0 h-10 v-8 h24 v8',style:'fill:var(--blue);stroke:var(--heading);stroke-width:2'},bt);
+      f.p.push(bt);for(i=0;i<5;i++)f.p.push(mk('circle',{r:4,style:'fill:var(--blue);fill-opacity:.7;stroke:var(--heading);stroke-width:1'},r));
+      f.p.push(mk('path',{d:DROP,style:'fill:var(--blue);stroke:var(--heading);stroke-width:1.5'},r));
+    }else{
+      for(i=0;i<3;i++)f.p.push(mk('circle',{r:10,style:'fill:none;stroke:var(--error);stroke-width:4'},r));
+      var t=mk('text',{style:"font:800 24px 'Lato',system-ui,sans-serif;fill:var(--heading);stroke:var(--bg);stroke-width:4;paint-order:stroke;text-anchor:middle"},r);t.textContent='BZZT';f.p.push(t);
+      var bx=mk('g',{},r);mk('rect',{x:-18,y:-11,width:36,height:22,rx:6,style:'fill:var(--card);stroke:var(--heading);stroke-width:2'},bx);mk('circle',{r:6,style:'fill:var(--error);stroke:var(--heading);stroke-width:1.5'},bx);f.p.push(bx);
+    }
+    list.push(f);
+  }
+  function fxStep(f,h){
+    var p=f.t/f.dur,d=h.d,hx=h.hx,hy=h.hy,i,q,e=function(x){return x*x*(3-2*x)},fade=Math.min(1,p*8,(1-p)*6),P=f.p;
+    f.root.setAttribute('transform','translate('+h.x.toFixed(1)+' '+h.y.toFixed(1)+') scale('+h.k.toFixed(3)+')');
+    function at(el,x,y,rot,op){el.setAttribute('transform','translate('+(d*x).toFixed(1)+' '+y.toFixed(1)+')'+(rot?' rotate('+rot.toFixed(1)+')':''));if(op!==undefined)el.setAttribute('opacity',op.toFixed(2))}
+    if(f.id==='treat'){q=Math.min(1,p/.55);at(P[0],hx+28,hy-170+(hy+22-(hy-170))*e(q),mo*q*140,p<.55?1:0);P[1].setAttribute('transform','');at(P[1],hx+28,hy-170+(hy+22-(hy-170))*e(q),mo*q*140,p<.55?1:0)}
+    else if(f.id==='pet'){
+      at(P[0],hx+6+Math.sin(p*Math.PI*6)*16*mo,hy-44+Math.sin(p*Math.PI*12)*3*mo,0,fade);
+      for(i=1;i<=3;i++){q=clamp((p-.1*i)/.7,0,1);at(P[i],hx+(i-2)*22,hy-60-q*70*(mo?1:.4),0,Math.sin(q*Math.PI)*(p>.05?1:0));P[i].setAttribute('transform','translate('+(d*(hx+(i-2)*22)).toFixed(1)+' '+(hy-60-q*70*(mo?1:.4)).toFixed(1)+') scale(1.6)')}
+    }else if(f.id==='spray'){
+      P[0].setAttribute('transform','translate('+(d*(hx+112)).toFixed(1)+' '+(hy-6)+') scale('+d+' 1)');P[0].setAttribute('opacity',fade.toFixed(2));
+      for(i=1;i<=5;i++){q=clamp((p-.08-i*.06)/.45,0,1);at(P[i],hx+86-(hx+86-(hx+18))*q,hy+Math.sin(i*2)*8*q,0,(q>0&&q<1?1:0)*.9)}
+      q=clamp((p-.5)/.5,0,1);P[6].setAttribute('transform','translate('+(d*(hx+36)).toFixed(1)+' '+(hy-26+q*16*mo).toFixed(1)+') scale(1.4)');P[6].setAttribute('opacity',(q>0?Math.min(1,(1-q)*3):0).toFixed(2));
+    }else{
+      for(i=0;i<3;i++){q=clamp(p*1.3-i*.18,0,1);P[i].setAttribute('transform','translate('+(d*hx).toFixed(1)+' '+hy+')');P[i].setAttribute('r',(12+q*(RM?30:70)).toFixed(1));P[i].setAttribute('opacity',(q>0?1-q:0).toFixed(2))}
+      P[3].setAttribute('transform','translate('+(d*hx+Math.sin(p*90)*3*mo).toFixed(1)+' '+(hy-62)+')');P[3].setAttribute('opacity',fade.toFixed(2));
+      P[4].setAttribute('transform','translate('+(d*(hx+112)+Math.sin(p*80)*2*mo).toFixed(1)+' '+(hy+8)+')');P[4].setAttribute('opacity',fade.toFixed(2));
+    }
+  }
+  function head(){var s=cat.state(),lay=s.body==='lay';return{x:s.x,y:s.y,d:s.dir,k:1.35*lerp(.5,.74,clamp((s.y-W.fy[0])/(W.fy[1]-W.fy[0]),0,1)),hx:lay?100:34,hy:lay?-44:-104}}
+  function update(dt){
+    var i,s,f;
+    for(i=0;i<order.length;i++){s=S[order[i]];if(s.rem>0)s.rem=Math.max(0,s.rem-dt);paint(order[i])}
+    if(supply<TB.TREATS.max){refill+=dt;if(refill>=TB.TREATS.refill){refill=0;supply++}}else refill=0;
+    if(list.length){var h=head();for(i=list.length-1;i>=0;i--){f=list[i];f.t+=dt;if(f.t>=f.dur){f.root.remove();list.splice(i,1)}else fxStep(f,h)}}
+  }
+  order.forEach(paint);
+  return{list:['laser'].concat(order),use:use,update:update,lock:function(v){locked=!!v},
+    reset:function(){supply=TB.TREATS.max;refill=0;order.forEach(function(k){S[k].rem=0;S[k].key=''});list.forEach(function(f){f.root.remove()});list.length=0;order.forEach(paint)},
+    supply:function(){return supply},
+    refill:function(){supply=TB.TREATS.max;order.forEach(paint)},clear:function(){order.forEach(function(k){S[k].rem=0;paint(k)})}};
+})();
+var audio={ctx:null,init:function(){if(!this.ctx&&window.AudioContext)this.ctx=new AudioContext()}};
+var ui=(function(){
+  var svg=$('#m'),dot=$('#laser'),btn=$('#laserBtn'),W=CFG.WORLD,L={on:false,x:450,y:625},enabled=true,drag=false,locked=false;
+  function pt(e){var r=svg.getBoundingClientRect();return[clamp((e.clientX-r.left)/r.width*W.w,0,W.w),clamp((e.clientY-r.top)/r.height*W.h,0,W.h)]}
+  function set(on,x,y){
+    if(x!==undefined){L.x=x;L.y=y}
+    L.on=on&&enabled&&!locked;dot.style.display=L.on?'':'none';
+    if(L.on)dot.setAttribute('transform','translate('+L.x.toFixed(1)+' '+L.y.toFixed(1)+')');
+    cat.laser(L.on,L.x,L.y);
+  }
+  /* the dot exists only while the left mouse button (or a finger) is held down on the scene */
+  function stop(){if(drag){drag=false;set(false)}}
+  svg.addEventListener('pointerdown',function(e){if(locked||(e.pointerType==='mouse'&&e.button!==0))return;drag=true;try{svg.setPointerCapture(e.pointerId)}catch(x){}var p=pt(e);set(true,p[0],p[1])});
+  svg.addEventListener('pointermove',function(e){if(drag){var p=pt(e);set(true,p[0],p[1])}});
+  svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);svg.addEventListener('lostpointercapture',stop);
+  svg.addEventListener('blur',function(){set(false)});
+  svg.addEventListener('keydown',function(e){
+    if(locked)return;
+    var k=e.key,st=(e.shiftKey?3:1)*CFG.LASER.KEYSTEP,dx=0,dy=0;
+    if(k==='ArrowLeft')dx=-st;else if(k==='ArrowRight')dx=st;else if(k==='ArrowUp')dy=-st;else if(k==='ArrowDown')dy=st;
+    else if(k==='Escape'){set(false);return}
+    else if(k===' '||k==='Enter'){e.preventDefault();set(!L.on);return}
+    else return;
+    e.preventDefault();set(true,clamp(L.x+dx,0,W.w),clamp(L.y+dy,0,W.h));
+  });
+  btn.addEventListener('click',function(){enabled=!enabled;btn.setAttribute('aria-pressed',enabled);btn.textContent='Laser: '+(enabled?'on':'off');if(!enabled)set(false)});
+  return{say:function(t){$('#say').textContent=t},laser:L,lock:function(v){locked=!!v;if(locked){drag=false;set(false)}}};
+})();
+
+/* ================= game loop (variable draw step + fixed model step) ================= */
+var game=(function(){
+  var last=performance.now(),acc=0,vs=[],fs=[];
+  function frame(n){
+    var dt=Math.min(.05,(n-last)/1000);last=n;acc+=dt;
+    while(acc>=CFG.DT){fs.forEach(function(f){f(CFG.DT)});acc-=CFG.DT}
+    vs.forEach(function(f){f(dt)});requestAnimationFrame(frame);
+  }
+  /* the conditioning engine: it reads the cat's near-times, commits it to actions and listens for reward / punish on the bus */
+  var eng=model.engine({
+    nearTime:function(id){return cat.nearTime(id)},
+    play:function(a,o){return cat.play(a,o)},
+    busy:function(){return cat.state().lock}
+  },function(e,a,b){bus.emit(e,a,b)});
+  /* the engine brain stays off whenever the gate says so (title screen, overlays, win moment) or the debug box is unticked */
+  var gate=function(){return true};
+  function applyBrain(){eng.brain(gate()&&$('#dbgBrain').checked)}
+  /* the ONE way to pick a cat: traits for the laser response, the conditioning model, and the look */
+  function selectCat(id,seed){cat.setTraits(CFG.CATS[id]);cat.setVariant(id);eng.setCat(id,seed);applyBrain()}
+  selectCat('latte');
+  fs.push(eng.step);
+  bus.on('reward',eng.reward);bus.on('punish',eng.punish);
+  /* debug only: force a behavior's action without a roll */
+  function perform(id){return eng.force(id)}
+  return{onTick:function(f){vs.push(f)},onFixed:function(f){fs.push(f)},start:function(){requestAnimationFrame(frame)},perform:perform,engine:eng,selectCat:selectCat,applyBrain:applyBrain,setGate:function(f){gate=f;applyBrain()}};
+})();
+game.onTick(cat.update);
+game.onTick(function(){cat.setStress(game.engine.state().stress)});   /* stress makes the cat less responsive to the laser */
+game.onTick(tools.update);
+game.onTick(machine.tick);
+
+/* ================= stats panel (player option: "Show debug info") ================= */
+var NMS={button:'Wall switch',pad:'Switch pad',crank:'Crank',seesaw:'See-saw',plant:'Plant',box:'Box'};
+/* builds the stress / fullness / six-behavior bars into box. refresh(src,target) takes the model or a snapshot of it. */
+function buildStats(box,title,withCredit){
+  var rows={},cr=null;
+  function row(label,tag,cls){
+    var d=document.createElement('div'),l=document.createElement('span'),t=document.createElement('span'),f=document.createElement('div'),fl=document.createElement('div'),v=document.createElement('span');
+    d.className='mt';l.textContent=label;if(tag){t.className='tag';t.textContent=' ('+tag+')';l.appendChild(t)}
+    f.className='tr';fl.className='fl '+cls;f.appendChild(fl);v.className='v';d.appendChild(l);d.appendChild(f);d.appendChild(v);box.appendChild(d);
+    return{fl:fl,v:v,f:f};
+  }
+  var h=document.createElement('h3');h.textContent=title;box.appendChild(h);
+  rows.stress=row('Stress','','str');rows.full=row('Fullness','','ful');
+  var h2=document.createElement('h3');h2.textContent='Behavior levels (chance to trigger on a roll)';h2.style.marginTop='12px';box.appendChild(h2);
+  CFG.BEHAVIORS.forEach(function(b){rows[b.id]=row(NMS[b.id],b.type==='task'?'task':'distraction',b.type==='task'?'task':'dis')});
+  if(withCredit){cr=document.createElement('p');cr.className='cr';box.appendChild(cr)}
+  function set(r,v){var p=Math.round(clamp(v,0,1)*100);r.fl.style.width=p+'%';r.v.textContent=p+'%';r.f.setAttribute('role','img');r.f.setAttribute('aria-label',p+' percent')}
+  return{refresh:function(m,tg){
+    set(rows.stress,m.stress);set(rows.full,m.fullness);
+    m.behaviors.forEach(function(b){set(rows[b.id],b.L)});
+    if(cr)cr.textContent='Credit goes to: '+(tg?NMS[tg.id]+(tg.end===null?' (happening now)':' (ended '+(m.t-tg.end).toFixed(1)+' s ago)'):'nothing');
+  }};
+}
+var stats=(function(){
+  var box=$('#stats'),btn=$('#infoBtn'),on=false,acc=1,E=game.engine,p=buildStats(box,'Debug info',true);
+  function update(dt){
+    if(!on)return;acc+=dt;if(acc<.1)return;acc=0;
+    p.refresh(E.state(),E.target());
+  }
+  btn.addEventListener('click',function(){on=!on;box.hidden=!on;btn.setAttribute('aria-pressed',on);btn.textContent=on?'Hide debug info':'Show debug info';acc=1});
+  game.onTick(update);
+  return{};
+})();
+
+/* ================= Step 3 glue: cat events -> machine, stepComplete -> cat.end ================= */
+(function(){
+  var CAT_EVT={pressButton:'buttonPressed',lieOnPad:'onPad',pawCrank:'crankTurn',pressSeesaw:'seesawPressed'},
+      STEP_ACT={1:'pressButton',2:'lieOnPad',3:'pawCrank',4:'pressSeesaw'};
+  cat.onAction(function(name,stage){var e=CAT_EVT[name];if(e)machine.catEvent(e,stage==='start',performance.now()/1000)});
+  bus.on('stepComplete',function(n){cat.end('step '+n,STEP_ACT[n])});
+})();
+/* ================= flow (Step 6): title screen, cat selection, win moment, stats window, end screen ================= */
+var flow=(function(){
+  var F=CFG.FLOW,W=CFG.WORLD,ov=$('#ov'),main=$('main'),svg=$('#m'),catPos=$('#catPos'),
+      panels=[].slice.call(ov.querySelectorAll('.dlg')),
+      RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),
+      IDS=['latte','cappuccino','mocha'],picks={},bubs={},
+      mode='title',openId=null,cur='latte',choosing=false,winning=false,pending=false,lastFocus=null,escOK=false,lastPT='mouse',
+      quizFn=null,snap=null,endStats=null,wn={t:0,stage:'',fast:false};
+  function seed(){return DEBUG?CFG.SEED:(Math.random()*4294967296)>>>0}
+  /* anything that stops the game from taking input: an overlay, the win moment, or the title screen */
+  function locked(){return !!openId||winning||mode==='title'}
+  function lockAll(){var v=locked();ui.lock(v);tools.lock(v);game.applyBrain()}
+  function snapshot(){var m=game.engine.state();return{stress:m.stress,fullness:m.fullness,t:m.t,behaviors:m.behaviors.map(function(b){return{id:b.id,L:b.L}})}}
+
+  /* ---- overlay: one container, several panels, focus trapped inside, page behind made inert ---- */
+  function openOv(id,m,opener){
+    if(!openId)lastFocus=opener||document.activeElement;
+    openId=id;ov.hidden=false;
+    if(id!=='ovTitle')escOK=false;      /* only the 'How to play' / 'Choose another cat' screens can be closed with Esc */
+    panels.forEach(function(p){p.hidden=p.id!==id});
+    if(id==='ovTitle')setMode(m||'title');
+    main.setAttribute('inert','');
+    lockAll();
+    ov.scrollTop=0;
+    var p=$('#'+id);try{p.focus({preventScroll:true})}catch(e){}
+  }
+  function closeOv(toScene){
+    var f=toScene?svg:(lastFocus&&document.body.contains(lastFocus)?lastFocus:svg);
+    ov.hidden=true;openId=null;main.removeAttribute('inert');lockAll();
+    try{f.focus({preventScroll:true})}catch(e){}
+    lastFocus=null;
+    if(pending&&mode==='play'){pending=false;win(true)}
+  }
+  function focusables(p){
+    return [].slice.call(p.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')).filter(function(n){return !n.disabled&&n.getClientRects().length>0});
+  }
+  ov.addEventListener('keydown',function(e){
+    var p=openId&&$('#'+openId),f,a;
+    if(!p)return;
+    if(e.key==='Escape'&&escOK&&!choosing){e.preventDefault();closeOv(false);return}
+    if(e.key!=='Tab')return;
+    f=focusables(p);a=document.activeElement;
+    if(!f.length){e.preventDefault();p.focus();return}
+    if(e.shiftKey&&(a===f[0]||a===p)){e.preventDefault();f[f.length-1].focus()}
+    else if(!e.shiftKey&&a===f[f.length-1]){e.preventDefault();f[0].focus()}
+  });
+  document.addEventListener('focusin',function(e){if(openId&&!ov.contains(e.target)){var p=$('#'+openId);if(p)p.focus({preventScroll:true})}});
+
+  /* ---- title screen ---- */
+  function setMode(m){
+    var p=$('#ovTitle'),c=$('#ovClose');
+    p.dataset.mode=m;escOK=m!=='title';
+    $('#ttlH').textContent=m==='how'?'How to play':m==='swap'?'Choose another cat':'Condition the Cat';
+    $('#swapNote').textContent='You are training '+CFG.CATS[cur].name+'. Choosing a cat starts a fresh training session.';
+    c.hidden=m==='title';c.textContent=m==='how'?'Back to the game':'Keep playing';
+  }
+  function show(id){
+    IDS.forEach(function(k){var on=k===id;picks[k].classList.toggle('open',on);bubs[k].classList.toggle('open',on)});
+    $('#cage').classList.add('has');
+  }
+  function hide(id){
+    picks[id].classList.remove('open');bubs[id].classList.remove('open');
+    if(!IDS.some(function(k){return bubs[k].classList.contains('open')}))$('#cage').classList.remove('has');
+  }
+  function resetPicks(){
+    choosing=false;
+    IDS.forEach(function(k){picks[k].classList.remove('open','sel','gone');bubs[k].classList.remove('open');bubs[k].querySelector('button').disabled=false});
+    $('#cage').classList.remove('has');
+  }
+  function build(){
+    var row=$('#row3'),zone=$('#zone'),src=$('#cat'),clones=[];
+    IDS.forEach(function(id,i){
+      var I=CFG.INTRO[id],name=CFG.CATS[id].name,pick=document.createElement('div'),cf=document.createElement('div'),tag=document.createElement('span'),
+          b=document.createElement('div'),lv=document.createElement('span'),tx=document.createElement('p'),btn=document.createElement('button'),
+          sv=document.createElementNS(NS,'svg'),g=document.createElementNS(NS,'g'),sh=document.createElementNS(NS,'ellipse'),c=src.cloneNode(true);
+      /* the cat: a clone of the in-game rig, recoloured by data-variant */
+      [].forEach.call(c.querySelectorAll('[id]'),function(n){n.removeAttribute('id')});
+      c.removeAttribute('id');c.classList.remove('blink');c.dataset.variant=id;c.dataset.pose=I.pose;c.dataset.body=CFG.POSES[I.pose].body;
+      sh.setAttribute('class','shadow');sh.setAttribute('rx',52);sh.setAttribute('ry',8);
+      g.setAttribute('transform','scale('+I.dir+' 1)');g.appendChild(sh);g.appendChild(c);sv.appendChild(g);
+      sv.setAttribute('viewBox','-105 -160 210 180');sv.setAttribute('aria-hidden','true');sv.setAttribute('focusable','false');
+      cf.className='cf';cf.appendChild(sv);clones.push(c);
+      tag.className='ntag';tag.textContent=name;
+      pick.className='pick';pick.dataset.cat=id;pick.appendChild(cf);pick.appendChild(tag);row.appendChild(pick);picks[id]=pick;
+      /* the thought bubble, with the real Choose button inside (keyboard and touch use it; the mouse can also just click the cat) */
+      b.className='tbub';b.id='tb-'+id;b.style.setProperty('--tx',((i+.5)/3*100).toFixed(1)+'%');
+      lv.className='dif dif-'+I.level.toLowerCase();lv.textContent='Difficulty: '+I.level;
+      tx.id='tbt-'+id;tx.textContent=I.blurb;
+      btn.type='button';btn.className='primary cbtn';btn.textContent='Choose '+name;btn.setAttribute('aria-describedby',tx.id);
+      b.appendChild(lv);b.appendChild(tx);b.appendChild(btn);zone.appendChild(b);bubs[id]=b;
+      cf.addEventListener('pointerdown',function(e){lastPT=e.pointerType});
+      cf.addEventListener('click',function(){if(choosing)return;if(lastPT==='mouse')choose(id);else show(id)});
+      pick.addEventListener('pointerenter',function(e){if(e.pointerType==='mouse'&&!choosing)show(id)});
+      pick.addEventListener('pointerleave',function(e){if(e.pointerType==='mouse'&&!b.contains(document.activeElement))hide(id)});
+      b.addEventListener('focusin',function(){if(!choosing)show(id)});
+      b.addEventListener('focusout',function(e){if(!b.contains(e.relatedTarget))hide(id)});
+      btn.addEventListener('click',function(){choose(id)});
+    });
+    (function blink(){clones.forEach(function(c){if(Math.random()<.5){c.classList.add('blink');setTimeout(function(){c.classList.remove('blink')},140)}});setTimeout(blink,2200+Math.random()*3000)})();
+  }
+  function choose(id){
+    if(choosing)return;choosing=true;cur=id;
+    IDS.forEach(function(k){picks[k].classList.remove('open');bubs[k].classList.remove('open');bubs[k].querySelector('button').disabled=true;
+      picks[k].classList.toggle('sel',k===id);picks[k].classList.toggle('gone',k!==id)});
+    $('#cage').classList.remove('has');
+    setTimeout(function(){resetPicks();newGame(id);closeOv(true)},RM?0:F.SELECT_FADE*1000);
+  }
+
+  /* ---- game start / full reset ---- */
+  function reset(id){
+    winning=false;pending=false;snap=null;$('#winb').hidden=true;
+    game.selectCat(id,seed());          /* fresh conditioning model */
+    cat.restart(F.START.x,F.START.y);   /* before machine.reset: the machine reads the cat's state */
+    machine.reset();tools.reset();      /* machine, treat supply, cooldowns, tool effects */
+    if(bubbles)bubbles.reset();         /* thought-bubble clock and history */
+    var s=document.querySelector('#dbgCat select');if(s)s.value=id;
+  }
+  function newGame(id){
+    cur=id;reset(id);mode='play';catPos.style.display='';
+    $('#curCat').textContent='Training: '+CFG.CATS[id].name;
+    lockAll();
+  }
+  function toTitle(){
+    mode='title';reset(cur);catPos.style.display='none';$('#curCat').textContent='';
+    resetPicks();openOv('ovTitle','title');
+  }
+
+  /* ---- win moment -> stats window -> (quiz, Step 7) -> end screen ---- */
+  function win(fast){
+    if(winning)return;
+    winning=true;wn.t=0;wn.fast=!!fast;wn.stage=fast?'hold':'wait';
+    $('#winb').hidden=false;lockAll();
+  }
+  function tick(dt){
+    if(!winning)return;
+    wn.t+=dt;
+    if(wn.stage==='wait'){if(!cat.state().lock||wn.t>F.WIN_WAIT){cat.walkOut();wn.stage='walk';wn.t=0}}
+    else if(wn.stage==='walk'){if(cat.out()||wn.t>F.WIN_WALK){wn.stage='hold';wn.t=0}}
+    else if(wn.t>(wn.fast?F.WIN_HOLD_FAST:F.WIN_HOLD)){
+      $('#winb').hidden=true;showStats();winning=false;lockAll();
+    }
+  }
+  function showStats(){
+    $('#stH').textContent=CFG.CATS[cur].name+' escaped!';
+    endStats.refresh(snap||snapshot());
+    $('#stNext').textContent=quizFn?'Take the quiz':'Continue';
+    openOv('ovStats');
+  }
+  function showEnd(sc){
+    var el=$('#enScore');
+    $('#enMsg').textContent='You conditioned '+CFG.CATS[cur].name+' to escape the cage using rewards and punishments.';
+    el.hidden=!sc;if(sc)el.textContent='Quiz score: '+sc.right+' of '+sc.total;
+    $('#enNote').hidden=!!quizFn;
+    openOv('ovEnd');
+  }
+
+  function init(){
+    build();
+    endStats=buildStats($('#endStats'),'How the cat ended up',false);
+    game.setGate(function(){return !locked()});
+    machine.onRunEnd(function(r){
+      if(mode!=='play'||winning||r.outcome!=='success')return;
+      if(r.distractions>0){ui.say('The door is open, but the cat got distracted by the plant or the box on the way, so this run does not count. Train the distractions away and try again.');return}
+      ui.say('Clean run! The padlock shatters, the cage door swings open, and the cat walks free.');
+      snap=snapshot();
+      if(openId)pending=true;else win(false);
+    });
+    game.onTick(tick);
+    $('#howBtn').addEventListener('click',function(e){if(mode==='play'&&!openId&&!winning)openOv('ovTitle','how',e.currentTarget)});
+    $('#swapBtn').addEventListener('click',function(e){if(mode==='play'&&!openId&&!winning)openOv('ovTitle','swap',e.currentTarget)});
+    $('#ovClose').addEventListener('click',function(){closeOv(false)});
+    $('#stNext').addEventListener('click',function(){if(quizFn)quizFn(showEnd);else showEnd()});
+    $('#playAgain').addEventListener('click',toTitle);
+    if(DEBUG){
+      var row=$('#dbgFlow');
+      [['Show title screen',toTitle],['Trigger win moment',function(){snap=snapshot();mode='play';win(false)}],['Show stats window',function(){snap=null;showStats()}]].forEach(function(p){
+        var b=document.createElement('button');b.textContent=p[0];b.addEventListener('click',p[1]);row.appendChild(b);
+      });
+    }
+    mode='title';catPos.style.display='none';openOv('ovTitle','title');
+  }
+  /* the quiz plugs in through setQuiz(function(done){...flow.open('ovQuiz'); call done({right,total}) when finished}) */
+  return{init:init,selectCat:function(id){game.selectCat(id,seed())},open:openOv,close:closeOv,locked:locked,showEnd:showEnd,toTitle:toTitle,win:win,showStats:showStats,
+    setQuiz:function(f){quizFn=f},catId:function(){return cur}};
+})();
+
+/* ================= thought bubbles (Step 7): decorative flavor, never instructions ================= */
+var bubbles=(function(){
+  var B=CFG.BUBBLES,W=CFG.WORLD,scene=$('#scene'),svg=$('#m'),el=document.createElement('div'),tx=document.createElement('p');
+  var clk=0,next=0,left=0,shown=false,lastText='',lastPunish=-1e9;
+  el.className='tbub gbub';el.setAttribute('aria-hidden','true');el.appendChild(tx);scene.appendChild(el);
+  function rnd(a,b){return a+Math.random()*(b-a)}
+  function schedule(){next=clk+rnd(B.INTERVAL[0],B.INTERVAL[1])}
+  /* no bubble (and the clock stands still) during any overlay, the title screen, the win moment, or while the cat hides */
+  function blocked(){return flow.locked()||cat.state().pose==='hide'}
+  function lines(){return (B.LINES[flow.catId()]||[]).concat(B.LINES.any||[])}   /* this cat's own lines plus the shared ones */
+  function text(L){return typeof L==='string'?L:L.text}
+  function tags(){var m=game.engine.state(),t=[];if(m.fullness>=B.FULL)t.push('full');if(m.stress>=B.STRESS)t.push('stressed');if(clk-lastPunish<=B.PUNISH_WINDOW)t.push('punished');return t}
+  /* weighted pick among lines that pass ok(L); never the line just shown */
+  function pick(ok,tagWeight){
+    var pool=[],tot=0,r,i,w;
+    lines().forEach(function(L){
+      if(text(L)===lastText||!ok(L))return;
+      w=typeof L==='string'?1:tagWeight;pool.push([L,w]);tot+=w;
+    });
+    if(!pool.length)return null;
+    r=Math.random()*tot;
+    for(i=0;i<pool.length;i++){r-=pool[i][1];if(r<0)return pool[i][0]}
+    return pool[pool.length-1][0];
+  }
+  /* maps the cat's head (900-wide scene coordinates) to the rendered SVG, keeps the bubble inside the scene, aims the thought dots at the cat */
+  function place(){
+    var r=svg.getBoundingClientRect(),sr=scene.getBoundingClientRect(),k=r.width/W.w,S=cat.state(),
+        s=lerp(.5,.74,clamp((S.y-W.fy[0])/(W.fy[1]-W.fy[0]),0,1)),h=B.HEAD[S.body]||B.HEAD.sit,
+        cx=r.left-sr.left+(S.x+h.x*s*S.dir)*k,cy=r.top-sr.top+(S.y+h.y*s)*k,
+        bw=el.offsetWidth,bh=el.offsetHeight,x=clamp(cx-bw/2,4,Math.max(4,sr.width-bw-4)),y=Math.max(4,cy-bh-B.GAP),
+        tb=$('#toolbar').getBoundingClientRect(),tl=tb.left-sr.left-4,tbm=tb.bottom-sr.top+4;
+    /* step 10: keep the bubble out of the tool bar (slide it left of the bar, or drop it below if there is no room) */
+    if(tb.width&&x+bw>tl&&y<tbm){if(tl-bw>=4)x=tl-bw;else y=tbm}
+    el.style.left=x.toFixed(1)+'px';el.style.top=y.toFixed(1)+'px';
+    el.style.setProperty('--tx',clamp(cx-x,18,Math.max(18,bw-30)).toFixed(1)+'px');
+  }
+  function say(L){
+    lastText=text(L);tx.textContent=lastText;left=B.SHOW;shown=true;el.classList.add('open');place();
+  }
+  function show(){
+    var tg=tags(),L=pick(function(L){return typeof L==='string'||tg.indexOf(L.tag)>=0},B.TAG_WEIGHT);
+    if(!L){schedule();return}
+    say(L);
+  }
+  /* instant reaction to a reward or punishment: lines tagged with the tool (plus 'punished' lines for a punishment, 'full' lines for a treat while full) */
+  function react(kind,tool){
+    if(blocked())return;
+    var full=game.engine.state().fullness>=B.FULL,
+        L=pick(function(L){return typeof L!=='string'&&(L.tag===tool||(kind==='punish'&&L.tag==='punished')||(tool==='treat'&&full&&L.tag==='full'))},1);
+    if(!L)return;
+    say(L);schedule();     /* the next timed bubble is a full interval away */
+  }
+  function hide(){shown=false;el.classList.remove('open')}
+  function tick(dt){
+    if(blocked()){if(shown)hide();return}
+    clk+=dt;
+    if(shown){left-=dt;if(left<=0){hide();schedule()}else place();return}
+    if(clk>=next)show();
+  }
+  function reset(){clk=0;lastText='';lastPunish=-1e9;hide();schedule()}
+  bus.on('punish',function(t){lastPunish=clk;react('punish',t)});
+  bus.on('reward',function(t){react('reward',t)});
+  game.onTick(tick);
+  schedule();
+  if(DEBUG){var b=document.createElement('button');b.textContent='Thought bubble now';b.addEventListener('click',function(){if(!blocked()){hide();show()}});$('#dbgFlow').appendChild(b)}
+  return{reset:reset,now:function(){if(!blocked()){hide();show()}}};
+})();
+
+/* ================= quiz (Step 7): registered with flow.setQuiz; flow supplies the overlay, focus trap and the end screen ================= */
+var quiz=(function(){
+  var Q=CFG.QUIZ,i=0,right=0,done=null,locked=false,items=[];
+  var qt=$('#qText'),prog=$('#qProg'),box=$('#qOpts'),fb=$('#qFb'),nx=$('#qNext');
+  function shuffle(a){for(var j=a.length-1;j>0;j--){var k=Math.floor(Math.random()*(j+1)),t=a[j];a[j]=a[k];a[k]=t}return a}
+  function ask(){
+    var q=Q[i];locked=false;
+    prog.textContent='Question '+(i+1)+' of '+Q.length;qt.textContent=q.q;
+    box.textContent='';fb.hidden=true;nx.hidden=true;
+    items=shuffle(q.o.map(function(t,n){return{t:t,ok:n===0}}));
+    items.forEach(function(o,n){
+      var b=document.createElement('button'),l=document.createElement('span'),w=document.createElement('span'),t=document.createElement('span');
+      b.type='button';b.className='qopt';
+      l.className='ql';l.textContent='ABCD'.charAt(n);l.setAttribute('aria-hidden','true');
+      w.className='qb';t.textContent=o.t;o.s=document.createElement('span');o.s.className='qs';
+      w.appendChild(t);w.appendChild(o.s);b.appendChild(l);b.appendChild(w);box.appendChild(b);o.b=b;
+      b.addEventListener('click',function(){answer(n)});
+    });
+  }
+  function answer(sel){
+    if(locked)return;locked=true;
+    var q=Q[i],ok=items[sel].ok;
+    if(ok)right++;
+    items.forEach(function(o,n){
+      o.b.setAttribute('aria-disabled','true');   /* stays focusable so the result can be read */
+      if(o.ok){o.b.classList.add('right');o.s.textContent='\u2713 Correct answer'}
+      else if(n===sel){o.b.classList.add('wrong');o.s.textContent='\u2717 Your answer'}
+      else o.b.classList.add('rest');
+    });
+    fb.classList.toggle('bad',!ok);
+    $('#qVerdict').textContent=ok?'\u2713 Correct!':'\u2717 Not quite.';
+    $('#qWhy').textContent=q.why;$('#qCode').textContent='CED '+q.code;
+    fb.hidden=false;
+    nx.textContent=i===Q.length-1?'See my score':'Next question';nx.hidden=false;
+    nx.focus();                                    /* the button's description is the explanation */
+  }
+  nx.addEventListener('click',function(){
+    if(i>=Q.length-1){var f=done;done=null;if(f)f({right:right,total:Q.length});return}
+    i++;ask();$('#ov').scrollTop=0;qt.focus();
+  });
+  flow.setQuiz(function(cb){done=cb;i=0;right=0;ask();flow.open('ovQuiz')});
+  return{};
+})();
+
+/* ================= debug ================= */
+var debug=(function(){
+  if(!DEBUG)return{};
+  $('#dbg').hidden=false;
+  var rowC=$('#dbgCat'),rowP=$('#dbgPose'),rowA=$('#dbgAnch'),A=CFG.ANCHORS,g=document.createElementNS(NS,'g'),rings={},hold=$('#dbgHold');
+  function btn(row,label,fn){var b=document.createElement('button');b.textContent=label;b.addEventListener('click',fn);row.appendChild(b);return b}
+  var roam=btn(rowC,'Roam: on',function(){var v=roam.textContent!=='Roam: on';roam.textContent=v?'Roam: on':'Roam: off';cat.auto(v)});
+  function noRoam(){roam.textContent='Roam: off';cat.auto(false)}
+  [['Walk',null],['Sit','sit'],['Lie down','lay'],['Lick paw','lick']].forEach(function(p){
+    btn(rowC,p[0],function(){noRoam();cat.reset();if(p[1])cat.setPose(p[1]);else cat.wander()});
+  });
+  var sel=document.createElement('select');sel.setAttribute('aria-label','Cat (laser response and conditioning parameters)');
+  Object.keys(CFG.CATS).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=CFG.CATS[k].name+' (laser '+CFG.CATS[k].laser+', lag '+CFG.CATS[k].lag+'s)';sel.appendChild(o)});
+  sel.addEventListener('change',function(){game.selectCat(sel.value)});rowC.appendChild(sel);
+  [['Press button','pressButton'],['Lie on pad','lieOnPad'],['Paw crank','pawCrank'],['Press see-saw','pressSeesaw'],['Paw plant','pawPlant'],
+   ['Jump in box','jumpBox'],['Flinch','flinch'],['Eat','eat'],['Petted','petted'],['Hide','hide']].forEach(function(p){
+    btn(rowP,p[0],function(){cat.reset();cat.play(p[1],{dur:hold.checked?Infinity:undefined})});
+  });
+  btn(rowP,'Release',function(){cat.release()});
+  var sb=btn(rowP,'Test: tilt see-saw down',function(){machine.plank(machine.plankAngle()<0?9:-14);sb.textContent=machine.plankAngle()<0?'Test: release see-saw':'Test: tilt see-saw down'});
+  Object.keys(A).forEach(function(k){btn(rowA,k,function(){noRoam();cat.reset();cat.walkTo(A[k].x,A[k].y)})});
+  var lab=document.createElement('label');lab.className='r';lab.style.marginTop='8px';
+  lab.innerHTML='<input type="checkbox" id="dbgShow" checked><span class="nm">Show station zones (solid and filled = cat is near)</span>';
+  rowA.parentNode.insertBefore(lab,$('#dbgInfo'));
+  Object.keys(A).forEach(function(k){
+    var c,t=document.createElementNS(NS,'text');
+    var z=world.zone(k);c=document.createElementNS(NS,'rect');c.setAttribute('x',z.x0);c.setAttribute('y',z.y0);c.setAttribute('width',z.x1-z.x0);c.setAttribute('height',z.y1-z.y0);
+    t.setAttribute('x',A[k].x);t.setAttribute('y',k==='plant'||k==='box'?655:597);t.setAttribute('class','dbgt');
+    g.appendChild(c);g.appendChild(t);rings[k]={c:c,t:t};
+  });
+  $('#dbgA').appendChild(g);
+  /* ---- Step 3 test tools ---- */
+  var script={on:false,h:[]},rowD=$('#dbgDo');
+  function later(ms,fn){script.h.push(setTimeout(fn,ms))}
+  function tryDo(id,n){if(!script.on||game.perform(id)||n<=0)return;later(250,function(){tryDo(id,n-1)})}
+  machine.onPhase(function(p){
+    if(p==='reset'){script.h.forEach(clearTimeout);script.h=[];return}
+    if(!script.on)return;
+    if(p==='launch'&&machine.toggle(1))later(Math.max(0,CFG.BALL_TO_GATE-5)*1000,function(){tryDo('pad',40)});
+    if(p==='bucket'&&machine.toggle(2))tryDo('crank',40);
+    if(p==='funnel'&&machine.toggle(3))later(1500,function(){tryDo('seesaw',40)});
+  });
+  function startAt(n){
+    machine.run(n);
+    if(script.on&&n===1){
+      if(machine.toggle(0))tryDo('button',40);
+      else machine.abort(1,'Step 1 fails: the cat sniffs the switch, decides it is not interesting, and leaves. The machine never starts.');
+    }
+  }
+  document.querySelectorAll('.drill').forEach(function(b){b.addEventListener('click',function(){startAt(+b.dataset.n)})});
+  ['button','pad','crank','seesaw','plant','box'].forEach(function(id){
+    btn(rowD,id,function(){if(!game.perform(id))ui.say('The cat is busy with a committed action. Press Release first.')});
+  });
+  $('#dbgBrain').addEventListener('change',function(){game.applyBrain()});
+  $('#dbgBrainTxt').firstChild.textContent='Engine brain: the cat rolls at stations it has been near for '+CFG.ROLL_DELAY+' s, the plant and box after '+CFG.ROLL_DELAY_DISTRACT+' s (unticked: it never triggers on its own; rewards and punishments still work)';
+  $('#dbgScript').addEventListener('change',function(e){script.on=e.target.checked;if(script.on){$('#dbgBrain').checked=false;game.applyBrain()}});
+  /* ---- Step 4: conditioning readout and test controls ---- */
+  var rowT=$('#dbgTrain'),E4=game.engine;
+  btn(rowT,'Refill treats',function(){tools.refill()});btn(rowT,'Clear cooldowns',function(){tools.clear()});
+  btn(rowT,'Set trained (L at cap)',function(){E4.preset('trained')});
+  btn(rowT,'Reset levels',function(){E4.preset('fresh')});
+  function bar(v,n){var k=Math.round(clamp(v,0,1)*n),o='';while(o.length<k)o+='\u2588';while(o.length<n)o+='\u2591';return o}
+  function pad(x,n){x=String(x);while(x.length<n)x+=' ';return x}
+  function modelText(){
+    var m=E4.state(),st=m.stats,tg=E4.target(),h,L=[];
+    L.push(m.cat.name+'   t '+m.t.toFixed(0)+' s   brain '+(m.brain?'on':'off'));
+    L.push('stress   '+bar(m.stress,16)+' '+m.stress.toFixed(2)+'   (hides at '+CFG.STRESS_HIDE+')');
+    L.push('fullness '+bar(m.fullness,16)+' '+m.fullness.toFixed(2));
+    L.push('');L.push(pad('behavior',9)+pad('level',20)+pad('cap/floor',11)+pad('armed',7)+pad('near',7)+'next roll');
+    m.behaviors.forEach(function(b){
+      var it=m.items[b.id],n=cat.nearTime(b.anchor),nx=n>0&&it.armed?(it.rollAt-n>0?'in '+(it.rollAt-n).toFixed(1)+' s':'due'):'-';
+      L.push(pad(b.id,9)+pad(bar(b.L,10)+' '+b.L.toFixed(2),20)+pad(b.cap.toFixed(2)+'/'+b.floor.toFixed(2),11)+pad(it.armed?'yes':'no',7)+pad(n>0?n.toFixed(1)+'s':'-',7)+nx);
+    });
+    L.push('');
+    L.push('credit goes to: '+(tg?tg.id+(tg.end===null?' (running)':' (ended '+(m.t-tg.end).toFixed(1)+' s ago)'):'nothing (a reward now is for nothing)'));
+    L.push('treats '+st.treats+'  pets '+st.pets+'  sprays '+st.sprays+'  buzzes '+st.buzzes+'  rewards-for-nothing '+st.nothing+'  extinctions '+st.extinct+'  hides '+st.hides+'  interactions '+st.interactions);
+    L.push('');L.push(m.log.length?m.log.join('\n'):'(no rolls yet)');
+    return L.join('\n');
+  }
+  $('#dbgShow').addEventListener('change',function(e){g.style.display=e.target.checked?'':'none'});
+  game.onTick(function(){
+    var s=cat.state(),k,n;
+    for(k in A){n=cat.nearTime(k);var on=n>0,r=rings[k];
+      r.c.setAttribute('style','fill:'+(on?'var(--sage)':'none')+';fill-opacity:.4;stroke:var(--error);stroke-width:2;'+(on?'':'stroke-dasharray:5 4'));
+      r.t.textContent=k+(on?' \u00b7 near '+n.toFixed(1)+'s':'')}
+    $('#dbgModel').textContent=modelText();
+    $('#dbgInfo').textContent='pose: '+s.pose+' (body '+s.body+')'+(s.act?'   action: '+s.act.name+' / '+s.act.stage:'')+'\nx: '+s.x.toFixed(0)+'   y: '+s.y.toFixed(0)+
+      '\nnear: '+(s.near.join(', ')||'none')+'\nlaser: '+(s.L.on?'on at '+s.L.x.toFixed(0)+', '+s.L.y.toFixed(0)+(s.eng?' (cat engaged)':' (cat ignoring)'):'off')+'\n'+machine.info();
+  });
+  return{};
+})();
+
+/* ================= sim (?sim: headless harness; scripted trainers drive the engine through a stub cat) ================= */
+var sim=(function(){
+  var H=CFG.HARNESS,TASKS=['button','pad','crank','seesaw'],RIVAL={crank:'plant',seesaw:'box'};
+  var NAMES={careful:'Careful',rewardAll:'Rewards everything',punishAll:'Punishes everything'};
+  /* a trainer reacts to what the cat just did. kind = 'task' | 'distraction'. idle = acts every IDLE_EVERY s when nothing is happening */
+  var TRAINERS={
+    careful:{react:function(e,kind){
+      var m=e.state(),c=m.cat;
+      if(kind==='task')e.reward(c.pet>c.treat||m.fullness>.7?'pet':'treat');
+      else if(m.stress<.5)e.punish(c.spray<.6?'spray':'buzzer');
+    },idle:null},
+    rewardAll:{react:function(e){var m=e.state();e.reward(m.fullness<.9&&m.cat.treat>=m.cat.pet?'treat':'pet')},idle:function(e){var m=e.state();e.reward(m.fullness<.9?'treat':'pet')}},
+    punishAll:{react:function(e){e.punish('spray')},idle:function(e){e.punish('spray')}}
+  };
+  function runOne(catId,trainerId,seed){
+    var T=0,dt=CFG.DT,near={},act=null,tr=TRAINERS[trainerId],v=null,nextIdle=H.IDLE_EVERY,lastBusy=0,extra=0;
+    var P={stage:'lesson',i:0,streak:0,rs:0,clean:0,done:false},times=[null,null,null,null,null],failedRuns=0,k;
+    var host={
+      nearTime:function(id){return near[id]||0},
+      busy:function(){return !!act},
+      play:function(anim,o){
+        if(act)return false;
+        var d=Math.min(o.dur===undefined?Infinity:o.dur,H.ACTION[anim]||3);
+        act={anim:anim,end:T+d,done:o.done};
+        if(anim==='hide'){near={};if(v)v.abort=true}
+        return true;
+      }
+    };
+    var eng=model.engine(host,function(e,a,b){
+      if(e==='interactionStart'&&v&&!v.got){v.got={id:a,roll:eng.state().last.roll};v.reactAt=T+H.REACT}
+      if(e==='interactionStart')lastBusy=T;
+      if(e==='interactionEnd'&&v&&v.got&&v.got.id===a)v.ended=true;
+    });
+    eng.setCat(catId,seed);
+    function newVisit(){
+      var task=P.stage==='lesson'?TASKS[P.i]:TASKS[P.rs];
+      v={task:task,rival:RIVAL[task]&&(P.stage==='run'||P.i>=2)?RIVAL[task]:null,phase:'walk',at:T+H.WALK+extra,got:null,reactAt:null,ended:false,abort:false,reacted:false};
+      extra=0;near={};
+    }
+    function endVisit(){
+      var ok=v.got&&v.got.id===v.task&&v.got.roll===1;   /* the task triggered on the first roll */
+      if(P.stage==='lesson'){
+        P.streak=ok?P.streak+1:0;
+        if(P.streak>=3){times[P.i]=T;P.i++;P.streak=0;if(P.i>=4)P.stage='run'}
+      }else if(ok){
+        P.rs++;if(P.rs>=4){P.rs=0;P.clean++;if(P.clean>=3){times[4]=T;P.done=true}}
+      }else{P.rs=0;P.clean=0;failedRuns++;extra=H.RUN_RESET}
+      v=null;
+    }
+    newVisit();
+    while(T<H.CAP&&!P.done){
+      T+=dt;
+      for(k in near)near[k]+=dt;
+      if(act&&T>=act.end){var a=act;act=null;if(a.done)a.done(a.anim,'done')}
+      if(v){
+        if(v.phase==='walk'&&T>=v.at){
+          v.phase='wait';v.arrive=T;near={};near[v.task]=1e-9;if(v.rival)near[v.rival]=1e-9;
+        }
+        if(v.reactAt!==null&&T>=v.reactAt){
+          v.reactAt=null;tr.react(eng,CFG.BEHAVIORS.filter(function(b){return b.id===v.got.id})[0].type);
+        }
+        if(v&&v.got&&v.ended&&v.reactAt===null)endVisit();
+        else if(v&&!v.got&&v.phase==='wait'&&(v.abort&&!act||T-v.arrive>H.PATIENCE+CFG.ROLL_DELAY))endVisit();
+      }
+      if(!v&&!P.done)newVisit();
+      if(tr.idle&&!act&&T>=nextIdle&&T-lastBusy>CFG.REWARD_WINDOW){tr.idle(eng);nextIdle=T+H.IDLE_EVERY}
+      eng.step(dt);
+    }
+    var st=eng.state().stats;
+    return{times:times,total:P.done?T:null,failedRuns:failedRuns,stats:st,m:eng.state()};
+  }
+  function mmss(x){if(x===null||x===undefined)return '  --  ';var m=Math.floor(x/60),s=Math.round(x%60);if(s===60){m++;s=0}return m+':'+(s<10?'0':'')+s}
+  function med(a){a=a.filter(function(x){return x!==null}).sort(function(p,q){return p-q});return a.length?a[Math.floor((a.length-1)/2)]:null}
+  /* async over cells so the page stays responsive; cb(text) is called as lines arrive */
+  function runAll(cb,finish){
+    var cells=[],out=[];
+    Object.keys(CFG.CATS).forEach(function(c){Object.keys(TRAINERS).forEach(function(t){cells.push([c,t])})});
+    out.push('?sim  headless harness: '+H.SEEDS.length+' seeds per cell, give up at '+mmss(H.CAP)+' of simulated play. Times are medians of the seeds that finished.');
+    out.push('Lessons 2-5: the task triggers on the first roll 3 times in a row. Lesson 6: 3 clean runs in a row (all 4 steps on the first roll, rival items in range). Lesson 1 is not simulated.');
+    out.push('');
+    out.push(pad('cat',12)+pad('trainer',22)+pad('done',6)+pad('L2 switch',11)+pad('L3 pad',9)+pad('L4 crank',10)+pad('L5 see-saw',12)+pad('L6 runs',9)+pad('failed runs',12)+'treats/pets/sprays/buzz/hides');
+    cb(out.join('\n'));
+    (function next(i){
+      if(i>=cells.length){
+        var a=runOne('latte','careful',1),b=runOne('latte','careful',1);
+        out.push('');out.push('seeded and repeatable: '+(a.total===b.total&&a.m.t===b.m.t));
+        cb(out.join('\n'));if(finish)finish();return;
+      }
+      var c=cells[i][0],t=cells[i][1],rs=H.SEEDS.map(function(sd){return runOne(c,t,sd)});
+      var fin=rs.filter(function(r){return r.total!==null}).length;
+      function col(j){return med(rs.map(function(r){return r.times[j]}))}
+      function avg(f){return Math.round(rs.reduce(function(s,r){return s+r.stats[f]},0)/rs.length)}
+      out.push(pad(CFG.CATS[c].name,12)+pad(NAMES[t],22)+pad(fin+'/'+rs.length,6)+pad(mmss(col(0)),11)+pad(mmss(col(1)),9)+pad(mmss(col(2)),10)+pad(mmss(col(3)),12)+pad(mmss(col(4)),9)+
+        pad(Math.round(rs.reduce(function(s,r){return s+r.failedRuns},0)/rs.length),12)+avg('treats')+'/'+avg('pets')+'/'+avg('sprays')+'/'+avg('buzzes')+'/'+avg('hides'));
+      cb(out.join('\n')+'\n\n(running '+(i+1)+'/'+cells.length+')');
+      setTimeout(function(){next(i+1)},0);
+    })(0);
+  }
+  function pad(x,n){x=String(x);while(x.length<n)x+=' ';return x}
+  return{run:runAll,one:runOne,mmss:mmss};
+})();
+
+/* ================= start ================= */
+if(SIM){
+  $('main').hidden=true;
+  var pre=document.createElement('pre');pre.id='simOut';pre.style.cssText='margin:20px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;color:var(--text);white-space:pre;overflow-x:auto';
+  pre.textContent='?sim starting...';document.body.appendChild(pre);
+  sim.run(function(t){pre.textContent=t},function(){pre.dataset.done='1'});
+}else{game.start();flow.init()}
+})();
+</script>
+</body>
+</html>
