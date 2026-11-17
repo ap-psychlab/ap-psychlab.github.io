@@ -55,7 +55,7 @@
 #say .blue { background: var(--stim-blue); }
 
 /* ---------- Robot ---------- */
-#bot { display: block; width: 100%; max-width: 330px; margin: 0 auto 8px; overflow: visible; }
+#bot { display: block; width: 100%; max-width: 340px; margin: 0 auto 8px; overflow: visible; }
 
 /* Gradient stops */
 .s-shell-hi  { stop-color: var(--bot-shell-hi); }
@@ -76,14 +76,14 @@
 #bot .shell   { fill: url(#gShell); stroke: var(--bot-rim); stroke-width: 1.5; }
 #bot .shade   { fill: var(--bot-visor); opacity: .16; }
 #bot .nozzle  { fill: url(#gVisor); }
-#bot .ring, #bot .cuff { fill: var(--bot-accent); stroke: var(--bot-accent-lo); stroke-width: 1; }
+#bot .ring    { fill: var(--bot-accent); stroke: var(--bot-accent-lo); stroke-width: 1; }
 #bot .flame-glow { fill: var(--bot-flame); opacity: .55; filter: url(#fSoft); }
 #bot .flame-out  { fill: url(#gFlame); }
 #bot .flame-in   { fill: var(--bot-flame-hi); opacity: .9; }
-#bot .cyl     { fill: url(#gCyl); stroke: var(--bot-rim); stroke-width: 1.2; }
-#bot .band    { fill: var(--bot-rim); }
-#bot .socket  { fill: url(#gVisor); stroke: var(--bot-rim); stroke-width: 2; }
-#bot .ear, #bot .hand, #bot .joint { fill: url(#gAccent); stroke: var(--bot-accent-lo); stroke-width: 1; }
+#bot .ear, #bot .hand { fill: url(#gAccent); }
+#bot .ear, #bot .hand { stroke: var(--bot-accent-lo); stroke-width: 1; }
+#bot .limb-edge { fill: none; stroke: var(--bot-rim); stroke-width: 15; stroke-linecap: round; }
+#bot .limb    { fill: none; stroke: var(--bot-shell); stroke-width: 12; stroke-linecap: round; }
 #bot .antenna { fill: none; stroke: var(--bot-rim); stroke-width: 4; stroke-linecap: round; }
 #bot .bulb    { fill: var(--bot-shell-lo); stroke: var(--bot-rim); stroke-width: 1.5; transition: fill .15s; }
 #bot .halo    { fill: none; filter: url(#fSoft); }
@@ -92,13 +92,12 @@
 #bot .visor, #bot .port { fill: url(#gVisor); }
 #bot .port-rim { fill: var(--bot-shell-lo); stroke: var(--bot-rim); stroke-width: 1.5; }
 #bot .visor-gloss { fill: var(--bot-shell-hi); opacity: .13; }
-#bot .gloss   { fill: none; stroke: var(--bot-shell-hi); stroke-width: 2.5; stroke-linecap: round; opacity: .35; }
-#bot .blush   { fill: var(--bot-blush); opacity: .8; filter: url(#fSoft); }
+#bot .gloss   { fill: none; stroke: var(--bot-shell-hi); stroke-width: 3; stroke-linecap: round; opacity: .35; }
+#bot .blush   { fill: var(--bot-blush); opacity: .75; filter: url(#fSoft); }
 #bot .face    { filter: url(#fGlow); }
 #bot .face ellipse, #bot .m-o { fill: var(--bot-glow); }
-#bot .face .spark { fill: var(--bot-shell-hi); }
 #bot .line    { fill: none; stroke: var(--bot-glow); stroke-width: 4.5; stroke-linecap: round; }
-#bot .chest-q { font: 700 22px var(--font-body); fill: var(--bot-glow); }
+#bot .chest-q { font: 700 28px var(--font-body); fill: var(--bot-glow); }
 #bot .chest-red  { fill: var(--stim-red); }
 #bot .chest-blue { fill: var(--stim-blue); }
 
@@ -119,24 +118,23 @@
 #bot[data-pick="blue"] :is(.bulb, .halo) { fill: var(--stim-blue); }
 
 /* Motion: drifting, hover bob, flame flicker, blink, head tilt, wave */
-#roll { transform-origin: 160px 240px; transition: transform .5s ease-in-out; }
+#roll { transform-origin: 160px 226px; transition: transform .5s ease-in-out; }
 #bot .bob { animation: bob 3s ease-in-out infinite; }
 #bot .shadow { transform-box: fill-box; transform-origin: center; animation: shadow 3s ease-in-out infinite; }
-#bot .flame { transform-origin: 160px 250px; animation: flicker .14s ease-in-out infinite alternate; }
+#bot .flame { transform-origin: 160px 235px; animation: flicker .14s ease-in-out infinite alternate; }
 #bot[data-mood="think"] .flame { animation-duration: .07s; }
 #bot .eyes-open { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
-#bot .head { transform-origin: 160px 184px; transition: transform .25s; }
+#bot .head { transform-origin: 160px 150px; transition: transform .25s; }
 #bot[data-mood="think"] .head { transform: rotate(5deg); }
 #bot[data-mood="flat"] .head { transform: rotate(-3deg); }
-#bot .arm { transition: transform .25s; }
-#bot[data-mood="happy"] .arm-r { animation: wave .5s ease-in-out infinite alternate; }
+#bot .arm-r { transform-origin: 210px 172px; transition: transform .25s; }
+#bot[data-mood="happy"] .arm-r { transform: rotate(-115deg); }
 #bot[data-mood="think"] .bulb { animation: pulse .3s linear infinite alternate; }
 
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 @keyframes shadow { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.86); opacity: .75; } }
 @keyframes flicker { from { transform: scale(1, 1); } to { transform: scale(.92, .82); } }
 @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
-@keyframes wave { from { transform: rotate(-70deg); } to { transform: rotate(-95deg); } }
 @keyframes pulse { to { fill: var(--bot-accent); } }
 
 /* ---------- Guess buttons ---------- */
@@ -187,9 +185,9 @@
 #results p { margin: 0 0 8px; }
 
 @media (prefers-reduced-motion: reduce) {
-  #roll, #bot .arm, #bot .head { transition: none; }
+  #roll, #bot .arm-r { transition: none; }
   #bot :is(.bob, .shadow, .flame, .eyes-open), #bot[data-mood="think"] .bulb { animation: none; }
-  #bot[data-mood="happy"] .arm-r { animation: none; transform: rotate(-80deg); }
+  #bot .head { transition: none; }
 }
 
 @media (max-width: 420px) {
