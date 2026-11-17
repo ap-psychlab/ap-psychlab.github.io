@@ -1,0 +1,196 @@
+/* Outguess the Robot — demo-specific styles (theme comes from ../../shared/theme.css) */
+
+:root {
+  /* Stimulus colors (true colors, used only for the two picks) */
+  --stim-red: #B71C1C;
+  --stim-blue: #1749A8;
+
+  /* Chip the robot (its own palette, robot only) */
+  --bot-shell-hi: #FFFFFF;
+  --bot-shell: #EDF0F8;
+  --bot-shell-lo: #B4BBD4;
+  --bot-rim: #8A92B0;
+  --bot-visor-hi: #3B4368;
+  --bot-visor: #15182A;
+  --bot-glow: #8FF7D4;
+  --bot-accent-hi: #FFE89A;
+  --bot-accent: #FFC02E;
+  --bot-accent-lo: #D98700;
+  --bot-blush: #FF8FAE;
+  --bot-flame-hi: #F0FCFF;
+  --bot-flame: #6FDCFF;
+  --bot-flame-lo: #3D8BFF;
+}
+
+.play { text-align: center; }
+
+/* ---------- Speech bubble ---------- */
+.bubble {
+  position: relative;
+  max-width: 520px;
+  min-height: 6.5em;
+  margin: 0 auto 14px;
+  padding: 12px 16px;
+  background: var(--bg-alt);
+  border: 2px solid var(--heading);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bubble::before, .bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  border-style: solid;
+  border-color: transparent;
+  transform: translateX(-50%);
+}
+.bubble::before { bottom: -14px; border-width: 14px 12px 0; border-top-color: var(--heading); }
+.bubble::after  { bottom: -10px; border-width: 11px 9px 0;  border-top-color: var(--bg-alt); }
+#say { margin: 0; color: var(--heading); font-size: 1.05rem; }
+#say strong { display: block; }
+#say .red, #say .blue { padding: 0 6px; border-radius: 4px; color: var(--bg); }
+#say .red { background: var(--stim-red); }
+#say .blue { background: var(--stim-blue); }
+
+/* ---------- Robot ---------- */
+#bot { display: block; width: 100%; max-width: 340px; margin: 0 auto 8px; overflow: visible; }
+
+/* Gradient stops */
+.s-shell-hi  { stop-color: var(--bot-shell-hi); }
+.s-shell     { stop-color: var(--bot-shell); }
+.s-shell-lo  { stop-color: var(--bot-shell-lo); }
+.s-visor-hi  { stop-color: var(--bot-visor-hi); }
+.s-visor     { stop-color: var(--bot-visor); }
+.s-accent-hi { stop-color: var(--bot-accent-hi); }
+.s-accent    { stop-color: var(--bot-accent); }
+.s-accent-lo { stop-color: var(--bot-accent-lo); }
+.s-flame     { stop-color: var(--bot-flame); }
+.s-flame-lo  { stop-color: var(--bot-flame-lo); stop-opacity: .85; }
+.s-flame-out { stop-color: var(--bot-flame-lo); stop-opacity: 0; }
+.s-shadow    { stop-color: var(--bot-visor); stop-opacity: .3; }
+.s-shadow-out { stop-color: var(--bot-visor); stop-opacity: 0; }
+
+#bot .shadow  { fill: url(#gShadow); }
+#bot .shell   { fill: url(#gShell); stroke: var(--bot-rim); stroke-width: 1.5; }
+#bot .shade   { fill: var(--bot-visor); opacity: .16; }
+#bot .nozzle  { fill: url(#gVisor); }
+#bot .ring    { fill: var(--bot-accent); stroke: var(--bot-accent-lo); stroke-width: 1; }
+#bot .flame-glow { fill: var(--bot-flame); opacity: .55; filter: url(#fSoft); }
+#bot .flame-out  { fill: url(#gFlame); }
+#bot .flame-in   { fill: var(--bot-flame-hi); opacity: .9; }
+#bot .ear, #bot .hand { fill: url(#gAccent); }
+#bot .ear, #bot .hand { stroke: var(--bot-accent-lo); stroke-width: 1; }
+#bot .limb-edge { fill: none; stroke: var(--bot-rim); stroke-width: 15; stroke-linecap: round; }
+#bot .limb    { fill: none; stroke: var(--bot-shell); stroke-width: 12; stroke-linecap: round; }
+#bot .antenna { fill: none; stroke: var(--bot-rim); stroke-width: 4; stroke-linecap: round; }
+#bot .bulb    { fill: var(--bot-shell-lo); stroke: var(--bot-rim); stroke-width: 1.5; transition: fill .15s; }
+#bot .halo    { fill: none; filter: url(#fSoft); }
+#bot .glint   { fill: var(--bot-shell-hi); opacity: .8; }
+#bot .glint.big { opacity: .9; }
+#bot .visor, #bot .port { fill: url(#gVisor); }
+#bot .port-rim { fill: var(--bot-shell-lo); stroke: var(--bot-rim); stroke-width: 1.5; }
+#bot .visor-gloss { fill: var(--bot-shell-hi); opacity: .13; }
+#bot .gloss   { fill: none; stroke: var(--bot-shell-hi); stroke-width: 3; stroke-linecap: round; opacity: .35; }
+#bot .blush   { fill: var(--bot-blush); opacity: .75; filter: url(#fSoft); }
+#bot .face    { filter: url(#fGlow); }
+#bot .face ellipse, #bot .m-o { fill: var(--bot-glow); }
+#bot .line    { fill: none; stroke: var(--bot-glow); stroke-width: 4.5; stroke-linecap: round; }
+#bot .chest-q { font: 700 28px var(--font-body); fill: var(--bot-glow); }
+#bot .chest-red  { fill: var(--stim-red); }
+#bot .chest-blue { fill: var(--stim-blue); }
+
+/* Faces: idle (default), think, happy, flat */
+#bot :is(.eyes-happy, .eyes-think, .eyes-flat, .m-flat, .m-o) { display: none; }
+#bot[data-mood="think"] :is(.eyes-open, .m-smile),
+#bot[data-mood="happy"] .eyes-open,
+#bot[data-mood="flat"] :is(.eyes-open, .m-smile) { display: none; }
+#bot[data-mood="think"] :is(.eyes-think, .m-o),
+#bot[data-mood="happy"] .eyes-happy,
+#bot[data-mood="flat"] :is(.eyes-flat, .m-flat) { display: inline; }
+
+/* Belly screen and antenna bulb show the pick */
+#bot .chest-red, #bot .chest-blue { display: none; }
+#bot[data-pick="red"] .chest-red, #bot[data-pick="blue"] .chest-blue { display: inline; }
+#bot:not([data-pick=""]) .chest-q { display: none; }
+#bot[data-pick="red"] :is(.bulb, .halo)  { fill: var(--stim-red); }
+#bot[data-pick="blue"] :is(.bulb, .halo) { fill: var(--stim-blue); }
+
+/* Motion: drifting, hover bob, flame flicker, blink, head tilt, wave */
+#roll { transform-origin: 160px 226px; transition: transform .5s ease-in-out; }
+#bot .bob { animation: bob 3s ease-in-out infinite; }
+#bot .shadow { transform-box: fill-box; transform-origin: center; animation: shadow 3s ease-in-out infinite; }
+#bot .flame { transform-origin: 160px 235px; animation: flicker .14s ease-in-out infinite alternate; }
+#bot[data-mood="think"] .flame { animation-duration: .07s; }
+#bot .eyes-open { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+#bot .head { transform-origin: 160px 150px; transition: transform .25s; }
+#bot[data-mood="think"] .head { transform: rotate(5deg); }
+#bot[data-mood="flat"] .head { transform: rotate(-3deg); }
+#bot .arm-r { transform-origin: 210px 172px; transition: transform .25s; }
+#bot[data-mood="happy"] .arm-r { transform: rotate(-115deg); }
+#bot[data-mood="think"] .bulb { animation: pulse .3s linear infinite alternate; }
+
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes shadow { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.86); opacity: .75; } }
+@keyframes flicker { from { transform: scale(1, 1); } to { transform: scale(.92, .82); } }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes pulse { to { fill: var(--bot-accent); } }
+
+/* ---------- Guess buttons ---------- */
+.pick {
+  min-width: 132px;
+  min-height: 56px;
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.pick svg { width: 22px; height: 22px; fill: var(--bg); }
+.pick-red, .pick-red:hover   { background: var(--stim-red); }
+.pick-blue, .pick-blue:hover { background: var(--stim-blue); }
+.pick:hover:not(:disabled) { filter: brightness(1.15); }
+
+/* ---------- History strip ---------- */
+.side .card { margin-bottom: 16px; }
+.history { display: flex; flex-wrap: wrap; gap: 4px; min-height: 44px; }
+.cell { display: flex; flex-direction: column; align-items: center; font-size: .95rem; font-weight: 700; line-height: 1.2; color: var(--heading); }
+.cell .miss { color: var(--error); font-weight: 700; }
+.chip {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .8rem;
+  color: var(--bg);
+}
+.chip[data-c="red"]  { background: var(--stim-red); border-radius: 50%; }
+.chip[data-c="blue"] { background: var(--stim-blue); border-radius: 4px; }
+.legend { margin: 12px 0 0; }
+.legend .chip { width: 20px; height: 20px; vertical-align: middle; }
+
+/* ---------- Results ---------- */
+.bar { margin-bottom: 12px; }
+.bar .lbl { display: flex; justify-content: space-between; gap: 8px; color: var(--heading); font-weight: 700; font-size: .95rem; }
+.bar .track { height: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--accent); }
+.bar.best .fill {
+  background: repeating-linear-gradient(45deg, var(--teal) 0 8px, var(--sage) 8px 12px);
+}
+.facts { margin: 0 0 8px; padding-left: 20px; }
+.facts li { margin-bottom: 4px; }
+#results p { margin: 0 0 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  #roll, #bot .arm-r { transition: none; }
+  #bot :is(.bob, .shadow, .flame, .eyes-open), #bot[data-mood="think"] .bulb { animation: none; }
+  #bot .head { transition: none; }
+}
+
+@media (max-width: 420px) {
+  .bubble { min-height: 8em; }
+  .pick { min-width: 116px; }
+}

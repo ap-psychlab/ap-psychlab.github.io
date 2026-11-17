@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outguess the Robot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<main class="wide">
+  <h1>Outguess the Robot</h1>
+  <p class="hint">Chip the robot picks a color each round. Guess what it will pick: click Red or Blue, or press R / B (or the ← / → arrow keys).</p>
+
+  <div class="split">
+  <div class="play">
+
+    <div class="bubble" id="bubble" role="status" aria-live="polite">
+      <p id="say"></p>
+    </div>
+
+    <svg id="bot" viewBox="0 0 320 300" data-mood="idle" data-pick="" role="img" aria-label="Chip, a small round robot hovering on a blue jet flame">
+      <defs>
+        <radialGradient id="gShell" cx="34%" cy="22%" r="90%">
+          <stop offset="0" class="s-shell-hi"/><stop offset=".45" class="s-shell"/><stop offset="1" class="s-shell-lo"/>
+        </radialGradient>
+        <linearGradient id="gVisor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" class="s-visor-hi"/><stop offset="1" class="s-visor"/>
+        </linearGradient>
+        <radialGradient id="gAccent" cx="35%" cy="28%" r="80%">
+          <stop offset="0" class="s-accent-hi"/><stop offset=".55" class="s-accent"/><stop offset="1" class="s-accent-lo"/>
+        </radialGradient>
+        <linearGradient id="gFlame" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" class="s-flame"/><stop offset=".55" class="s-flame-lo"/><stop offset="1" class="s-flame-out"/>
+        </linearGradient>
+        <radialGradient id="gShadow">
+          <stop offset="0" class="s-shadow"/><stop offset="1" class="s-shadow-out"/>
+        </radialGradient>
+        <filter id="fGlow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="2.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="fSoft" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4"/></filter>
+      </defs>
+
+      <g id="roll">
+        <ellipse class="shadow" cx="160" cy="290" rx="66" ry="8"/>
+
+        <g class="bob">
+          <!-- jet flame -->
+          <g class="flame">
+            <path class="flame-glow" d="M141 237Q138 262 160 283Q182 262 179 237Z"/>
+            <path class="flame-out" d="M144 235Q141 259 160 279Q179 259 176 235Z"/>
+            <path class="flame-in" d="M152 235Q150 249 160 261Q170 249 168 235Z"/>
+          </g>
+          <rect class="nozzle" x="138" y="226" width="44" height="12" rx="5"/>
+          <rect class="ring" x="134" y="222" width="52" height="7" rx="3.5"/>
+
+          <g class="arm">
+            <path class="limb-edge" d="M110 172q-22 8 -24 30"/>
+            <path class="limb" d="M110 172q-22 8 -24 30"/>
+            <circle class="hand" cx="86" cy="204" r="10"/>
+          </g>
+          <g class="arm arm-r">
+            <path class="limb-edge" d="M210 172q22 8 24 30"/>
+            <path class="limb" d="M210 172q22 8 24 30"/>
+            <circle class="hand" cx="234" cy="204" r="10"/>
+          </g>
+
+          <!-- body, with the round belly screen that shows each pick -->
+          <rect class="shell" x="104" y="142" width="112" height="84" rx="38"/>
+          <ellipse class="shade" cx="160" cy="152" rx="46" ry="9"/>
+          <circle class="port-rim" cx="160" cy="188" r="25"/>
+          <circle class="port" cx="160" cy="188" r="20"/>
+          <text class="chest-q" x="160" y="198" text-anchor="middle">?</text>
+          <circle class="chest-red" cx="160" cy="188" r="13"/>
+          <rect class="chest-blue" x="148" y="176" width="24" height="24" rx="5"/>
+          <path class="gloss" d="M145 180a17 17 0 0 1 22 -9"/>
+
+          <g class="head">
+            <path class="antenna" d="M160 48q-7 -9 0 -18"/>
+            <circle class="halo" cx="160" cy="24" r="16"/>
+            <circle class="bulb" cx="160" cy="24" r="9"/>
+            <circle class="glint" cx="157" cy="21" r="2.5"/>
+
+            <circle class="ear" cx="84" cy="98" r="14"/>
+            <circle class="ear" cx="236" cy="98" r="14"/>
+            <rect class="shell" x="82" y="44" width="156" height="108" rx="52"/>
+            <ellipse class="glint big" cx="126" cy="60" rx="30" ry="9" transform="rotate(-14 126 60)"/>
+
+            <rect class="visor" x="100" y="66" width="120" height="64" rx="30"/>
+            <ellipse class="visor-gloss" cx="134" cy="79" rx="30" ry="6" transform="rotate(-10 134 79)"/>
+            <ellipse class="blush" cx="117" cy="113" rx="9" ry="5"/>
+            <ellipse class="blush" cx="203" cy="113" rx="9" ry="5"/>
+
+            <g class="face">
+              <g class="eyes-open">
+                <ellipse cx="137" cy="93" rx="9" ry="12"/>
+                <ellipse cx="183" cy="93" rx="9" ry="12"/>
+              </g>
+              <path class="line eyes-happy" d="M127 98q10 -15 20 0M173 98q10 -15 20 0"/>
+              <g class="eyes-think">
+                <ellipse cx="141" cy="89" rx="7" ry="9"/>
+                <ellipse cx="187" cy="89" rx="7" ry="9"/>
+              </g>
+              <path class="line eyes-flat" d="M128 94h18M174 94h18"/>
+              <path class="line m-smile" d="M152 111q8 8 16 0"/>
+              <path class="line m-flat" d="M153 114h14"/>
+              <circle class="m-o" cx="160" cy="114" r="4"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </svg>
+
+    <div class="row" id="talkRow">
+      <button class="btn" id="nextBtn">Next</button>
+    </div>
+
+    <div class="row" id="guessRow" hidden>
+      <button class="btn pick pick-red" id="redBtn" aria-label="Guess red, key R">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>Red
+      </button>
+      <button class="btn pick pick-blue" id="blueBtn" aria-label="Guess blue, key B">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Blue
+      </button>
+    </div>
+
+    <div class="row">
+      <button class="btn alt" id="soundBtn" aria-pressed="true">Sound: On</button>
+      <button class="btn ghost" id="restartBtn" hidden>Restart</button>
+    </div>
+
+  </div>
+
+  <aside class="side" aria-label="Scores and results">
+    <div class="stats" aria-label="Scores">
+      <div class="stat"><span>Round</span><strong id="roundV">0 / 40</strong></div>
+      <div class="stat"><span>Correct</span><strong id="correctV">0</strong></div>
+    </div>
+
+    <section class="card" id="historyCard">
+      <h2>Chip's picks so far</h2>
+      <div class="history" id="history"></div>
+      <p class="hint legend">
+        <span class="chip" data-c="red">R</span> red
+        <span class="chip" data-c="blue">B</span> blue
+        &nbsp; ✓ you guessed it &nbsp; ✗ you missed
+      </p>
+    </section>
+
+    <section class="card" id="results" hidden>
+      <h2>Results</h2>
+      <div class="bars" id="bars"></div>
+      <ul class="facts" id="facts"></ul>
+      <h3>What's going on?</h3>
+      <p>Chip has no memory. Every pick is a fresh 70/30 roll, so after any streak the chance of red is still 70%. Believing that blue is “due” after a run of reds is the <strong>gambler's fallacy</strong>.</p>
+      <p>Because red is the more likely pick on every round, the best strategy is to guess red every time (about 70% correct on average). Mixing in blue guesses to match the 70/30 pattern averages only about 58%.</p>
+    </section>
+  </aside>
+  </div>
+</main>
+</body>
+</html>
