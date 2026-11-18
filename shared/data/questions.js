@@ -4,7 +4,7 @@
  * Games shuffle `choices` (keeping `answer` and `feedback` aligned) unless `shuffle` is false.
  * status: "draft" (not yet reviewed) or "live" (reviewed); games use both. "omitted" questions are skipped by every game.
  * choiceRefs: the term id each choice names or illustrates (null if none), in choice order; games list
- *   these as "What's this?" definitions after the answer is shown (shared/term-help.js).
+ *   these under "Terms used in this question" after the answer is shown (shared/term-help.js).
  * figure (optional): data for a scatterplot, bar graph or line graph drawn by shared/figures.js;
  *   the format is described at the top of that file.
  */

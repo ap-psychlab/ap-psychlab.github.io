@@ -440,7 +440,7 @@
     $("hintBox").textContent = "Hint: " + q.hint;
     $("explain").hidden = !V.revealed;
     $("explain").textContent = V.revealed ? "Explanation: " + q.explanation : "";
-    // "What's this?" definitions after the reveal, for the choices on screen
+    // "Terms used in this question" after the reveal, for the choices on screen
     if (window.APPSYCH_TERM_HELP) {
       const shown = V.revealed ? t.order.map((orig, pos) => ({ letter: LETTERS[pos], orig: orig }))
         .filter((s) => V.choices || s.orig === q.answer) : null;

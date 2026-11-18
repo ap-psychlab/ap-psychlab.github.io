@@ -1,4 +1,4 @@
-/* Shared styles for question figures (shared/figures.js) and "What's this?" term help
+/* Shared styles for question figures (shared/figures.js) and "Terms used in this question"
  * (shared/term-help.js). Uses theme.css tokens only. */
 
 /* ---------- Figures ---------- */
@@ -53,16 +53,15 @@
   .fig-axis-title { font-size: .8125em; }
 }
 
-/* ---------- "What's this?" term help ---------- */
+/* ---------- "Terms used in this question" (term help) ---------- */
 .term-help { margin: 16px 0 0; }
 .th-title { margin: 0 0 8px; font-weight: 700; color: var(--heading); }
 .th-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .th-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); }
 .th-item summary {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px;
-  min-height: 44px; padding: 10px 12px; cursor: pointer; list-style-position: inside;
+  min-height: 44px; padding: 10px 12px; cursor: pointer;
 }
-.th-tag { font-size: .85rem; color: var(--text); }
 .th-term { font-weight: 700; color: var(--heading); }
+.th-where { color: var(--text); }
 .th-def, .th-ex { margin: 0; padding: 0 12px 10px; }
 .th-ex { font-size: .95rem; }

@@ -771,7 +771,7 @@ function renderQuestion() {
   const hintBox = $('hintBox'); hintBox.hidden = !(it.hintUsed && !answered); hintBox.textContent = 'Hint: ' + q.hint;
   const ex = $('explain'); ex.hidden = !answered; ex.innerHTML = '';
   if (answered) { const p = el('p'); p.appendChild(el('strong', null, 'Explanation: ')); p.appendChild(document.createTextNode(q.explanation)); ex.appendChild(p); }
-  // "What's this?" definitions, only once the answer is shown
+  // "Terms used in this question", only once the answer is shown
   if (window.APPSYCH_TERM_HELP) APPSYCH_TERM_HELP.mount($('termHelp'), q, answered ? it.order.map((orig, pos) => ({ letter: LETTERS[pos], orig: orig })) : null);
   const hint = $('hintBtn'); hint.hidden = answered; hint.disabled = it.hintUsed;
   hint.setAttribute('aria-expanded', it.hintUsed ? 'true' : 'false'); hint.textContent = it.hintUsed ? 'Hint shown' : 'Show hint';

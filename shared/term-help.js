@@ -1,4 +1,4 @@
-/* "What's this?" term definitions for answered questions: window.APPSYCH_TERM_HELP
+/* "Terms used in this question" definitions for answered questions: window.APPSYCH_TERM_HELP
  * Needs ../../shared/data/terms.js (window.APPSYCH_TERMS) loaded first.
  *
  * APPSYCH_TERM_HELP.mount(container, q, shown)
@@ -7,8 +7,11 @@
  *          (or { label: "Answer", orig } to use your own label)
  *          (pass null or [] before the answer is revealed: the list stays hidden, because
  *          naming each choice's term could give the answer away)
- *   Lists the question's topic and the term behind each shown choice (q.choiceRefs),
- *   each as a <details> that opens to the term's definition (and example, if any).
+ *   Lists the question's own term and the term behind each shown choice (q.choiceRefs) as
+ *   "Term (Question Stem, Choice A)", each a <details> that opens to the definition (and
+ *   example, if any). "Question Stem" (the scenario, any graph, and the question) is added
+ *   for the question's own term when no shown choice holds it, and for any listed term whose
+ *   name or alias appears in the stem text.
  *   Items that are open stay open when the same question is re-rendered.
  */
 window.APPSYCH_TERM_HELP = (function () {
@@ -28,13 +31,24 @@ window.APPSYCH_TERM_HELP = (function () {
     return e;
   }
 
-  // ["B", "D"] -> "Choices B, D"; custom labels are kept as given
-  function labelText(list) {
+  // [stem, "B", "D"] -> "Question Stem, Choices B, D"; custom labels are kept as given
+  function labelText(list, stem) {
     var letters = list.filter(function (l) { return l.letter; }).map(function (l) { return l.letter; });
-    var custom = list.filter(function (l) { return !l.letter; });
-    var parts = custom.slice();
+    var parts = list.filter(function (l) { return !l.letter; });
     if (letters.length) parts.unshift((letters.length > 1 ? "Choices " : "Choice ") + letters.join(", "));
+    if (stem) parts.unshift("Question Stem");
     return parts.join(", ");
+  }
+
+  // Does the stem name this term (its name or an alias, with or without a plural s)?
+  function named(t, text) {
+    var names = [t.term].concat(t.aliases || []);
+    return names.some(function (n) {
+      var bare = n.replace(/\s*\(.*?\)\s*/g, " ").trim().replace(/(es|s)$/i, "");
+      if (bare.length < 3) return false;
+      var re = new RegExp("\\b" + bare.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(s|es)?\\b", "i");
+      return re.test(text);
+    });
   }
 
   function mount(container, q, shown) {
@@ -61,7 +75,7 @@ window.APPSYCH_TERM_HELP = (function () {
     if (!order.length) { container.hidden = true; return; }
 
     container.hidden = false;
-    container.appendChild(make("p", "th-title", "What's this? Terms in this question"));
+    container.appendChild(make("p", "th-title", "Terms used in this question:"));
     var ul = make("ul", "th-list");
     order.forEach(function (id) {
       var t = lookup(id);
@@ -70,10 +84,10 @@ window.APPSYCH_TERM_HELP = (function () {
       d.setAttribute("data-term", id);
       if (wasOpen[id]) d.open = true;
       var s = make("summary");
-      var tag = labelText(labels[id]) || "Question topic";
-      if (id === q.term && labels[id].length) tag = "Topic · " + tag;
-      s.appendChild(make("span", "th-tag", tag));
-      s.appendChild(make("span", "th-term", t.term));
+      var inStem = (id === q.term && !labels[id].length) || named(t, q.stem || "");
+      s.appendChild(make("strong", "th-term", t.term));
+      s.appendChild(document.createTextNode(" "));
+      s.appendChild(make("span", "th-where", "(" + labelText(labels[id], inStem) + ")"));
       d.appendChild(s);
       d.appendChild(make("p", "th-def", t.definition));
       if (t.example) {

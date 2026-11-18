@@ -257,7 +257,7 @@
       p.appendChild(document.createTextNode(q.explanation));
       ex.appendChild(p);
     }
-    // "What's this?" definitions, only once the answer is shown
+    // "Terms used in this question", only once the answer is shown
     if (window.APPSYCH_TERM_HELP) {
       APPSYCH_TERM_HELP.mount($("termHelp"), q, reveal ? it.order.map((orig, pos) => ({ letter: LETTERS[pos], orig: orig })) : null);
     }
