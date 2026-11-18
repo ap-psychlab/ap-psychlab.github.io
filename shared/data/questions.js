@@ -2,12 +2,14 @@
  * One question per term in terms.js (linked by `term`). Written for this site; no copied exam or textbook items.
  * difficulty: 1 (one clear cue) to 5 (multi-step reasoning with subtle, partly true distractors).
  * Games shuffle `choices` (keeping `answer` and `feedback` aligned) unless `shuffle` is false.
+ * status: "draft" (not yet reviewed) or "live" (reviewed); games use both. "omitted" questions are skipped by every game.
  */
 window.APPSYCH_QUESTIONS = [
   // ===== Science Practices =====
   // perspectives
   {
     id: "q-psychology-1",
+    status: "draft",
     term: "psychology",
     ced: ["0.1"],
     skills: ["1.A"],
@@ -32,6 +34,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-psychodynamic-perspective-1",
+    status: "draft",
     term: "psychodynamic-perspective",
     ced: ["0.1", "5.3.B.3"],
     skills: ["1.A"],
@@ -51,6 +54,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-behavioral-perspective-1",
+    status: "draft",
     term: "behavioral-perspective",
     ced: ["0.1", "3.7.A.1"],
     skills: ["1.A"],
@@ -75,6 +79,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-humanistic-perspective-1",
+    status: "draft",
     term: "humanistic-perspective",
     ced: ["0.1", "4.4.B.1"],
     skills: ["1.A"],
@@ -94,6 +99,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-biological-perspective-1",
+    status: "draft",
     term: "biological-perspective",
     ced: ["0.1"],
     skills: ["1.A"],
@@ -113,6 +119,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-cognitive-perspective-1",
+    status: "draft",
     term: "cognitive-perspective",
     ced: ["0.1", "5.3.B.5"],
     skills: ["1.A"],
@@ -132,6 +139,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-sociocultural-perspective-1",
+    status: "draft",
     term: "sociocultural-perspective",
     ced: ["0.1"],
     skills: ["1.A"],
@@ -156,6 +164,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-evolutionary-perspective-1",
+    status: "draft",
     term: "evolutionary-perspective",
     ced: ["0.1", "1.1.A.2"],
     skills: ["1.A"],
@@ -180,6 +189,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-cultural-norms-1",
+    status: "draft",
     term: "cultural-norms",
     ced: ["0.1", "5.3.A.1", "5.3.A.2"],
     skills: ["1.B"],
@@ -206,6 +216,7 @@ window.APPSYCH_QUESTIONS = [
   // research-methods
   {
     id: "q-research-design-1",
+    status: "draft",
     term: "research-design",
     ced: ["0.2"],
     skills: ["2.A"],
@@ -225,6 +236,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-experiment-1",
+    status: "draft",
     term: "experiment",
     ced: ["0.2"],
     skills: ["2.A"],
@@ -249,6 +261,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-hypothesis-1",
+    status: "draft",
     term: "hypothesis",
     ced: ["0.2"],
     skills: ["2.B"],
@@ -273,6 +286,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-theory-1",
+    status: "draft",
     term: "theory",
     ced: ["0.2"],
     skills: ["2.B"],
@@ -297,6 +311,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-falsifiable-1",
+    status: "draft",
     term: "falsifiable",
     ced: ["0.2"],
     skills: ["2.B"],
@@ -321,6 +336,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-operational-definitions-1",
+    status: "draft",
     term: "operational-definitions",
     ced: ["0.2"],
     skills: ["2.B"],
@@ -345,6 +361,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-replication-1",
+    status: "draft",
     term: "replication",
     ced: ["0.2"],
     skills: ["2.B"],
@@ -369,6 +386,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-case-study-1",
+    status: "draft",
     term: "case-study",
     ced: ["0.2"],
     skills: ["2.A", "2.C"],
@@ -393,6 +411,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-correlation-1",
+    status: "draft",
     term: "correlation",
     ced: ["0.2"],
     skills: ["2.C"],
@@ -417,6 +436,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-naturalistic-observation-1",
+    status: "draft",
     term: "naturalistic-observation",
     ced: ["0.2"],
     skills: ["2.A"],
@@ -441,6 +461,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-survey-1",
+    status: "draft",
     term: "survey",
     ced: ["0.2"],
     skills: ["2.C"],
@@ -460,6 +481,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-meta-analysis-1",
+    status: "draft",
     term: "meta-analysis",
     ced: ["0.2", "5.5.A.1"],
     skills: ["2.A"],
@@ -479,6 +501,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-structured-interviews-1",
+    status: "draft",
     term: "structured-interviews",
     ced: ["0.2"],
     skills: ["2.B", "2.C"],
@@ -503,6 +526,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-qualitative-measures-1",
+    status: "draft",
     term: "qualitative-measures",
     ced: ["0.2"],
     skills: ["2.B", "2.C"],
@@ -527,6 +551,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-quantitative-measures-1",
+    status: "draft",
     term: "quantitative-measures",
     ced: ["0.2"],
     skills: ["2.B", "2.C"],
@@ -551,6 +576,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-likert-scale-1",
+    status: "draft",
     term: "likert-scale",
     ced: ["0.2"],
     skills: ["2.B", "2.C"],
@@ -577,6 +603,7 @@ window.APPSYCH_QUESTIONS = [
   // experimental-design
   {
     id: "q-independent-variables-1",
+    status: "draft",
     term: "independent-variables",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -601,6 +628,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-dependent-variables-1",
+    status: "draft",
     term: "dependent-variables",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -620,6 +648,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-confounding-variables-1",
+    status: "draft",
     term: "confounding-variables",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -644,6 +673,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-experimental-group-1",
+    status: "draft",
     term: "experimental-group",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -663,6 +693,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-control-group-1",
+    status: "draft",
     term: "control-group",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -687,6 +718,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-random-assignment-1",
+    status: "draft",
     term: "random-assignment",
     ced: ["0.3"],
     skills: ["2.A", "2.B"],
@@ -711,6 +743,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-placebo-1",
+    status: "draft",
     term: "placebo",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -735,6 +768,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-placebo-effect-1",
+    status: "draft",
     term: "placebo-effect",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -754,6 +788,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-single-blind-study-1",
+    status: "draft",
     term: "single-blind-study",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -778,6 +813,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-double-blind-study-1",
+    status: "draft",
     term: "double-blind-study",
     ced: ["0.3"],
     skills: ["2.B"],
@@ -802,6 +838,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-research-confederates-1",
+    status: "draft",
     term: "research-confederates",
     ced: ["0.3", "0.7"],
     skills: ["2.B", "2.D"],
@@ -823,6 +860,7 @@ window.APPSYCH_QUESTIONS = [
   // research-bias
   {
     id: "q-confirmation-bias-1",
+    status: "draft",
     term: "confirmation-bias",
     ced: ["0.4", "4.2.B.1"],
     skills: ["1.B"],
@@ -842,6 +880,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-hindsight-bias-1",
+    status: "draft",
     term: "hindsight-bias",
     ced: ["0.4"],
     skills: ["1.B"],
@@ -866,6 +905,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-overconfidence-1",
+    status: "draft",
     term: "overconfidence",
     ced: ["0.4"],
     skills: ["1.B", "3.A"],
@@ -885,6 +925,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-experimenter-bias-1",
+    status: "draft",
     term: "experimenter-bias",
     ced: ["0.4"],
     skills: ["2.B"],
@@ -909,6 +950,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-social-desirability-bias-1",
+    status: "draft",
     term: "social-desirability-bias",
     ced: ["0.4"],
     skills: ["2.C"],
@@ -933,6 +975,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-self-report-bias-1",
+    status: "draft",
     term: "self-report-bias",
     ced: ["0.4"],
     skills: ["2.C"],
@@ -957,6 +1000,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-wording-effect-1",
+    status: "draft",
     term: "wording-effect",
     ced: ["0.4"],
     skills: ["2.C"],
@@ -977,6 +1021,7 @@ window.APPSYCH_QUESTIONS = [
   // statistics
   {
     id: "q-central-tendency-1",
+    status: "draft",
     term: "central-tendency",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1001,6 +1046,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-mean-1",
+    status: "draft",
     term: "mean",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1021,6 +1067,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-median-1",
+    status: "draft",
     term: "median",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1045,6 +1092,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-mode-1",
+    status: "draft",
     term: "mode",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1064,6 +1112,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-variation-1",
+    status: "draft",
     term: "variation",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1088,6 +1137,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-range-1",
+    status: "draft",
     term: "range",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1112,6 +1162,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-percentile-rank-1",
+    status: "draft",
     term: "percentile-rank",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1136,6 +1187,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-normal-curve-1",
+    status: "draft",
     term: "normal-curve",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1156,6 +1208,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-positively-skewed-distribution-1",
+    status: "draft",
     term: "positively-skewed-distribution",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1180,6 +1233,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-negatively-skewed-distribution-1",
+    status: "draft",
     term: "negatively-skewed-distribution",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1204,6 +1258,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-bimodal-distribution-1",
+    status: "draft",
     term: "bimodal-distribution",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1223,6 +1278,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-standard-deviation-1",
+    status: "draft",
     term: "standard-deviation",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1247,6 +1303,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-regression-toward-the-mean-1",
+    status: "draft",
     term: "regression-toward-the-mean",
     ced: ["0.5"],
     skills: ["3.B"],
@@ -1271,6 +1328,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-effect-sizes-1",
+    status: "draft",
     term: "effect-sizes",
     ced: ["0.5"],
     skills: ["3.C"],
@@ -1295,6 +1353,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-statistical-significance-1",
+    status: "draft",
     term: "statistical-significance",
     ced: ["0.5"],
     skills: ["3.C"],
@@ -1319,6 +1378,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-scatterplot-1",
+    status: "draft",
     term: "scatterplot",
     ced: ["0.5"],
     skills: ["3.C"],
@@ -1338,6 +1398,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-correlation-coefficient-1",
+    status: "draft",
     term: "correlation-coefficient",
     ced: ["0.5"],
     skills: ["3.C"],
@@ -1358,6 +1419,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-positive-correlation-1",
+    status: "draft",
     term: "positive-correlation",
     ced: ["0.5"],
     skills: ["3.C"],
@@ -1382,6 +1444,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-negative-correlation-1",
+    status: "draft",
     term: "negative-correlation",
     ced: ["0.5"],
     skills: ["3.C"],
@@ -1401,6 +1464,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-correlation-does-not-equal-causation-1",
+    status: "draft",
     term: "correlation-does-not-equal-causation",
     ced: ["0.5"],
     skills: ["2.C"],
@@ -1425,6 +1489,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-directionality-problem-1",
+    status: "draft",
     term: "directionality-problem",
     ced: ["0.5"],
     skills: ["2.C"],
@@ -1444,6 +1509,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-third-variable-problem-1",
+    status: "draft",
     term: "third-variable-problem",
     ced: ["0.5"],
     skills: ["2.C"],
@@ -1468,6 +1534,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-generalization-1",
+    status: "draft",
     term: "generalization",
     ced: ["0.5"],
     skills: ["2.B"],
@@ -1493,6 +1560,7 @@ window.APPSYCH_QUESTIONS = [
   // sampling
   {
     id: "q-sample-1",
+    status: "draft",
     term: "sample",
     ced: ["0.6"],
     skills: ["2.B"],
@@ -1512,6 +1580,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-population-1",
+    status: "draft",
     term: "population",
     ced: ["0.6"],
     skills: ["2.B"],
@@ -1536,6 +1605,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-representative-sample-1",
+    status: "draft",
     term: "representative-sample",
     ced: ["0.6"],
     skills: ["2.B"],
@@ -1560,6 +1630,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-random-sampling-1",
+    status: "draft",
     term: "random-sampling",
     ced: ["0.6", "0.3"],
     skills: ["2.B"],
@@ -1584,6 +1655,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-convenience-sampling-1",
+    status: "draft",
     term: "convenience-sampling",
     ced: ["0.6"],
     skills: ["2.B"],
@@ -1603,6 +1675,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-sampling-bias-1",
+    status: "draft",
     term: "sampling-bias",
     ced: ["0.6"],
     skills: ["2.B"],
@@ -1628,6 +1701,7 @@ window.APPSYCH_QUESTIONS = [
   // ethics
   {
     id: "q-institutional-review-1",
+    status: "draft",
     term: "institutional-review",
     ced: ["0.7"],
     skills: ["2.D"],
@@ -1647,6 +1721,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-informed-consent-1",
+    status: "draft",
     term: "informed-consent",
     ced: ["0.7"],
     skills: ["2.D"],
@@ -1666,6 +1741,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-informed-assent-1",
+    status: "draft",
     term: "informed-assent",
     ced: ["0.7"],
     skills: ["2.D"],
@@ -1690,6 +1766,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-protection-from-harm-1",
+    status: "draft",
     term: "protection-from-harm",
     ced: ["0.7"],
     skills: ["2.D"],
@@ -1714,6 +1791,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-confidentiality-1",
+    status: "draft",
     term: "confidentiality",
     ced: ["0.7"],
     skills: ["2.D"],
@@ -1738,6 +1816,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-anonymity-1",
+    status: "draft",
     term: "anonymity",
     ced: ["0.7"],
     skills: ["2.D"],
@@ -1762,6 +1841,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-deception-1",
+    status: "draft",
     term: "deception",
     ced: ["0.7"],
     skills: ["2.D"],
@@ -1786,6 +1866,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-debriefing-1",
+    status: "draft",
     term: "debriefing",
     ced: ["0.7"],
     skills: ["2.D"],
@@ -1805,6 +1886,7 @@ window.APPSYCH_QUESTIONS = [
   },
   {
     id: "q-peer-review-1",
+    status: "draft",
     term: "peer-review",
     ced: ["0.7", "0.2"],
     skills: ["2.B"],

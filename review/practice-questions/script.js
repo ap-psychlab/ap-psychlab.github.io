@@ -9,7 +9,7 @@
 (function () {
   "use strict";
 
-  const BANK = window.APPSYCH_QUESTIONS || [];
+  const BANK = (window.APPSYCH_QUESTIONS || []).filter((q) => q.status !== "omitted");
   const TOPICS = window.APPSYCH_TOPICS;
   const PICKER = window.APPSYCH_TOPIC_PICKER;
   const MAX_QUIZ = 75;

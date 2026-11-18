@@ -10,7 +10,7 @@
 (function () {
   "use strict";
 
-  const BANK = window.APPSYCH_QUESTIONS || [];
+  const BANK = (window.APPSYCH_QUESTIONS || []).filter((q) => q.status !== "omitted");
   const TOPICS = window.APPSYCH_TOPICS;
   const PICKER = window.APPSYCH_TOPIC_PICKER;
   const MAX_COLS = 6, ROWS = 5, MIN_Q = 3, MAX_TEAMS = 12, STEP = 100;

@@ -696,7 +696,7 @@ function newClimb() {
 }
 
 /* ==== SECTION: Questions ==== */
-const BANK = window.APPSYCH_QUESTIONS || [], TOPICS = window.APPSYCH_TOPICS, PICKER = window.APPSYCH_TOPIC_PICKER;
+const BANK = (window.APPSYCH_QUESTIONS || []).filter((q) => q.status !== "omitted"), TOPICS = window.APPSYCH_TOPICS, PICKER = window.APPSYCH_TOPIC_PICKER;
 const LETTERS = ['A', 'B', 'C', 'D'];
 const quiz = { deck: new Array(NQ).fill(null), results: new Array(NQ).fill(null), cur: -1, openedAt: 0 };
 let picker = null;
