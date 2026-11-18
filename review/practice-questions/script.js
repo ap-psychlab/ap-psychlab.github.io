@@ -203,6 +203,7 @@
     else if (!quiz && answered) status = "Time: " + fmtTime(it.timeMs);
     $("qStatus").textContent = status;
     $("stem").textContent = q.stem;
+    if (window.APPSYCH_FIGURES) APPSYCH_FIGURES.mount($("qFigure"), q.figure);
 
     // Choices
     const list = $("choices");
@@ -255,6 +256,10 @@
       p.appendChild(el("strong", null, "Explanation: "));
       p.appendChild(document.createTextNode(q.explanation));
       ex.appendChild(p);
+    }
+    // "What's this?" definitions, only once the answer is shown
+    if (window.APPSYCH_TERM_HELP) {
+      APPSYCH_TERM_HELP.mount($("termHelp"), q, reveal ? it.order.map((orig, pos) => ({ letter: LETTERS[pos], orig: orig })) : null);
     }
 
     // Buttons for this phase

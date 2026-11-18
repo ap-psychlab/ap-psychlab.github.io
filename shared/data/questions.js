@@ -1,8 +1,12 @@
 /* AP Psychology practice questions: window.APPSYCH_QUESTIONS
- * One question per term in terms.js (linked by `term`). Written for this site; no copied exam or textbook items.
+ * At least one question per term in terms.js (linked by `term`). Written for this site; no copied exam or textbook items.
  * difficulty: 1 (one clear cue) to 5 (multi-step reasoning with subtle, partly true distractors).
  * Games shuffle `choices` (keeping `answer` and `feedback` aligned) unless `shuffle` is false.
  * status: "draft" (not yet reviewed) or "live" (reviewed); games use both. "omitted" questions are skipped by every game.
+ * choiceRefs: the term id each choice names or illustrates (null if none), in choice order; games list
+ *   these as "What's this?" definitions after the answer is shown (shared/term-help.js).
+ * figure (optional): data for a scatterplot, bar graph or line graph drawn by shared/figures.js;
+ *   the format is described at the top of that file.
  */
 window.APPSYCH_QUESTIONS = [
   // ===== Science Practices =====
@@ -23,6 +27,7 @@ window.APPSYCH_QUESTIONS = [
       "Common-sense ideas come from the psychodynamic perspective, which modern psychologists no longer accept."
     ],
     answer: 2,
+    choiceRefs: [null, null, "hindsight-bias", "psychodynamic-perspective"],
     hint: "Think about how an outcome feels once you already know it.",
     explanation: "Many \"obvious\" results only seem obvious after people hear them, and some common-sense beliefs turn out to be false. Psychology is a science because it tests ideas systematically rather than trusting intuition.",
     feedback: [
@@ -43,6 +48,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Haddad believes that Leo's intense fear of being abandoned by his friends comes from conflicts with his parents in early childhood that Leo is not consciously aware of. Dr. Haddad's explanation best reflects which perspective?",
     choices: ["Psychodynamic", "Humanistic", "Cognitive", "Behavioral"],
     answer: 0,
+    choiceRefs: ["psychodynamic-perspective", "humanistic-perspective", "cognitive-perspective", "behavioral-perspective"],
     hint: "Notice that Leo is not aware of what is driving his fear.",
     explanation: "Dr. Haddad points to unconscious conflicts rooted in early childhood, which is how the psychodynamic perspective explains behavior.",
     feedback: [
@@ -68,6 +74,7 @@ window.APPSYCH_QUESTIONS = [
       "What usually happens right after Sofia's tantrums begin"
     ],
     answer: 3,
+    choiceRefs: ["cognitive-perspective", "biological-perspective", "psychodynamic-perspective", "behavioral-perspective"],
     hint: "Behaviorists focus on what can be observed in the environment.",
     explanation: "The behavioral perspective explains behavior through learning from the environment. Dr. Brennan would look at the observable consequences that follow tantrums, such as a parent giving in.",
     feedback: [
@@ -88,6 +95,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Ms. Alvarez, a school counselor, tells Kofi, who is failing two classes, that she values him no matter what grades he earns and that she believes he can grow into the person he wants to become. Ms. Alvarez's approach best reflects which perspective?",
     choices: ["Cognitive", "Humanistic", "Psychodynamic", "Sociocultural"],
     answer: 1,
+    choiceRefs: ["cognitive-perspective", "humanistic-perspective", "psychodynamic-perspective", "sociocultural-perspective"],
     hint: "Focus on her acceptance of Kofi and her belief in his potential.",
     explanation: "Ms. Alvarez offers acceptance that doesn't depend on Kofi's grades and emphasizes his capacity for growth, both hallmarks of the humanistic perspective.",
     feedback: [
@@ -108,6 +116,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "After a car accident damaged part of his frontal lobe, Marcus began making impulsive decisions he never would have made before. His doctor explains the change as a result of the injury to his brain tissue. The doctor's explanation reflects which perspective?",
     choices: ["Cognitive", "Biological", "Evolutionary", "Psychodynamic"],
     answer: 1,
+    choiceRefs: ["cognitive-perspective", "biological-perspective", "evolutionary-perspective", "psychodynamic-perspective"],
     hint: "What kind of cause does the doctor point to?",
     explanation: "The doctor attributes Marcus's impulsivity to physical damage in the brain, which is how the biological perspective explains behavior.",
     feedback: [
@@ -128,6 +137,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Jaylen believes that if he makes a single mistake at his piano recital, everyone in the audience will decide he is a failure. A psychologist explains that this way of interpreting situations is the main cause of Jaylen's anxiety. The psychologist's explanation best reflects which perspective?",
     choices: ["Behavioral", "Psychodynamic", "Humanistic", "Cognitive"],
     answer: 3,
+    choiceRefs: ["behavioral-perspective", "psychodynamic-perspective", "humanistic-perspective", "cognitive-perspective"],
     hint: "Look at what the psychologist identifies as the cause.",
     explanation: "The psychologist says Jaylen's interpretation of situations causes his anxiety. Explaining problems through thoughts and beliefs is the cognitive perspective.",
     feedback: [
@@ -153,6 +163,7 @@ window.APPSYCH_QUESTIONS = [
       "Teens snack more after learning that snacking reliably relieves boredom after school."
     ],
     answer: 0,
+    choiceRefs: ["sociocultural-perspective", "evolutionary-perspective", "biological-perspective", "behavioral-perspective"],
     hint: "Look for the explanation that involves other people and culture.",
     explanation: "The sociocultural perspective explains behavior through other people and culture. Friends' food choices and advertising aimed at teens are both social influences.",
     feedback: [
@@ -178,6 +189,7 @@ window.APPSYCH_QUESTIONS = [
       "How do people's thoughts about snakes make their fear worse?"
     ],
     answer: 2,
+    choiceRefs: ["biological-perspective", "behavioral-perspective", "evolutionary-perspective", "cognitive-perspective"],
     hint: "Think about the perspective that looks back across many generations.",
     explanation: "The evolutionary perspective explains common traits by how they helped ancestors survive and reproduce. Ancestors who avoided snakes were less likely to be bitten and more likely to pass on that tendency.",
     feedback: [
@@ -203,6 +215,7 @@ window.APPSYCH_QUESTIONS = [
       "A behavior that seems unusual in one culture may be expected and healthy in another."
     ],
     answer: 3,
+    choiceRefs: [null, null, null, "cultural-norms"],
     hint: "Deviation from social norms is one factor used to identify disorders, but whose norms?",
     explanation: "Cultural norms set expectations for behavior, so a behavior that seems strange in one culture may be normal in another. Checking the client's culture helps avoid mistaking normal behavior for a disorder.",
     feedback: [
@@ -225,6 +238,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Mensah wants to find out whether a new reading app causes second graders to earn higher reading scores. Which research design would best allow her to reach this conclusion?",
     choices: ["Experiment", "Correlational study", "Case study", "Naturalistic observation"],
     answer: 0,
+    choiceRefs: ["experiment", "correlation", "case-study", "naturalistic-observation"],
     hint: "Look closely at the word \"causes\" in her question.",
     explanation: "Dr. Mensah's question is about cause and effect. Only an experiment, which manipulates an independent variable and randomly assigns participants, can answer it.",
     feedback: [
@@ -250,6 +264,7 @@ window.APPSYCH_QUESTIONS = [
       "Only a correlational study uses a sample, so its results can be generalized."
     ],
     answer: 1,
+    choiceRefs: [null, "experiment", "correlation", "sample"],
     hint: "Think about what the researcher does to the variables, not just how they are measured.",
     explanation: "An experiment manipulates an independent variable and randomly assigns participants, which allows cause-and-effect conclusions. A correlational study only measures how variables relate.",
     feedback: [
@@ -275,6 +290,7 @@ window.APPSYCH_QUESTIONS = [
       "Students who regularly chew gum during tests are generally happier than students who don't."
     ],
     answer: 2,
+    choiceRefs: [null, null, "hypothesis", null],
     hint: "A good hypothesis is a specific, testable prediction that matches the research question.",
     explanation: "A hypothesis is a testable prediction about how variables relate. This one names the variable being tested (gum chewing) and a measurable outcome (words recalled).",
     feedback: [
@@ -300,6 +316,7 @@ window.APPSYCH_QUESTIONS = [
       "a replication and a hypothesis, respectively"
     ],
     answer: 0,
+    choiceRefs: ["theory", "hypothesis", "operational-definitions", "replication"],
     hint: "Which statement is broader, and which one could be tested in a single study?",
     explanation: "A theory organizes many observations into a broad explanation and produces hypotheses. Dr. Lin's prediction about weekly quizzes is a specific, testable hypothesis drawn from her theory.",
     feedback: [
@@ -325,6 +342,7 @@ window.APPSYCH_QUESTIONS = [
       "Students who sleep 8 hours will outscore students who sleep 5 hours on a math quiz."
     ],
     answer: 3,
+    choiceRefs: [null, null, null, "falsifiable"],
     hint: "Ask which statement a study's results could actually contradict.",
     explanation: "A falsifiable hypothesis could be shown wrong by evidence. The sleep hypothesis makes a specific prediction that quiz scores could contradict; the other statements fit any possible result.",
     feedback: [
@@ -350,6 +368,7 @@ window.APPSYCH_QUESTIONS = [
       "Whether participants report exercising at least three times per week"
     ],
     answer: 1,
+    choiceRefs: [null, "operational-definitions", null, null],
     hint: "Which option tells another researcher exactly how to measure stress?",
     explanation: "An operational definition states precisely how a variable is measured. A specific questionnaire score after a specific task lets other researchers replicate the study.",
     feedback: [
@@ -375,6 +394,7 @@ window.APPSYCH_QUESTIONS = [
       "Background music improves memory only for the participants in Dr. Fischer's sample."
     ],
     answer: 2,
+    choiceRefs: [null, null, "replication", "generalization"],
     hint: "Think about what it means when repeated studies don't match the original.",
     explanation: "Replication tests whether a result holds up with new participants. When five careful repetitions find no effect, the original finding is likely unreliable.",
     feedback: [
@@ -400,6 +420,7 @@ window.APPSYCH_QUESTIONS = [
       "It can collect only numerical data, not descriptions."
     ],
     answer: 0,
+    choiceRefs: ["generalization", null, "random-assignment", "quantitative-measures"],
     hint: "First identify the method, then think about how many people it studies.",
     explanation: "Studying one person in great depth is a case study. Because the girl's condition is rare, what is learned about her may not generalize to other people.",
     feedback: [
@@ -425,6 +446,7 @@ window.APPSYCH_QUESTIONS = [
       "Teens who use more social media tend to report more loneliness."
     ],
     answer: 3,
+    choiceRefs: [null, null, null, "correlation"],
     hint: "Ask what a correlation can and cannot tell you.",
     explanation: "A positive correlation means higher social media use tends to go with higher loneliness. Because no variable was manipulated, the results can't show cause and effect in either direction.",
     feedback: [
@@ -450,6 +472,7 @@ window.APPSYCH_QUESTIONS = [
       "Interviewing one child in depth about why she shares her toys"
     ],
     answer: 2,
+    choiceRefs: ["survey", "experiment", "naturalistic-observation", "case-study"],
     hint: "Look for the plan in which the researcher watches without changing anything.",
     explanation: "Naturalistic observation records behavior in its natural setting without interfering. Watching normal playtime from behind a one-way window does exactly that.",
     feedback: [
@@ -470,6 +493,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Patel wants to estimate how many hours of homework high school students across her state complete each week. Which method would let her collect this information from the largest number of students most efficiently?",
     choices: ["Case study", "Survey", "Naturalistic observation", "Experiment"],
     answer: 1,
+    choiceRefs: ["case-study", "survey", "naturalistic-observation", "experiment"],
     hint: "She wants a lot of information from a lot of people, quickly.",
     explanation: "A survey collects self-reported information from many people through questionnaires, making it the most efficient way to estimate homework time across a state.",
     feedback: [
@@ -490,6 +514,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Russo gathers 85 published studies on whether psychotherapy reduces symptoms of depression. He statistically combines their results and reports one overall estimate of how effective therapy is. Which method did Dr. Russo use?",
     choices: ["Meta-analysis", "Replication", "Correlational study", "Survey"],
     answer: 0,
+    choiceRefs: ["meta-analysis", "replication", "correlation", "survey"],
     hint: "Notice that Dr. Russo didn't collect any new data from participants.",
     explanation: "Dr. Russo combined the results of 85 existing studies to reach an overall conclusion, which is a meta-analysis.",
     feedback: [
@@ -515,6 +540,7 @@ window.APPSYCH_QUESTIONS = [
       "Watching teachers in their classrooms without speaking to them"
     ],
     answer: 2,
+    choiceRefs: [null, "likert-scale", "structured-interviews", "naturalistic-observation"],
     hint: "One goal calls for qualitative answers; the other calls for consistency.",
     explanation: "In a structured interview, every participant gets the same questions in the same order, so answers can be compared. Open-ended questions still yield qualitative descriptions.",
     feedback: [
@@ -540,6 +566,7 @@ window.APPSYCH_QUESTIONS = [
       "Students' written descriptions of their first week at school"
     ],
     answer: 3,
+    choiceRefs: ["quantitative-measures", "likert-scale", "quantitative-measures", "qualitative-measures"],
     hint: "Look for data that would be words rather than numbers.",
     explanation: "Qualitative data are words, descriptions, or observations rather than numbers. Students' written descriptions of their first week fit; the other options are counts or ratings.",
     feedback: [
@@ -565,6 +592,7 @@ window.APPSYCH_QUESTIONS = [
       "Interviewing the players about leadership instead of the coaches"
     ],
     answer: 1,
+    choiceRefs: ["qualitative-measures", "quantitative-measures", "qualitative-measures", "qualitative-measures"],
     hint: "Which option would produce numbers instead of words?",
     explanation: "Quantitative measures produce numbers. Counting how often each player directs teammates turns leadership into data that can be analyzed statistically.",
     feedback: [
@@ -590,6 +618,7 @@ window.APPSYCH_QUESTIONS = [
       "Do you usually complete homework before or after dinner?"
     ],
     answer: 0,
+    choiceRefs: ["likert-scale", "quantitative-measures", "qualitative-measures", null],
     hint: "Look for an item that asks how much the student agrees.",
     explanation: "A Likert scale asks people to rate how much they agree or disagree with a statement. Only the first item does this.",
     feedback: [
@@ -617,6 +646,7 @@ window.APPSYCH_QUESTIONS = [
       "the number of participants"
     ],
     answer: 2,
+    choiceRefs: ["dependent-variables", null, "independent-variables", "sample"],
     hint: "Which factor does Dr. Bell deliberately make different between the groups?",
     explanation: "The independent variable is what the researcher manipulates. Dr. Bell varies whether the drink contains caffeine and then measures reaction time.",
     feedback: [
@@ -637,6 +667,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Soto randomly assigns students to study a list of vocabulary words for 30 minutes, either with flashcards or by rereading their notes. A week later, every student takes the same 20-question quiz, and she records their scores. What is the dependent variable?",
     choices: ["Study method", "Length of the study session", "Random assignment to groups", "Quiz scores"],
     answer: 3,
+    choiceRefs: ["independent-variables", null, "random-assignment", "dependent-variables"],
     hint: "What does Dr. Soto measure at the end of the study?",
     explanation: "The dependent variable is the outcome that is measured. Dr. Soto records quiz scores to see whether they differ by study method.",
     feedback: [
@@ -662,6 +693,7 @@ window.APPSYCH_QUESTIONS = [
       "Neither class knew which curriculum the researchers expected to work."
     ],
     answer: 1,
+    choiceRefs: [null, "confounding-variables", "placebo", "single-blind-study"],
     hint: "List everything that was different between the two classes, not just the curriculum.",
     explanation: "The classes differed in teacher experience and time of day as well as curriculum. These confounding variables make it impossible to tell which factor caused the higher scores.",
     feedback: [
@@ -682,6 +714,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Moreno studies whether a 10-minute daily meditation app reduces anxiety in nurses. Half of the nurses, chosen at random, use the app for a month, while the other half continue their normal routines. All the nurses then complete an anxiety survey. The nurses who used the app make up the",
     choices: ["experimental group", "control group", "placebo group", "dependent variable"],
     answer: 0,
+    choiceRefs: ["experimental-group", "control-group", "placebo", "dependent-variables"],
     hint: "Which nurses received the treatment being tested?",
     explanation: "The experimental group receives the manipulation of the independent variable. Here, that is the nurses who used the meditation app.",
     feedback: [
@@ -707,6 +740,7 @@ window.APPSYCH_QUESTIONS = [
       "It removes the need to randomly assign students to the different groups."
     ],
     answer: 2,
+    choiceRefs: [null, null, "control-group", "random-assignment"],
     hint: "Grades might change over a semester for reasons that have nothing to do with tutoring.",
     explanation: "A control group provides a baseline. Comparing tutored students to untutored students shows whether the program, rather than time or other factors, raised grades.",
     feedback: [
@@ -714,6 +748,43 @@ window.APPSYCH_QUESTIONS = [
       "Researchers track group membership in any study; that is unrelated to why an untutored comparison group is needed.",
       "Correct: grades might rise anyway over a semester, so the control group shows what happens without tutoring.",
       "A control group doesn't replace random assignment, which is still needed to make the groups similar at the start."
+    ]
+  },
+  {
+    id: "q-control-group-2",
+    status: "draft",
+    term: "control-group",
+    ced: ["0.3"],
+    skills: ["3.C", "2.B"],
+    style: "research",
+    difficulty: 4,
+    stem: "Dr. Mendez randomly assigned adults with anxiety to start an 8-week therapy program or to wait 8 weeks before starting it (the waitlist group). Both groups rated their anxiety every 2 weeks. Which conclusion is best supported by the graph?",
+    figure: {
+      type: "line",
+      title: "Average anxiety rating over 8 weeks",
+      alt: "Line graph from week 0 to week 8. The therapy group falls from 8.0 to 4.2. The waitlist group falls slowly from 8.1 to 6.8.",
+      x: { label: "Week", min: 0, max: 8, step: 2 },
+      y: { label: "Anxiety rating (1 to 10)", min: 0, max: 10, step: 2 },
+      series: [
+        { "name": "Therapy", "points": [[0, 8], [2, 7.1], [4, 6], [6, 5], [8, 4.2]] },
+        { "name": "Waitlist", "points": [[0, 8.1], [2, 7.7], [4, 7.3], [6, 7], [8, 6.8]] }
+      ]
+    },
+    choices: [
+      "The therapy caused the entire drop in the therapy group's anxiety.",
+      "Anxiety fell in both groups, but it fell much more with therapy.",
+      "The therapy had no effect, because anxiety also fell without it.",
+      "The waitlist group's anxiety rose while the therapy group's fell."
+    ],
+    answer: 1,
+    choiceRefs: ["control-group", "control-group", null, null],
+    hint: "Ask what the waitlist group shows about how anxiety changes without the program.",
+    explanation: "The waitlist group improved a little (8.1 to 6.8) with no therapy, so some change happens anyway. The therapy group improved much more (8.0 to 4.2), so the program added a large benefit beyond that baseline.",
+    feedback: [
+      "The waitlist group also improved by about 1.3 points without therapy, so not all of the therapy group's drop came from the program.",
+      "Correct: the waitlist group shows the baseline change, and the therapy group dropped about three times as much.",
+      "Some improvement without therapy doesn't erase the effect; the therapy group improved far more than the waitlist group.",
+      "Both lines go down; the waitlist group's anxiety fell slowly rather than rising."
     ]
   },
   {
@@ -732,6 +803,7 @@ window.APPSYCH_QUESTIONS = [
       "Drawing names from a hat to decide which students get standing desks"
     ],
     answer: 3,
+    choiceRefs: [null, "confounding-variables", null, "random-assignment"],
     hint: "Which method makes the two groups most alike before the study begins?",
     explanation: "Drawing names randomly assigns students to conditions, so pre-existing differences such as motivation are spread evenly across the groups.",
     feedback: [
@@ -757,6 +829,7 @@ window.APPSYCH_QUESTIONS = [
       "a different brand of energy drink with similar ingredients"
     ],
     answer: 1,
+    choiceRefs: ["control-group", "placebo", null, null],
     hint: "Both groups should believe they might be getting the real thing.",
     explanation: "A placebo is an inactive substance that looks like the real treatment. It gives both groups the same expectations, so any difference can be credited to the drink's ingredients.",
     feedback: [
@@ -777,6 +850,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "In a study on pain, participants who swallowed sugar pills that they were told were strong painkillers reported much less pain than participants who received no pills. This difference is best explained by",
     choices: ["experimenter bias", "social desirability bias", "the placebo effect", "random assignment"],
     answer: 2,
+    choiceRefs: ["experimenter-bias", "social-desirability-bias", "placebo-effect", "random-assignment"],
     hint: "The pills had no active ingredient, so what else could have changed participants' pain?",
     explanation: "Because the sugar pills were inactive, the reduced pain came from participants believing they had taken a painkiller. That is the placebo effect.",
     feedback: [
@@ -784,6 +858,44 @@ window.APPSYCH_QUESTIONS = [
       "Social desirability bias involves answering to look good, and nothing suggests participants were trying to impress anyone.",
       "Correct: the sugar pills had no active ingredient, so the drop in pain came from participants' expectations.",
       "Random assignment is a way to form groups; it doesn't cause a difference in pain."
+    ]
+  },
+  {
+    id: "q-placebo-effect-2",
+    status: "draft",
+    term: "placebo-effect",
+    ced: ["0.3"],
+    skills: ["3.C"],
+    style: "research",
+    difficulty: 4,
+    stem: "Dr. Haruki randomly assigned volunteers to drink coffee with caffeine, decaf coffee they were told contained caffeine, or no drink. Then each person took a reaction-time test, where lower times are faster. Which conclusion is best supported by the graph?",
+    figure: {
+      type: "bar",
+      title: "Average reaction time by group",
+      alt: "Bar graph of average reaction time. Caffeine group 285 milliseconds, decaf (told caffeine) group 305, no-drink group 330.",
+      x: { label: "Group" },
+      y: { label: "Reaction time (ms)", min: 0, max: 350, step: 50 },
+      categories: ["Caffeine", "Decaf (told caffeine)", "No drink"],
+      series: [
+        { "name": "Average reaction time", "values": [285, 305, 330] }
+      ],
+      showValues: true
+    },
+    choices: [
+      "Expecting caffeine sped people up, and caffeine itself sped them up even more.",
+      "Caffeine had no real effect, because the decaf group also reacted faster than the no-drink group.",
+      "The decaf group reacted faster than the caffeine group, so expectations mattered more than caffeine.",
+      "Expectations had no effect, because the decaf group was slower than the caffeine group."
+    ],
+    answer: 0,
+    choiceRefs: ["placebo-effect", "placebo-effect", null, "placebo-effect"],
+    hint: "Compare the decaf group with the no-drink group, then compare the caffeine group with the decaf group.",
+    explanation: "The decaf group (305 ms) was faster than the no-drink group (330 ms), so expecting caffeine helped: a placebo effect. The caffeine group (285 ms) was faster still, so caffeine added an effect beyond expectations.",
+    feedback: [
+      "Correct: decaf beat no drink, showing a placebo effect, and caffeine beat decaf, showing a real effect of caffeine.",
+      "The decaf group shows a placebo effect, but the caffeine group was faster still, so caffeine also had a real effect.",
+      "Lower times are faster: the caffeine group (285 ms) was faster than the decaf group (305 ms), not slower.",
+      "Being slower than caffeine doesn't rule out expectations; decaf was still faster than no drink, which shows a placebo effect."
     ]
   },
   {
@@ -802,6 +914,7 @@ window.APPSYCH_QUESTIONS = [
       "Double-blind, with no remaining risk of bias"
     ],
     answer: 0,
+    choiceRefs: ["single-blind-study", "double-blind-study", "single-blind-study", "double-blind-study"],
     hint: "Consider who knows each participant's group, and who rates the outcome.",
     explanation: "Only the participants are kept unaware of their condition, so the study is single-blind. Because Dr. Walker rates sleep quality while knowing the groups, experimenter bias could affect the results.",
     feedback: [
@@ -827,6 +940,7 @@ window.APPSYCH_QUESTIONS = [
       "Assistants' expectations will be less likely to sway their ratings."
     ],
     answer: 3,
+    choiceRefs: ["placebo-effect", null, "placebo", "experimenter-bias"],
     hint: "Think about whose expectations the change removes from the results.",
     explanation: "Making the study double-blind keeps the assistants unaware of who got the drug, which controls for experimenter bias in their mood ratings.",
     feedback: [
@@ -847,6 +961,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "In a study on helping behavior, a man who appears to be another participant drops a stack of papers in the hallway, and researchers record whether the real participant stops to help. The man actually works for the researchers. He is best described as",
     choices: ["a member of the control group", "a research confederate", "the dependent variable", "a placebo"],
     answer: 1,
+    choiceRefs: ["control-group", "research-confederates", "dependent-variables", "placebo"],
     hint: "Notice that the man is pretending to be something he isn't.",
     explanation: "The man poses as a participant but secretly works for the researchers. That makes him a research confederate, and his role involves deception.",
     feedback: [
@@ -869,6 +984,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Coach Ramírez believes left-handed pitchers get more nervous under pressure. Over the season, he remembers every time a left-hander walked a batter in a close game but forgets the same mistakes made by right-handers. Coach Ramírez is showing",
     choices: ["confirmation bias", "hindsight bias", "overconfidence", "experimenter bias"],
     answer: 0,
+    choiceRefs: ["confirmation-bias", "hindsight-bias", "overconfidence", "experimenter-bias"],
     hint: "Notice which mistakes the coach remembers and which ones he forgets.",
     explanation: "Coach Ramírez remembers mistakes that support his belief about left-handers and forgets ones that don't. Favoring evidence that fits an existing belief is confirmation bias.",
     feedback: [
@@ -894,6 +1010,7 @@ window.APPSYCH_QUESTIONS = [
       "Mr. Fox grades essays higher when he expects the writers to be strong students."
     ],
     answer: 2,
+    choiceRefs: ["overconfidence", "confirmation-bias", "hindsight-bias", "experimenter-bias"],
     hint: "Look for a judgment made after the outcome was already known.",
     explanation: "Hindsight bias is believing, once an outcome is known, that one would have predicted it. Noor claims she always knew, but only after the surprising result.",
     feedback: [
@@ -914,6 +1031,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Kowalski had 200 students answer trivia questions and rate how sure they were of each answer before seeing the correct answers. The results:\nAnswers rated \"100% sure\": 74% correct\nAnswers rated \"80% sure\": 61% correct\nAnswers rated \"60% sure\": 52% correct\nThese results best demonstrate",
     choices: ["hindsight bias", "overconfidence", "confirmation bias", "social desirability bias"],
     answer: 1,
+    choiceRefs: ["hindsight-bias", "overconfidence", "confirmation-bias", "social-desirability-bias"],
     hint: "Compare each confidence rating with the percentage actually correct.",
     explanation: "Students' confidence exceeded their accuracy at every level; for example, they were right only 74% of the time when \"100% sure.\" Being more confident than correct is overconfidence.",
     feedback: [
@@ -939,6 +1057,7 @@ window.APPSYCH_QUESTIONS = [
       "Having scorers who don't know the groups"
     ],
     answer: 3,
+    choiceRefs: [null, null, "self-report-bias", "experimenter-bias"],
     hint: "The problem comes from what the scorer knows.",
     explanation: "Dr. Holt's expectations are influencing her scores, which is experimenter bias. Using scorers who don't know which students used the program removes that influence.",
     feedback: [
@@ -964,6 +1083,7 @@ window.APPSYCH_QUESTIONS = [
       "The anonymous survey was given to a much larger sample of students."
     ],
     answer: 0,
+    choiceRefs: ["social-desirability-bias", "wording-effect", "self-report-bias", "sample"],
     hint: "Think about what changes when students' names are attached to their answers.",
     explanation: "Requiring names makes students worry about how their answers will look, so many underreport copying. Answering to look good rather than truthfully is social desirability bias.",
     feedback: [
@@ -989,6 +1109,7 @@ window.APPSYCH_QUESTIONS = [
       "It affects naturalistic observation more than it affects surveys."
     ],
     answer: 2,
+    choiceRefs: ["social-desirability-bias", "likert-scale", "self-report-bias", "naturalistic-observation"],
     hint: "Consider whether wanting to look good is the only reason self-descriptions can be wrong.",
     explanation: "Self-report bias includes any inaccuracy from people describing themselves, including faulty memory. Anonymity reduces the urge to look good, but it doesn't fix memory errors.",
     feedback: [
@@ -1009,6 +1130,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "A school randomly split its students into two halves for a survey. Half were asked, \"Should the school forbid phones during lunch?\" and 34% said yes. The other half were asked, \"Should the school not allow phones during lunch?\" and 57% said yes. Which of the following best explains the difference in results?",
     choices: ["Sampling bias", "Wording effect", "Confirmation bias", "Social desirability bias"],
     answer: 1,
+    choiceRefs: ["sampling-bias", "wording-effect", "confirmation-bias", "social-desirability-bias"],
     hint: "The two groups were similar, so what else differed between the two versions?",
     explanation: "Both questions ask about the same policy, but \"forbid\" sounds stronger than \"not allow,\" so fewer students agreed with it. A change in answers caused by phrasing is the wording effect.",
     feedback: [
@@ -1035,6 +1157,7 @@ window.APPSYCH_QUESTIONS = [
       "They can be found only for normally distributed data."
     ],
     answer: 1,
+    choiceRefs: ["variation", "central-tendency", null, "normal-curve"],
     hint: "Try a small set of scores, such as 2, 2, 3, 9, and find each measure.",
     explanation: "Each measure defines the center of the data in a different way, so they often disagree. For 2, 2, 3, 9, the mode is 2, the median is 2.5, and the mean is 4.",
     feedback: [
@@ -1055,6 +1178,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Osei records how many hours of sleep six students got the night before an exam:\n5, 6, 6, 7, 8, 10\nWhat is the mean number of hours?",
     choices: ["5", "6", "6.5", "7"],
     answer: 3,
+    choiceRefs: ["range", "mode", "median", "mean"],
     shuffle: false,
     hint: "The mean uses every score in the set, not just the middle one or the most common one.",
     explanation: "The six scores add up to 42, and 42 divided by 6 is 7, so the mean is 7 hours.",
@@ -1081,6 +1205,7 @@ window.APPSYCH_QUESTIONS = [
       "standard deviation, because it shows how far incomes are from the mean"
     ],
     answer: 0,
+    choiceRefs: ["median", "mean", "range", "standard-deviation"],
     hint: "Ask which measure would change a lot if one of the millionaires moved away.",
     explanation: "The three very high incomes pull the mean far above what most households earn. The median is the middle income, so it stays close to what a typical household earns.",
     feedback: [
@@ -1101,6 +1226,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "A cafeteria manager tallies the sandwiches students buy in one week: turkey (42), veggie (35), ham (18), and tuna (12). To decide which sandwich to stock the most of, which statistic should she use?",
     choices: ["Mean", "Median", "Mode", "Range"],
     answer: 2,
+    choiceRefs: ["mean", "median", "mode", "range"],
     hint: "Sandwich types are categories, not numbers that can be added up or put in order.",
     explanation: "She needs the most frequently chosen sandwich, which is the mode (turkey). The mean and median require numerical scores, but sandwich types are categories.",
     feedback: [
@@ -1126,6 +1252,7 @@ window.APPSYCH_QUESTIONS = [
       "Averages can be compared only when scores form a normal curve."
     ],
     answer: 1,
+    choiceRefs: ["mode", "variation", null, "normal-curve"],
     hint: "Two players can share the same center but differ in something else.",
     explanation: "Equal means show the players have the same center, but Darius's scores are far more spread out. Measures of variation, such as the range or standard deviation, show that Kenji is much more consistent.",
     feedback: [
@@ -1151,6 +1278,7 @@ window.APPSYCH_QUESTIONS = [
       "The range cannot be calculated when a data set includes an outlier."
     ],
     answer: 2,
+    choiceRefs: ["mean", "central-tendency", "range", null],
     hint: "Look at how close together four of the five times are.",
     explanation: "Four of the five times fall within 50 ms of each other; only the 650 ms score is far away. Because the range uses only the highest and lowest scores, that one outlier makes the data look much more varied than they are.",
     feedback: [
@@ -1176,6 +1304,7 @@ window.APPSYCH_QUESTIONS = [
       "She scored 84 points higher than the average test taker."
     ],
     answer: 0,
+    choiceRefs: ["percentile-rank", null, null, "mean"],
     hint: "A percentile compares a score with other people's scores, not with the number of questions.",
     explanation: "Percentile rank is the percentage of scores at or below a given score. At the 84th percentile, Amara did as well as or better than about 84% of the students who took the test.",
     feedback: [
@@ -1196,6 +1325,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Scores on a memory test form a normal curve with a mean of 50 and a standard deviation of 10. Priyanka scores 60. Her percentile rank is closest to the",
     choices: ["34th", "50th", "68th", "84th"],
     answer: 3,
+    choiceRefs: [null, null, null, null],
     shuffle: false,
     hint: "A score of 60 is exactly one standard deviation above the mean; think about everyone who scored below it.",
     explanation: "Half of all scores fall below the mean of 50, and about 34% fall between 50 and 60 (one standard deviation above). So about 84% of scores are at or below 60.",
@@ -1222,6 +1352,7 @@ window.APPSYCH_QUESTIONS = [
       "Normal, with a mean about equal to the median"
     ],
     answer: 2,
+    choiceRefs: ["negatively-skewed-distribution", "positively-skewed-distribution", "positively-skewed-distribution", "normal-curve"],
     hint: "Find where the few unusual scores are, then think about which measure they pull toward them.",
     explanation: "The few very high scores stretch the tail to the right, so the distribution is positively skewed. Those high scores pull the mean up, so the mean is higher than the median.",
     feedback: [
@@ -1247,6 +1378,7 @@ window.APPSYCH_QUESTIONS = [
       "Arrival times at a café that is busiest at breakfast and dinner"
     ],
     answer: 1,
+    choiceRefs: ["positively-skewed-distribution", "negatively-skewed-distribution", "normal-curve", "bimodal-distribution"],
     hint: "Think about where most scores would pile up and which direction the few unusual scores would stretch.",
     explanation: "On an easy quiz, most scores pile up near the top, and the few students who struggled create a tail stretching to the left. A tail toward the low scores is a negative skew.",
     feedback: [
@@ -1267,6 +1399,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Castillo graphs the ages of everyone at a public pool on a summer afternoon. Many swimmers are around age 8, many are around age 35, and very few are between 15 and 25. Which of the following best describes the graph?",
     choices: ["Normal curve", "Positively skewed distribution", "Negatively skewed distribution", "Bimodal distribution"],
     answer: 3,
+    choiceRefs: ["normal-curve", "positively-skewed-distribution", "negatively-skewed-distribution", "bimodal-distribution"],
     hint: "Count how many places the graph rises to a high point.",
     explanation: "The ages cluster in two separate places, around 8 (children) and around 35 (their parents), with few people in between. A distribution with two distinct peaks is bimodal.",
     feedback: [
@@ -1292,6 +1425,7 @@ window.APPSYCH_QUESTIONS = [
       "Section 2 performed better overall because its standard deviation is larger."
     ],
     answer: 0,
+    choiceRefs: ["standard-deviation", null, null, null],
     hint: "Measure each 8-point gap above the mean in units of that section's standard deviation.",
     explanation: "Both students scored 8 points above the mean. In Section 1 that is 2 standard deviations (8 divided by 4), but in Section 2 it is less than 1 (8 divided by 14), so Lina's score is far more unusual within her section.",
     feedback: [
@@ -1317,6 +1451,7 @@ window.APPSYCH_QUESTIONS = [
       "His success in the first month made him overconfident about his skills."
     ],
     answer: 2,
+    choiceRefs: [null, null, "regression-toward-the-mean", "overconfidence"],
     hint: "Compare both months with what this player usually hits.",
     explanation: "A .410 month is far above his usual .270, so it likely included a lucky streak. Later results tend to fall back toward a person's typical level, which explains the drop without any curse.",
     feedback: [
@@ -1342,6 +1477,7 @@ window.APPSYCH_QUESTIONS = [
       "Study Y found a medium effect, so its result is probably due to chance."
     ],
     answer: 1,
+    choiceRefs: [null, "effect-sizes", null, "statistical-significance"],
     hint: "Compare each value with the usual cutoffs for small, medium, and large effects.",
     explanation: "Effect sizes of about 0.2 or below are small, 0.3 to 0.7 are medium, and 0.8 or above are large. Study Z (0.85) found a large effect, and Study X (0.15) found a small one.",
     feedback: [
@@ -1367,6 +1503,7 @@ window.APPSYCH_QUESTIONS = [
       "The difference is probably not due to chance, but the app's effect was small."
     ],
     answer: 3,
+    choiceRefs: ["effect-sizes", "statistical-significance", "effect-sizes", "statistical-significance"],
     hint: "Statistical significance and effect size answer two different questions about a result.",
     explanation: "Statistical significance means the difference is unlikely to be due to chance. The effect size of 0.15 shows the difference was small. Both can be true at once.",
     feedback: [
@@ -1387,6 +1524,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Patel makes a scatterplot of students' weekly hours of phone use (horizontal axis) and their GPAs (vertical axis). The points form a wide, loose cloud that slopes downward from left to right. Which of the following best describes the relationship?",
     choices: ["A strong positive correlation", "A strong negative correlation", "A moderate negative correlation", "No correlation"],
     answer: 2,
+    choiceRefs: ["positive-correlation", "negative-correlation", "negative-correlation", null],
     hint: "The slope shows the direction, and how tightly the points cluster shows the strength.",
     explanation: "A downward slope means GPA tends to fall as phone use rises, which is a negative correlation. Because the points form a wide, loose cloud rather than a tight line, the relationship is only moderate.",
     feedback: [
@@ -1394,6 +1532,40 @@ window.APPSYCH_QUESTIONS = [
       "The direction is right, but in a strong correlation the points cluster tightly around a line, not in a wide, loose cloud.",
       "Correct: the downward slope shows a negative correlation, and the loose spread shows it is moderate rather than strong.",
       "With no correlation the points would show no overall slope; these points clearly trend downward."
+    ]
+  },
+  {
+    id: "q-scatterplot-2",
+    status: "draft",
+    term: "scatterplot",
+    ced: ["0.5"],
+    skills: ["3.C"],
+    style: "research",
+    difficulty: 3,
+    stem: "Dr. Kaur recorded each student's weekly hours of phone use and GPA. Based on the scatterplot, which of the following best describes the relationship between the two variables?",
+    figure: {
+      type: "scatter",
+      title: "Weekly phone use and GPA (32 students)",
+      alt: "Scatterplot of 32 students. The points drift downward from upper left to lower right but are widely scattered around that trend.",
+      x: { label: "Phone use (hours per week)", min: 0, max: 40, step: 10 },
+      y: { label: "GPA", min: 1, max: 4, step: 0.5, decimals: 1 },
+      points: [[4, 3.49], [31, 3.08], [17, 3.41], [33, 2.89], [37, 2.45], [15, 3.65], [6, 3.34], [6, 3.41], [19, 2.76], [12, 3.85], [22, 3.28], [17, 3.28], [7, 3.08], [9, 3.86], [36, 2.09], [4, 3.48], [36, 1.99], [37, 2.87], [24, 2.28], [32, 2.63], [9, 4], [38, 2.72], [12, 3.58], [16, 3.5], [27, 2.95], [24, 2.88], [28, 3.04], [5, 3.03], [28, 3.32], [29, 3.31], [5, 2.26], [38, 1.8]]
+    },
+    choices: [
+      "A strong positive correlation",
+      "A strong negative correlation",
+      "A moderate negative correlation",
+      "No correlation"
+    ],
+    answer: 2,
+    choiceRefs: ["positive-correlation", "negative-correlation", "negative-correlation", null],
+    hint: "The overall slope shows the direction, and how tightly the points cluster around a line shows the strength.",
+    explanation: "GPA tends to be lower for students with more phone use, so the correlation is negative. The points are widely scattered around that trend rather than close to a line, so the relationship is moderate, not strong.",
+    feedback: [
+      "A positive correlation slopes upward from left to right; these points drift downward.",
+      "The direction is right, but in a strong correlation the points lie close to a line; these are widely scattered.",
+      "Correct: the points trend downward, and the wide scatter shows the relationship is moderate rather than strong.",
+      "With no correlation the points would show no overall slope; these clearly drift downward."
     ]
   },
   {
@@ -1407,6 +1579,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Which of the following correlation coefficients shows the strongest relationship between two variables?",
     choices: ["-0.82", "-0.15", "+0.10", "+0.64"],
     answer: 0,
+    choiceRefs: [null, null, null, null],
     shuffle: false,
     hint: "The sign shows direction; strength depends on how far the number is from zero.",
     explanation: "Strength is shown by how close the coefficient is to -1 or +1, whatever its sign. At -0.82, this coefficient is farther from zero than any of the others.",
@@ -1433,6 +1606,7 @@ window.APPSYCH_QUESTIONS = [
       "Students who sleep less each night tend to remember less from class."
     ],
     answer: 3,
+    choiceRefs: ["negative-correlation", "negative-correlation", null, "positive-correlation"],
     hint: "In a positive correlation, the two variables move in the same direction, whether that direction is up or down.",
     explanation: "Less sleep goes with less memory, so the two variables move in the same direction. Variables that decrease together form a positive correlation, just as variables that increase together do.",
     feedback: [
@@ -1453,6 +1627,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Ms. Okonkwo notices that students with more absences tend to have lower final exam scores. This pattern is an example of",
     choices: ["a positive correlation", "a negative correlation", "a bimodal distribution", "regression toward the mean"],
     answer: 1,
+    choiceRefs: ["positive-correlation", "negative-correlation", "bimodal-distribution", "regression-toward-the-mean"],
     hint: "Notice whether the two variables move in the same direction or in opposite directions.",
     explanation: "As absences go up, exam scores tend to go down. When one variable rises as the other falls, the correlation is negative.",
     feedback: [
@@ -1478,6 +1653,7 @@ window.APPSYCH_QUESTIONS = [
       "Surveys cannot be used to find relationships between eating habits and grades."
     ],
     answer: 0,
+    choiceRefs: ["correlation-does-not-equal-causation", null, "directionality-problem", "survey"],
     hint: "Ask whether the researchers changed anything or only measured what children already did.",
     explanation: "The survey only measured two existing variables, so it shows a correlation. Without an experiment, it can't show that breakfast causes the higher grades.",
     feedback: [
@@ -1498,6 +1674,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Researchers find that teens who report more anxiety also spend more time on social media. Dr. Ahmed argues that social media use increases anxiety, while Dr. Brooks argues that anxious teens turn to social media to cope. Their disagreement best illustrates",
     choices: ["the third variable problem", "regression toward the mean", "the directionality problem", "sampling bias"],
     answer: 2,
+    choiceRefs: ["third-variable-problem", "regression-toward-the-mean", "directionality-problem", "sampling-bias"],
     hint: "Both researchers agree the two variables are related; notice what they disagree about.",
     explanation: "Both researchers accept the correlation but disagree about which variable influences the other. Not knowing the direction of influence in a correlation is the directionality problem.",
     feedback: [
@@ -1523,6 +1700,7 @@ window.APPSYCH_QUESTIONS = [
       "Third variable problem; mailing books alone may not raise reading scores."
     ],
     answer: 3,
+    choiceRefs: ["directionality-problem", "third-variable-problem", "sampling-bias", "third-variable-problem"],
     hint: "The psychologist names a factor that could affect both book ownership and reading scores.",
     explanation: "Parents' love of reading may lead both to more books at home and to higher scores, making it a third variable. If so, mailing books won't supply what actually raised scores, so the plan may not work.",
     feedback: [
@@ -1548,6 +1726,7 @@ window.APPSYCH_QUESTIONS = [
       "The results are meaningless because the study used volunteers."
     ],
     answer: 1,
+    choiceRefs: ["generalization", "generalization", null, "sampling-bias"],
     hint: "Consider who was in the sample and how much they resemble students everywhere.",
     explanation: "The sample came from one elite university, so it may not represent students in general. The results apply with confidence only to students like those studied until other groups are tested.",
     feedback: [
@@ -1569,6 +1748,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Ferreira wants to learn how much homework Ohio high school students do each night. She surveys 500 students from 25 Ohio high schools. In this study, the 500 students are the",
     choices: ["sample", "population", "control group", "independent variable"],
     answer: 0,
+    choiceRefs: ["sample", "population", "control-group", "independent-variables"],
     hint: "Ask whether the 500 students are everyone Dr. Ferreira wants to learn about or only the ones she studied.",
     explanation: "Dr. Ferreira wants to learn about all Ohio high school students, the population. The 500 students she actually surveys are the sample drawn from that population.",
     feedback: [
@@ -1594,6 +1774,7 @@ window.APPSYCH_QUESTIONS = [
       "The nurses who report high levels of burnout"
     ],
     answer: 2,
+    choiceRefs: ["sample", null, "population", null],
     hint: "Look at the group Dr. Owusu chose from, not just the nurses she chose.",
     explanation: "Dr. Owusu drew her sample from the 4,000 nurses in the hospital system, so they are the population. Nurses outside that system had no chance of being selected.",
     feedback: [
@@ -1619,6 +1800,7 @@ window.APPSYCH_QUESTIONS = [
       "500 adults picked at random from a list of all adult residents"
     ],
     answer: 3,
+    choiceRefs: ["convenience-sampling", "sampling-bias", null, "representative-sample"],
     hint: "A larger sample is not automatically a better match for the population.",
     explanation: "Choosing at random from a list of all adult residents gives every adult an equal chance of selection, so the sample should resemble the city, including about 30% over age 60. The other samples overrepresent certain groups.",
     feedback: [
@@ -1644,6 +1826,7 @@ window.APPSYCH_QUESTIONS = [
       "Random sampling requires a large population, while random assignment requires a small one."
     ],
     answer: 1,
+    choiceRefs: ["random-assignment", "random-sampling", null, null],
     hint: "Think about which procedure happens first, before a study has any participants.",
     explanation: "Random sampling chooses participants from the population, which helps results generalize. Random assignment places those participants into experimental or control groups, which helps control confounding variables.",
     feedback: [
@@ -1664,6 +1847,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "For a class project on teen sleep habits, Mia surveys the 28 students in her own first-period class because they are the easiest people for her to reach. Mia's method of choosing participants is",
     choices: ["convenience sampling", "random sampling", "random assignment", "a case study"],
     answer: 0,
+    choiceRefs: ["convenience-sampling", "random-sampling", "random-assignment", "case-study"],
     hint: "Ask whether every teen had an equal chance of being picked.",
     explanation: "Mia chose participants because they were easy to reach, not by giving every teen an equal chance. That is convenience sampling, and her class may not represent teens in general.",
     feedback: [
@@ -1689,6 +1873,7 @@ window.APPSYCH_QUESTIONS = [
       "The host should have reported the median instead of a percentage."
     ],
     answer: 2,
+    choiceRefs: ["sample", "random-assignment", "sampling-bias", "median"],
     hint: "Consider who decided which residents ended up in the sample.",
     explanation: "Listeners chose themselves, and people with strong feelings, or people who listen to that station, are more likely to call. The sample may not represent city residents, which is sampling bias.",
     feedback: [
@@ -1710,6 +1895,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Before Dr. Abara can begin a study in which participants receive mild electric shocks, her university requires a committee to examine her procedures and decide whether the risks are acceptable. This requirement is an example of",
     choices: ["debriefing", "informed consent", "confidentiality", "institutional review"],
     answer: 3,
+    choiceRefs: ["debriefing", "informed-consent", "confidentiality", "institutional-review"],
     hint: "Notice who is making the decision and when it happens.",
     explanation: "A committee reviews the study's procedures before it begins to protect participants' rights and welfare. That is institutional review.",
     feedback: [
@@ -1730,6 +1916,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "Dr. Varga recruits adult volunteers for a memory study. He tells them only that they will \"take a few memory tests,\" without mentioning that they will also drink a strong caffeinated beverage that can cause jitteriness. Which ethical requirement has Dr. Varga most clearly failed to meet?",
     choices: ["Informed consent", "Protection from harm", "Confidentiality", "Debriefing"],
     answer: 0,
+    choiceRefs: ["informed-consent", "protection-from-harm", "confidentiality", "debriefing"],
     hint: "Focus on what participants knew at the moment they agreed to take part.",
     explanation: "Participants agreed without being told about the caffeinated drink or its possible side effects. Informed consent requires telling participants what a study involves, including its risks, before they agree.",
     feedback: [
@@ -1755,6 +1942,7 @@ window.APPSYCH_QUESTIONS = [
       "Asking each child's teacher to sign a second consent form for the school"
     ],
     answer: 1,
+    choiceRefs: ["informed-consent", "informed-assent", "deception", null],
     hint: "The parents have agreed, so think about whose agreement is still missing.",
     explanation: "Children can't give legal consent, so a parent consents for them. Researchers must still explain the study in terms the child understands and get the child's own agreement, which is informed assent.",
     feedback: [
@@ -1780,6 +1968,7 @@ window.APPSYCH_QUESTIONS = [
       "Dr. Ito ends a stressful task early for anyone upset and offers counseling."
     ],
     answer: 3,
+    choiceRefs: ["anonymity", "debriefing", "informed-consent", "protection-from-harm"],
     hint: "Look for the researcher who is reducing physical or emotional risk while the study is happening.",
     explanation: "Ending a stressful task early and offering counseling directly reduce psychological risk to participants. The other choices show anonymity, debriefing, and informed consent.",
     feedback: [
@@ -1805,6 +1994,7 @@ window.APPSYCH_QUESTIONS = [
       "She protected anonymity and confidentiality, so consent was not required."
     ],
     answer: 2,
+    choiceRefs: ["anonymity", "confidentiality", "confidentiality", "informed-consent"],
     hint: "Ask whether Dr. Moreau herself can tell which notes belong to which person.",
     explanation: "Dr. Moreau knows whose responses are whose, so the data are not anonymous. By locking the notes and publishing only group results, she keeps that information private, which is confidentiality.",
     feedback: [
@@ -1830,6 +2020,7 @@ window.APPSYCH_QUESTIONS = [
       "Students learn the survey's true purpose after they turn it in."
     ],
     answer: 0,
+    choiceRefs: ["anonymity", "confidentiality", "informed-consent", "debriefing"],
     hint: "Ask whether anyone, including the counselor, could tell who filled out each survey.",
     explanation: "With no names or ID numbers collected, no one can link a survey to the student who completed it. That is anonymity, and it encourages honest answers about sensitive behavior.",
     feedback: [
@@ -1855,6 +2046,7 @@ window.APPSYCH_QUESTIONS = [
       "Studies of conformity involve no risk, so ethical rules about deception don't apply."
     ],
     answer: 1,
+    choiceRefs: ["informed-consent", "deception", "confidentiality", null],
     hint: "Think about what would happen to the results if participants knew the study was about conformity.",
     explanation: "If participants knew the study tested conformity, they might resist going along with the group, ruining the results. Deception is allowed when it is necessary for valid results and is followed by debriefing.",
     feedback: [
@@ -1875,6 +2067,7 @@ window.APPSYCH_QUESTIONS = [
     stem: "At the end of a study, Dr. Ndiaye tells each participant that the \"other student\" who gave wrong answers was a member of the research team, explains the study's real goal, and answers questions. Dr. Ndiaye is",
     choices: ["obtaining informed consent", "conducting institutional review", "protecting anonymity", "debriefing participants"],
     answer: 3,
+    choiceRefs: ["informed-consent", "institutional-review", "anonymity", "debriefing"],
     hint: "Notice when this conversation takes place.",
     explanation: "Explaining a study's real purpose and any deception after participation ends is debriefing.",
     feedback: [
@@ -1900,6 +2093,7 @@ window.APPSYCH_QUESTIONS = [
       "It requires researchers to repeat their own study before they can publish it."
     ],
     answer: 2,
+    choiceRefs: ["replication", "institutional-review", "peer-review", "replication"],
     hint: "Consider what reviewers can and cannot check when they read a finished study.",
     explanation: "In peer review, other experts evaluate a study before it is published and can catch flaws. Reviewers can't rerun the study, though, so published findings still need replication.",
     feedback: [

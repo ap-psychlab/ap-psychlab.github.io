@@ -396,6 +396,7 @@
     $("qCat").textContent = t.cat;
     $("qPts").textContent = t.points + " points";
     $("stem").textContent = q.stem;
+    if (window.APPSYCH_FIGURES) APPSYCH_FIGURES.mount($("qFigure"), q.figure);
 
     // Choices: all four, or (open response, after the reveal) only the answer
     const list = $("choices");
@@ -439,6 +440,13 @@
     $("hintBox").textContent = "Hint: " + q.hint;
     $("explain").hidden = !V.revealed;
     $("explain").textContent = V.revealed ? "Explanation: " + q.explanation : "";
+    // "What's this?" definitions after the reveal, for the choices on screen
+    if (window.APPSYCH_TERM_HELP) {
+      const shown = V.revealed ? t.order.map((orig, pos) => ({ letter: LETTERS[pos], orig: orig }))
+        .filter((s) => V.choices || s.orig === q.answer) : null;
+      if (shown && !V.choices) shown.forEach((s) => { s.label = "Answer"; });
+      APPSYCH_TERM_HELP.mount($("termHelp"), q, shown);
+    }
 
     // Before the reveal: hint, choices, reveal. After: award buttons.
     $("closeBtn").hidden = V.revealed;

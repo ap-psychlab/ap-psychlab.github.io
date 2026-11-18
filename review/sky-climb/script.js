@@ -747,6 +747,7 @@ function renderQuestion() {
   $('qTitle').textContent = 'Question ' + (quiz.cur + 1) + ' of ' + NQ;
   $('qWhere').textContent = last ? 'Summit · ' + TOP_FT + ' ft' : 'Lantern ledge · ' + ftOf(ledges[quiz.cur]) + ' ft';
   $('stem').textContent = q.stem;
+  if (window.APPSYCH_FIGURES) APPSYCH_FIGURES.mount($('qFigure'), q.figure);
   const list = $('choices'); list.innerHTML = '';
   it.order.forEach((orig, pos) => {
     const li = el('li'), c = el('button', 'choice'), isAns = orig === q.answer, isPick = orig === it.pick;
@@ -770,6 +771,8 @@ function renderQuestion() {
   const hintBox = $('hintBox'); hintBox.hidden = !(it.hintUsed && !answered); hintBox.textContent = 'Hint: ' + q.hint;
   const ex = $('explain'); ex.hidden = !answered; ex.innerHTML = '';
   if (answered) { const p = el('p'); p.appendChild(el('strong', null, 'Explanation: ')); p.appendChild(document.createTextNode(q.explanation)); ex.appendChild(p); }
+  // "What's this?" definitions, only once the answer is shown
+  if (window.APPSYCH_TERM_HELP) APPSYCH_TERM_HELP.mount($('termHelp'), q, answered ? it.order.map((orig, pos) => ({ letter: LETTERS[pos], orig: orig })) : null);
   const hint = $('hintBtn'); hint.hidden = answered; hint.disabled = it.hintUsed;
   hint.setAttribute('aria-expanded', it.hintUsed ? 'true' : 'false'); hint.textContent = it.hintUsed ? 'Hint shown' : 'Show hint';
   const cont = $('contBtn'); cont.disabled = !answered; cont.textContent = last ? 'Open the chest' : 'Keep climbing';

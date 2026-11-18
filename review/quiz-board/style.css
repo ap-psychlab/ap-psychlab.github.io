@@ -159,6 +159,8 @@ legend, .legend { display: block; font-weight: 700; color: var(--heading); margi
   margin: 0 0 16px; color: var(--heading); white-space: pre-line;
   font-size: clamp(1.2rem, .95rem + 1.25vw, 2.1rem); line-height: 1.35;
 }
+/* Figures scale with the projected text (figures use em sizes) */
+.q-figure { font-size: clamp(1rem, .8rem + .7vw, 1.5rem); }
 .choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .choice {
   display: flex; align-items: flex-start; gap: 12px; width: 100%; min-height: 44px; padding: 8px 12px;

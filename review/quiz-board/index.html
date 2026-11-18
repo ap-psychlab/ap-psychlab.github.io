@@ -9,10 +9,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../shared/theme.css">
 <link rel="stylesheet" href="../../shared/topic-picker.css">
+<link rel="stylesheet" href="../../shared/question-extras.css">
 <link rel="stylesheet" href="style.css">
 <script src="../../shared/data/questions.js" defer></script>
 <script src="../../shared/data/topics.js" defer></script>
+<script src="../../shared/data/terms.js" defer></script>
 <script src="../../shared/topic-picker.js" defer></script>
+<script src="../../shared/figures.js" defer></script>
+<script src="../../shared/term-help.js" defer></script>
 <script src="script.js" defer></script>
 </head>
 <body>
@@ -93,9 +97,11 @@
     </div>
     <div class="qb-body">
       <p class="stem" id="stem"></p>
+      <div class="q-figure" id="qFigure" hidden></div>
       <ol class="choices" id="choices" aria-label="Answer choices"></ol>
       <p class="hint-box" id="hintBox" hidden></p>
       <p class="explain" id="explain" hidden></p>
+      <div class="term-help" id="termHelp" hidden></div>
     </div>
     <div class="qb-foot">
       <div class="row" id="askRow">
