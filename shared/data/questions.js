@@ -973,5 +973,858 @@ window.APPSYCH_QUESTIONS = [
       "Confirmation bias is favoring evidence that supports one's beliefs; it doesn't explain why two similar groups answered differently.",
       "Social desirability bias would push both groups in the same direction; only the phrasing of the question differed."
     ]
+  },
+  // statistics
+  {
+    id: "q-central-tendency-1",
+    term: "central-tendency",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "compare",
+    difficulty: 2,
+    stem: "Which of the following statements about the mean, median, and mode of a data set is most accurate?",
+    choices: [
+      "They describe how spread out the scores are.",
+      "They can be three different values for the same data.",
+      "They are always equal when there are no outliers.",
+      "They can be found only for normally distributed data."
+    ],
+    answer: 1,
+    hint: "Try a small set of scores, such as 2, 2, 3, 9, and find each measure.",
+    explanation: "Each measure defines the center of the data in a different way, so they often disagree. For 2, 2, 3, 9, the mode is 2, the median is 2.5, and the mean is 4.",
+    feedback: [
+      "Spread is described by measures of variation, such as the range and standard deviation; the mean, median, and mode describe the center.",
+      "Correct: each measure locates the center differently, so one data set can have a different mean, median, and mode.",
+      "Even without outliers they can differ; for 1, 1, 4, 6, the mode is 1, the median is 2.5, and the mean is 3.",
+      "Any set of numeric scores has a mean and a median, whatever the shape of its distribution."
+    ]
+  },
+  {
+    id: "q-mean-1",
+    term: "mean",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "research",
+    difficulty: 2,
+    stem: "Dr. Osei records how many hours of sleep six students got the night before an exam:\n5, 6, 6, 7, 8, 10\nWhat is the mean number of hours?",
+    choices: ["5", "6", "6.5", "7"],
+    answer: 3,
+    shuffle: false,
+    hint: "The mean uses every score in the set, not just the middle one or the most common one.",
+    explanation: "The six scores add up to 42, and 42 divided by 6 is 7, so the mean is 7 hours.",
+    feedback: [
+      "5 is the range (10 - 5), which measures how spread out the scores are, not their average.",
+      "6 is the mode, the score that appears most often, not the arithmetic average.",
+      "6.5 is the median, the midpoint between the two middle scores, 6 and 7.",
+      "Correct: the scores total 42, and 42 divided by 6 students is 7 hours."
+    ]
+  },
+  {
+    id: "q-median-1",
+    term: "median",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "prediction",
+    difficulty: 2,
+    stem: "A town of 300 households includes three households that each earn over $5 million a year. Most households earn between $45,000 and $70,000. A reporter wants one number that best represents a typical household's income. The reporter should use the",
+    choices: [
+      "median, because the few extreme incomes barely affect it",
+      "mean, because it includes every household's income",
+      "range, because it shows the full spread of incomes",
+      "standard deviation, because it shows how far incomes are from the mean"
+    ],
+    answer: 0,
+    hint: "Ask which measure would change a lot if one of the millionaires moved away.",
+    explanation: "The three very high incomes pull the mean far above what most households earn. The median is the middle income, so it stays close to what a typical household earns.",
+    feedback: [
+      "Correct: the median is the middle value, so a few extreme incomes don't pull it away from typical households.",
+      "Including every income is the problem here: three multimillion-dollar incomes pull the mean far above what most households earn.",
+      "The range describes spread, not a typical value, and it would be huge here because of the extreme incomes.",
+      "Standard deviation describes how spread out incomes are, not what a typical household earns."
+    ]
+  },
+  {
+    id: "q-mode-1",
+    term: "mode",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "scenario",
+    difficulty: 2,
+    stem: "A cafeteria manager tallies the sandwiches students buy in one week: turkey (42), veggie (35), ham (18), and tuna (12). To decide which sandwich to stock the most of, which statistic should she use?",
+    choices: ["Mean", "Median", "Mode", "Range"],
+    answer: 2,
+    hint: "Sandwich types are categories, not numbers that can be added up or put in order.",
+    explanation: "She needs the most frequently chosen sandwich, which is the mode (turkey). The mean and median require numerical scores, but sandwich types are categories.",
+    feedback: [
+      "A mean requires adding numerical scores; sandwich types are categories, so they can't be averaged.",
+      "A median requires putting scores in numerical order; sandwich types have no natural order.",
+      "Correct: the mode is the most frequent category, turkey, which tells her what students buy most.",
+      "The range measures the spread between the highest and lowest scores and can't identify the most popular sandwich."
+    ]
+  },
+  {
+    id: "q-variation-1",
+    term: "variation",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "explain",
+    difficulty: 2,
+    stem: "Kenji and Darius each average 15 points per basketball game. Kenji usually scores between 13 and 17 points, while Darius scores anywhere from 2 to 30. Their coach says the two players perform the same. Which of the following best explains the flaw in the coach's reasoning?",
+    choices: [
+      "The coach should have compared the players' modes instead of their means.",
+      "The coach ignored how much each player's scores vary from game to game.",
+      "The coach cannot compute averages without a much larger number of games.",
+      "Averages can be compared only when scores form a normal curve."
+    ],
+    answer: 1,
+    hint: "Two players can share the same center but differ in something else.",
+    explanation: "Equal means show the players have the same center, but Darius's scores are far more spread out. Measures of variation, such as the range or standard deviation, show that Kenji is much more consistent.",
+    feedback: [
+      "The mode is another measure of central tendency; like the mean, it says nothing about how consistent each player is.",
+      "Correct: the averages match, but Darius's scores are much more spread out, so the players differ in consistency.",
+      "The number of games isn't the issue; even with many games, equal means can hide very different spreads.",
+      "Means can be compared for any distribution shape; the real problem is that the coach ignored spread."
+    ]
+  },
+  {
+    id: "q-range-1",
+    term: "range",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "explain",
+    difficulty: 4,
+    stem: "Dr. Russo records five participants' reaction times in milliseconds:\n210, 240, 250, 260, 650\nShe reports a range of 440 ms and concludes that reaction times varied widely across participants. Which of the following best explains the problem with her conclusion?",
+    choices: [
+      "The range should be found by subtracting the mean from the highest score.",
+      "The range measures central tendency, so it cannot describe how scores vary.",
+      "The range uses only the two extreme scores, so one outlier can inflate it.",
+      "The range cannot be calculated when a data set includes an outlier."
+    ],
+    answer: 2,
+    hint: "Look at how close together four of the five times are.",
+    explanation: "Four of the five times fall within 50 ms of each other; only the 650 ms score is far away. Because the range uses only the highest and lowest scores, that one outlier makes the data look much more varied than they are.",
+    feedback: [
+      "The range is the highest score minus the lowest (650 - 210 = 440), so her math is right; the problem is what the number represents.",
+      "The range is a measure of variation, not central tendency; the problem is that it relies on only two scores.",
+      "Correct: four times cluster between 210 and 260 ms, and the single 650 ms score alone makes the range large.",
+      "The range can always be calculated; it just becomes misleading when an outlier sets one of its endpoints."
+    ]
+  },
+  {
+    id: "q-percentile-rank-1",
+    term: "percentile-rank",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "research",
+    difficulty: 3,
+    stem: "On a statewide reading test, Amara's score report says she is at the 84th percentile. Which of the following is the most accurate interpretation?",
+    choices: [
+      "She scored as high as or higher than about 84% of test takers.",
+      "She answered about 84% of the reading test's questions correctly.",
+      "About 84% of test takers scored higher than she did.",
+      "She scored 84 points higher than the average test taker."
+    ],
+    answer: 0,
+    hint: "A percentile compares a score with other people's scores, not with the number of questions.",
+    explanation: "Percentile rank is the percentage of scores at or below a given score. At the 84th percentile, Amara did as well as or better than about 84% of the students who took the test.",
+    feedback: [
+      "Correct: percentile rank gives the share of test takers who scored at or below her, here about 84%.",
+      "Percent correct counts questions answered right; percentile rank compares her score with other test takers' scores.",
+      "This reverses the meaning: at the 84th percentile, only about 16% of test takers scored higher than Amara.",
+      "Percentile rank is a percentage of people, not a number of points above the mean."
+    ]
+  },
+  {
+    id: "q-normal-curve-1",
+    term: "normal-curve",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "research",
+    difficulty: 4,
+    stem: "Scores on a memory test form a normal curve with a mean of 50 and a standard deviation of 10. Priyanka scores 60. Her percentile rank is closest to the",
+    choices: ["34th", "50th", "68th", "84th"],
+    answer: 3,
+    shuffle: false,
+    hint: "A score of 60 is exactly one standard deviation above the mean; think about everyone who scored below it.",
+    explanation: "Half of all scores fall below the mean of 50, and about 34% fall between 50 and 60 (one standard deviation above). So about 84% of scores are at or below 60.",
+    feedback: [
+      "About 34% of scores fall between the mean and one standard deviation above it, but this leaves out the 50% below the mean.",
+      "The 50th percentile is the mean itself, a score of 50, and Priyanka scored above the mean.",
+      "About 68% of scores fall within one standard deviation on both sides of the mean, not below one standard deviation above it.",
+      "Correct: 50% of scores fall below the mean and about 34% fall between 50 and 60, for about 84% in all."
+    ]
+  },
+  {
+    id: "q-positively-skewed-distribution-1",
+    term: "positively-skewed-distribution",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "research",
+    difficulty: 4,
+    stem: "On Dr. Brandt's very difficult statistics exam, most students scored between 40 and 60, but a few students scored above 95. Which of the following best describes the distribution of scores?",
+    choices: [
+      "Negatively skewed, with a mean lower than the median",
+      "Positively skewed, with a mean lower than the median",
+      "Positively skewed, with a mean higher than the median",
+      "Normal, with a mean about equal to the median"
+    ],
+    answer: 2,
+    hint: "Find where the few unusual scores are, then think about which measure they pull toward them.",
+    explanation: "The few very high scores stretch the tail to the right, so the distribution is positively skewed. Those high scores pull the mean up, so the mean is higher than the median.",
+    feedback: [
+      "Negative skew comes from a few unusually low scores; here the unusual scores are high, stretching the tail to the right.",
+      "The direction of skew is right, but the few high scores pull the mean up, so it is higher than the median, not lower.",
+      "Correct: a few very high scores stretch the right tail and pull the mean above the median.",
+      "A normal curve is symmetrical, but these scores bunch between 40 and 60 with a few far above, so the curve is lopsided."
+    ]
+  },
+  {
+    id: "q-negatively-skewed-distribution-1",
+    term: "negatively-skewed-distribution",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "best-example",
+    difficulty: 3,
+    stem: "Which of the following would most likely produce a negatively skewed distribution?",
+    choices: [
+      "Yearly incomes of all adults working in a large city",
+      "Scores on an easy quiz that almost every student aces",
+      "Heights of adult women in a large national sample",
+      "Arrival times at a café that is busiest at breakfast and dinner"
+    ],
+    answer: 1,
+    hint: "Think about where most scores would pile up and which direction the few unusual scores would stretch.",
+    explanation: "On an easy quiz, most scores pile up near the top, and the few students who struggled create a tail stretching to the left. A tail toward the low scores is a negative skew.",
+    feedback: [
+      "Most people earn moderate incomes and a few earn very high ones, which stretches the tail right and creates a positive skew.",
+      "Correct: most scores bunch near the top, and a few low scores stretch the tail to the left.",
+      "Heights of a large group of adults usually form a roughly normal, symmetrical curve.",
+      "Two busy times would create two peaks, a bimodal distribution, rather than a skew."
+    ]
+  },
+  {
+    id: "q-bimodal-distribution-1",
+    term: "bimodal-distribution",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "research",
+    difficulty: 1,
+    stem: "Dr. Castillo graphs the ages of everyone at a public pool on a summer afternoon. Many swimmers are around age 8, many are around age 35, and very few are between 15 and 25. Which of the following best describes the graph?",
+    choices: ["Normal curve", "Positively skewed distribution", "Negatively skewed distribution", "Bimodal distribution"],
+    answer: 3,
+    hint: "Count how many places the graph rises to a high point.",
+    explanation: "The ages cluster in two separate places, around 8 (children) and around 35 (their parents), with few people in between. A distribution with two distinct peaks is bimodal.",
+    feedback: [
+      "A normal curve has one peak in the middle with fewer scores toward both ends; these ages cluster in two places.",
+      "A positive skew has one peak with a long tail of high scores, not two separate clusters.",
+      "A negative skew has one peak with a long tail of low scores, not two separate clusters.",
+      "Correct: ages cluster around 8 and around 35 with few in between, giving two distinct peaks."
+    ]
+  },
+  {
+    id: "q-standard-deviation-1",
+    term: "standard-deviation",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "research",
+    difficulty: 5,
+    stem: "Two sections took the same chemistry test.\nSection 1: mean 78, standard deviation 4\nSection 2: mean 78, standard deviation 14\nLina scored 86 in Section 1, and Noor scored 86 in Section 2. Which of the following is most accurate?",
+    choices: [
+      "Lina's score stands out more within her section than Noor's score does.",
+      "Noor's score stands out more because Section 2 has the larger standard deviation.",
+      "The two scores stand out equally because both sections have the same mean.",
+      "Section 2 performed better overall because its standard deviation is larger."
+    ],
+    answer: 0,
+    hint: "Measure each 8-point gap above the mean in units of that section's standard deviation.",
+    explanation: "Both students scored 8 points above the mean. In Section 1 that is 2 standard deviations (8 divided by 4), but in Section 2 it is less than 1 (8 divided by 14), so Lina's score is far more unusual within her section.",
+    feedback: [
+      "Correct: 8 points is 2 standard deviations above the mean in Section 1 but less than 1 in Section 2.",
+      "A larger standard deviation means scores are more spread out, so an 8-point gap is less unusual there, not more.",
+      "Equal means and equal raw scores aren't enough; how unusual a score is depends on the spread of the scores around it.",
+      "Standard deviation shows spread, not performance; both sections had the same mean of 78."
+    ]
+  },
+  {
+    id: "q-regression-toward-the-mean-1",
+    term: "regression-toward-the-mean",
+    ced: ["0.5"],
+    skills: ["3.B"],
+    style: "explain",
+    difficulty: 4,
+    stem: "A baseball player who usually bats .270 hits .410 during his first month of the season. After he appears on a magazine cover, he hits .285 the next month. Fans blame a \"cover curse.\" Which of the following best explains his drop?",
+    choices: [
+      "Being on the cover caused stress that lowered his performance.",
+      "The first month had too few games to calculate a batting average.",
+      "Extreme stretches are usually followed by results nearer his average.",
+      "His success in the first month made him overconfident about his skills."
+    ],
+    answer: 2,
+    hint: "Compare both months with what this player usually hits.",
+    explanation: "A .410 month is far above his usual .270, so it likely included a lucky streak. Later results tend to fall back toward a person's typical level, which explains the drop without any curse.",
+    feedback: [
+      "Stress is possible, but nothing in the stem supports it, and a drop would be expected even without the magazine cover.",
+      "A batting average can be calculated for any number of at-bats; the issue is that one extreme month rarely lasts.",
+      "Correct: a .410 month is extreme for a .270 hitter, so his next month moving back toward .270 is expected.",
+      "Nothing in the stem suggests overconfidence; extreme performances usually fall back toward average on their own."
+    ]
+  },
+  {
+    id: "q-effect-sizes-1",
+    term: "effect-sizes",
+    ced: ["0.5"],
+    skills: ["3.C"],
+    style: "research",
+    difficulty: 3,
+    stem: "Dr. Mensah compares three studies of exercise and mood. The effect sizes were:\nStudy X: 0.15\nStudy Y: 0.50\nStudy Z: 0.85\nWhich of the following best describes the results?",
+    choices: [
+      "Study X found the strongest effect, because smaller numbers mean less error.",
+      "Study Z found a large effect, and Study X found a small one.",
+      "All three studies found large effects, because each is above zero.",
+      "Study Y found a medium effect, so its result is probably due to chance."
+    ],
+    answer: 1,
+    hint: "Compare each value with the usual cutoffs for small, medium, and large effects.",
+    explanation: "Effect sizes of about 0.2 or below are small, 0.3 to 0.7 are medium, and 0.8 or above are large. Study Z (0.85) found a large effect, and Study X (0.15) found a small one.",
+    feedback: [
+      "A larger effect size means a stronger effect; 0.15 is the weakest of the three, not the strongest.",
+      "Correct: 0.85 is above the 0.8 cutoff for a large effect, and 0.15 is below the 0.2 cutoff for a small one.",
+      "An effect size above zero shows some effect, but only values of about 0.8 or more count as large.",
+      "Effect size shows strength, not whether results are due to chance; statistical significance addresses chance."
+    ]
+  },
+  {
+    id: "q-statistical-significance-1",
+    term: "statistical-significance",
+    ced: ["0.5"],
+    skills: ["3.C"],
+    style: "research",
+    difficulty: 5,
+    stem: "Dr. Alves finds that students who used a new flashcard app scored higher than a control group. The difference was statistically significant, and the effect size was 0.15. Which of the following conclusions is best supported?",
+    choices: [
+      "The app had a large effect, because the result was statistically significant.",
+      "The difference is probably due to chance, because the effect size is so small.",
+      "The app had no real effect, because effect sizes below 0.2 are not meaningful.",
+      "The difference is probably not due to chance, but the app's effect was small."
+    ],
+    answer: 3,
+    hint: "Statistical significance and effect size answer two different questions about a result.",
+    explanation: "Statistical significance means the difference is unlikely to be due to chance. The effect size of 0.15 shows the difference was small. Both can be true at once.",
+    feedback: [
+      "Significance shows a result is unlikely to be due to chance, not that it is large; an effect size of 0.15 is small.",
+      "Statistical significance, not effect size, addresses chance, and this result was significant; a small effect can still be real.",
+      "A small effect is still an effect; the significant result suggests it is real, even though it is modest.",
+      "Correct: significance means the difference is unlikely to be due to chance, and 0.15 means the effect was small."
+    ]
+  },
+  {
+    id: "q-scatterplot-1",
+    term: "scatterplot",
+    ced: ["0.5"],
+    skills: ["3.C"],
+    style: "research",
+    difficulty: 3,
+    stem: "Dr. Patel makes a scatterplot of students' weekly hours of phone use (horizontal axis) and their GPAs (vertical axis). The points form a wide, loose cloud that slopes downward from left to right. Which of the following best describes the relationship?",
+    choices: ["A strong positive correlation", "A strong negative correlation", "A moderate negative correlation", "No correlation"],
+    answer: 2,
+    hint: "The slope shows the direction, and how tightly the points cluster shows the strength.",
+    explanation: "A downward slope means GPA tends to fall as phone use rises, which is a negative correlation. Because the points form a wide, loose cloud rather than a tight line, the relationship is only moderate.",
+    feedback: [
+      "A positive correlation slopes upward from left to right; these points slope downward.",
+      "The direction is right, but in a strong correlation the points cluster tightly around a line, not in a wide, loose cloud.",
+      "Correct: the downward slope shows a negative correlation, and the loose spread shows it is moderate rather than strong.",
+      "With no correlation the points would show no overall slope; these points clearly trend downward."
+    ]
+  },
+  {
+    id: "q-correlation-coefficient-1",
+    term: "correlation-coefficient",
+    ced: ["0.5"],
+    skills: ["3.C"],
+    style: "compare",
+    difficulty: 3,
+    stem: "Which of the following correlation coefficients shows the strongest relationship between two variables?",
+    choices: ["-0.82", "-0.15", "+0.10", "+0.64"],
+    answer: 0,
+    shuffle: false,
+    hint: "The sign shows direction; strength depends on how far the number is from zero.",
+    explanation: "Strength is shown by how close the coefficient is to -1 or +1, whatever its sign. At -0.82, this coefficient is farther from zero than any of the others.",
+    feedback: [
+      "Correct: -0.82 is farthest from zero, so it shows the strongest relationship; the minus sign only shows its direction.",
+      "-0.15 is close to zero, so it shows a weak relationship.",
+      "+0.10 is very close to zero, so it shows almost no relationship.",
+      "+0.64 is a moderate positive relationship, but it is closer to zero than -0.82."
+    ]
+  },
+  {
+    id: "q-positive-correlation-1",
+    term: "positive-correlation",
+    ced: ["0.5"],
+    skills: ["3.C"],
+    style: "best-example",
+    difficulty: 3,
+    stem: "Which of the following best illustrates a positive correlation?",
+    choices: [
+      "The more Ines practices piano, the fewer mistakes she makes at recitals.",
+      "Neighborhoods with more trees tend to have cooler summer temperatures.",
+      "Students' shoe sizes show no relationship to their vocabulary scores.",
+      "Students who sleep less each night tend to remember less from class."
+    ],
+    answer: 3,
+    hint: "In a positive correlation, the two variables move in the same direction, whether that direction is up or down.",
+    explanation: "Less sleep goes with less memory, so the two variables move in the same direction. Variables that decrease together form a positive correlation, just as variables that increase together do.",
+    feedback: [
+      "More practice goes with fewer mistakes, so the variables move in opposite directions, a negative correlation.",
+      "More trees go with lower temperatures, so the variables move in opposite directions, a negative correlation.",
+      "No relationship between two variables means a correlation near zero, not a positive one.",
+      "Correct: sleep and memory decrease together, and variables that move in the same direction form a positive correlation."
+    ]
+  },
+  {
+    id: "q-negative-correlation-1",
+    term: "negative-correlation",
+    ced: ["0.5"],
+    skills: ["3.C"],
+    style: "scenario",
+    difficulty: 1,
+    stem: "Ms. Okonkwo notices that students with more absences tend to have lower final exam scores. This pattern is an example of",
+    choices: ["a positive correlation", "a negative correlation", "a bimodal distribution", "regression toward the mean"],
+    answer: 1,
+    hint: "Notice whether the two variables move in the same direction or in opposite directions.",
+    explanation: "As absences go up, exam scores tend to go down. When one variable rises as the other falls, the correlation is negative.",
+    feedback: [
+      "In a positive correlation both variables rise or fall together; here absences rise as scores fall.",
+      "Correct: as absences rise, scores tend to fall, so the variables move in opposite directions.",
+      "A bimodal distribution describes one variable with two peaks, not a relationship between two variables.",
+      "Regression toward the mean is extreme scores being followed by more typical ones, not a relationship between two variables."
+    ]
+  },
+  {
+    id: "q-correlation-does-not-equal-causation-1",
+    term: "correlation-does-not-equal-causation",
+    ced: ["0.5"],
+    skills: ["2.C"],
+    style: "explain",
+    difficulty: 2,
+    stem: "A headline reads \"Eating Breakfast Makes Kids Smarter,\" based on a survey finding that children who eat breakfast earn higher grades. Which of the following best explains the problem with the headline?",
+    choices: [
+      "The survey shows a relationship, but it can't show that breakfast raises grades.",
+      "Grades are a poor measure of intelligence, so the survey found no real relationship.",
+      "The relationship actually shows that earning higher grades causes children to eat breakfast.",
+      "Surveys cannot be used to find relationships between eating habits and grades."
+    ],
+    answer: 0,
+    hint: "Ask whether the researchers changed anything or only measured what children already did.",
+    explanation: "The survey only measured two existing variables, so it shows a correlation. Without an experiment, it can't show that breakfast causes the higher grades.",
+    feedback: [
+      "Correct: a survey can show that breakfast and grades are related, but a correlation alone cannot show cause.",
+      "Grades may be an imperfect measure, but the survey still found a relationship; the problem is claiming that one variable causes the other.",
+      "This also claims cause and effect, just in the other direction; a correlation can't establish either direction of cause.",
+      "Surveys can reveal relationships between variables; they just can't show which variable, if any, causes the other."
+    ]
+  },
+  {
+    id: "q-directionality-problem-1",
+    term: "directionality-problem",
+    ced: ["0.5"],
+    skills: ["2.C"],
+    style: "research",
+    difficulty: 3,
+    stem: "Researchers find that teens who report more anxiety also spend more time on social media. Dr. Ahmed argues that social media use increases anxiety, while Dr. Brooks argues that anxious teens turn to social media to cope. Their disagreement best illustrates",
+    choices: ["the third variable problem", "regression toward the mean", "the directionality problem", "sampling bias"],
+    answer: 2,
+    hint: "Both researchers agree the two variables are related; notice what they disagree about.",
+    explanation: "Both researchers accept the correlation but disagree about which variable influences the other. Not knowing the direction of influence in a correlation is the directionality problem.",
+    feedback: [
+      "The third variable problem involves an outside factor causing both variables; here the debate is which of the two variables affects the other.",
+      "Regression toward the mean involves extreme scores moving toward average, not a debate about cause.",
+      "Correct: the researchers disagree about whether anxiety leads to social media use or social media use leads to anxiety.",
+      "Sampling bias is a flaw in how participants are chosen; nothing here suggests the sample was unrepresentative."
+    ]
+  },
+  {
+    id: "q-third-variable-problem-1",
+    term: "third-variable-problem",
+    ced: ["0.5"],
+    skills: ["2.C"],
+    style: "research",
+    difficulty: 4,
+    stem: "A study finds that students with more books at home score higher on reading tests, so a school board plans to mail free books to every family. A psychologist notes that parents who love reading tend to buy more books and also read with their children. Which of the following best identifies the psychologist's concern and what it implies?",
+    choices: [
+      "Directionality problem; good readers may be asking their parents for more books.",
+      "Third variable problem; the study proves parents' reading habits raise scores.",
+      "Sampling bias; families who own many books were overrepresented in the study.",
+      "Third variable problem; mailing books alone may not raise reading scores."
+    ],
+    answer: 3,
+    hint: "The psychologist names a factor that could affect both book ownership and reading scores.",
+    explanation: "Parents' love of reading may lead both to more books at home and to higher scores, making it a third variable. If so, mailing books won't supply what actually raised scores, so the plan may not work.",
+    feedback: [
+      "Reverse causation is possible, but the psychologist describes a separate factor, parents' reading habits, that could drive both variables.",
+      "This names the right problem but overclaims: a correlational study can't prove that parents' habits cause higher scores either.",
+      "Nothing suggests the sample was unrepresentative; the concern is an outside factor linked to both variables.",
+      "Correct: parents' reading habits may drive both books and scores, so adding books alone may not raise scores."
+    ]
+  },
+  {
+    id: "q-generalization-1",
+    term: "generalization",
+    ced: ["0.5"],
+    skills: ["2.B"],
+    style: "research",
+    difficulty: 2,
+    stem: "Dr. Nakamura tests a new study technique with 40 volunteers from one elite private university and finds that it improves their exam scores. Which of the following conclusions is most appropriate?",
+    choices: [
+      "The technique will improve exam scores for all high school and college students.",
+      "The technique may help similar students but may not help all students.",
+      "The technique does not work for students at other kinds of schools.",
+      "The results are meaningless because the study used volunteers."
+    ],
+    answer: 1,
+    hint: "Consider who was in the sample and how much they resemble students everywhere.",
+    explanation: "The sample came from one elite university, so it may not represent students in general. The results apply with confidence only to students like those studied until other groups are tested.",
+    feedback: [
+      "The sample came from one elite university, so it can't support a claim about all students everywhere.",
+      "Correct: results from one elite university may apply to similar students, but generalizing further requires a broader sample.",
+      "The study didn't test other schools, so it gives no evidence that the technique fails there either.",
+      "Volunteer samples limit generalization, but the results still tell us something about students like these."
+    ]
+  },
+  // sampling
+  {
+    id: "q-sample-1",
+    term: "sample",
+    ced: ["0.6"],
+    skills: ["2.B"],
+    style: "research",
+    difficulty: 1,
+    stem: "Dr. Ferreira wants to learn how much homework Ohio high school students do each night. She surveys 500 students from 25 Ohio high schools. In this study, the 500 students are the",
+    choices: ["sample", "population", "control group", "independent variable"],
+    answer: 0,
+    hint: "Ask whether the 500 students are everyone Dr. Ferreira wants to learn about or only the ones she studied.",
+    explanation: "Dr. Ferreira wants to learn about all Ohio high school students, the population. The 500 students she actually surveys are the sample drawn from that population.",
+    feedback: [
+      "Correct: the 500 students actually surveyed are the sample drawn from the larger population.",
+      "The population is everyone she wants to learn about, all Ohio high school students, not just the 500 she surveyed.",
+      "A control group is a comparison group in an experiment; this survey doesn't compare treatments.",
+      "An independent variable is a factor the researcher changes; the students are participants, not a variable."
+    ]
+  },
+  {
+    id: "q-population-1",
+    term: "population",
+    ced: ["0.6"],
+    skills: ["2.B"],
+    style: "research",
+    difficulty: 2,
+    stem: "Dr. Owusu randomly selects 200 of the 4,000 nurses employed by a hospital system to complete a survey about burnout. Which group is the population in this study?",
+    choices: [
+      "The 200 nurses who completed the survey",
+      "All nurses working in the country",
+      "All 4,000 nurses employed by the hospital system",
+      "The nurses who report high levels of burnout"
+    ],
+    answer: 2,
+    hint: "Look at the group Dr. Owusu chose from, not just the nurses she chose.",
+    explanation: "Dr. Owusu drew her sample from the 4,000 nurses in the hospital system, so they are the population. Nurses outside that system had no chance of being selected.",
+    feedback: [
+      "The 200 surveyed nurses are the sample, the smaller group drawn from the population.",
+      "Nurses outside this hospital system had no chance of being chosen, so they aren't the population the sample represents.",
+      "Correct: the sample was drawn from all 4,000 nurses in the hospital system, so they form the population.",
+      "Burnout is what's being measured, not how the population is defined; the population includes nurses at every burnout level."
+    ]
+  },
+  {
+    id: "q-representative-sample-1",
+    term: "representative-sample",
+    ced: ["0.6"],
+    skills: ["2.B"],
+    style: "best-example",
+    difficulty: 3,
+    stem: "Dr. Lindqvist wants to study the exercise habits of adults in a city where 30% of adults are over age 60. Which of the following samples would be most representative?",
+    choices: [
+      "500 adults surveyed at the city's largest fitness center",
+      "2,000 adults who answer an online poll on a popular fitness website",
+      "500 adults over age 60 picked at random from city records",
+      "500 adults picked at random from a list of all adult residents"
+    ],
+    answer: 3,
+    hint: "A larger sample is not automatically a better match for the population.",
+    explanation: "Choosing at random from a list of all adult residents gives every adult an equal chance of selection, so the sample should resemble the city, including about 30% over age 60. The other samples overrepresent certain groups.",
+    feedback: [
+      "Gym members probably exercise more than most adults, so this sample would overstate the city's exercise habits.",
+      "A large online poll still draws only people who visit fitness sites and choose to answer, so it is not representative.",
+      "Random selection helps, but limiting the sample to adults over 60 leaves out the 70% of adults who are younger.",
+      "Correct: random selection from all adult residents gives every adult an equal chance, so the sample should resemble the city."
+    ]
+  },
+  {
+    id: "q-random-sampling-1",
+    term: "random-sampling",
+    ced: ["0.6", "0.3"],
+    skills: ["2.B"],
+    style: "compare",
+    difficulty: 4,
+    stem: "Which of the following best describes the difference between random sampling and random assignment?",
+    choices: [
+      "Random sampling reduces confounding variables, while random assignment helps results generalize.",
+      "Random sampling decides who is in a study, while random assignment decides each person's group.",
+      "Random sampling is used only in experiments, while random assignment is used only in surveys.",
+      "Random sampling requires a large population, while random assignment requires a small one."
+    ],
+    answer: 1,
+    hint: "Think about which procedure happens first, before a study has any participants.",
+    explanation: "Random sampling chooses participants from the population, which helps results generalize. Random assignment places those participants into experimental or control groups, which helps control confounding variables.",
+    feedback: [
+      "This reverses the two: random sampling helps results generalize, and random assignment helps control confounding variables.",
+      "Correct: random sampling selects participants from the population; random assignment divides them into experimental and control groups.",
+      "Random assignment is used in experiments, while random sampling can be used in experiments, surveys, and other designs.",
+      "Neither depends on population size; they differ in purpose, choosing participants versus placing them in groups."
+    ]
+  },
+  {
+    id: "q-convenience-sampling-1",
+    term: "convenience-sampling",
+    ced: ["0.6"],
+    skills: ["2.B"],
+    style: "scenario",
+    difficulty: 1,
+    stem: "For a class project on teen sleep habits, Mia surveys the 28 students in her own first-period class because they are the easiest people for her to reach. Mia's method of choosing participants is",
+    choices: ["convenience sampling", "random sampling", "random assignment", "a case study"],
+    answer: 0,
+    hint: "Ask whether every teen had an equal chance of being picked.",
+    explanation: "Mia chose participants because they were easy to reach, not by giving every teen an equal chance. That is convenience sampling, and her class may not represent teens in general.",
+    feedback: [
+      "Correct: Mia chose the people who were easiest for her to reach, which is convenience sampling.",
+      "Random sampling gives every member of the population an equal chance of being chosen; most teens had no chance here.",
+      "Random assignment places participants into experimental groups; Mia is choosing who participates, not assigning groups.",
+      "A case study examines one person or group in depth; Mia is surveying 28 students about one topic."
+    ]
+  },
+  {
+    id: "q-sampling-bias-1",
+    term: "sampling-bias",
+    ced: ["0.6"],
+    skills: ["2.B"],
+    style: "research",
+    difficulty: 4,
+    stem: "A radio host asks listeners to call in and say whether they support a new city curfew. Of 600 callers, 82% oppose it, and the host announces that most city residents oppose the curfew. Which of the following is the most serious problem with this conclusion?",
+    choices: [
+      "A sample of 600 people is too small to represent a whole city.",
+      "The callers were not randomly assigned to a control group.",
+      "People who chose to call may differ from residents who did not.",
+      "The host should have reported the median instead of a percentage."
+    ],
+    answer: 2,
+    hint: "Consider who decided which residents ended up in the sample.",
+    explanation: "Listeners chose themselves, and people with strong feelings, or people who listen to that station, are more likely to call. The sample may not represent city residents, which is sampling bias.",
+    feedback: [
+      "A well-chosen sample of 600 can represent a city; the problem is how these callers were selected, not how many there were.",
+      "Random assignment applies to experiments with groups; this is a poll, and its problem is how participants were selected.",
+      "Correct: callers chose themselves, and people with strong opinions or who hear this show may not match residents overall.",
+      "A percentage is a reasonable way to report poll results; the problem lies in who answered."
+    ]
+  },
+  // ethics
+  {
+    id: "q-institutional-review-1",
+    term: "institutional-review",
+    ced: ["0.7"],
+    skills: ["2.D"],
+    style: "research",
+    difficulty: 1,
+    stem: "Before Dr. Abara can begin a study in which participants receive mild electric shocks, her university requires a committee to examine her procedures and decide whether the risks are acceptable. This requirement is an example of",
+    choices: ["debriefing", "informed consent", "confidentiality", "institutional review"],
+    answer: 3,
+    hint: "Notice who is making the decision and when it happens.",
+    explanation: "A committee reviews the study's procedures before it begins to protect participants' rights and welfare. That is institutional review.",
+    feedback: [
+      "Debriefing happens after a study, when participants learn its true purpose; this review happens before the study begins.",
+      "Informed consent comes from participants agreeing to take part; here a committee, not the participants, makes the decision.",
+      "Confidentiality means keeping participants' information private, not having a committee approve procedures.",
+      "Correct: a committee examining the procedures and risks before the study begins is institutional review."
+    ]
+  },
+  {
+    id: "q-informed-consent-1",
+    term: "informed-consent",
+    ced: ["0.7"],
+    skills: ["2.D"],
+    style: "research",
+    difficulty: 3,
+    stem: "Dr. Varga recruits adult volunteers for a memory study. He tells them only that they will \"take a few memory tests,\" without mentioning that they will also drink a strong caffeinated beverage that can cause jitteriness. Which ethical requirement has Dr. Varga most clearly failed to meet?",
+    choices: ["Informed consent", "Protection from harm", "Confidentiality", "Debriefing"],
+    answer: 0,
+    hint: "Focus on what participants knew at the moment they agreed to take part.",
+    explanation: "Participants agreed without being told about the caffeinated drink or its possible side effects. Informed consent requires telling participants what a study involves, including its risks, before they agree.",
+    feedback: [
+      "Correct: participants agreed without knowing about the drink or its side effects, so their consent wasn't informed.",
+      "Jitteriness is a mild risk; the clearer failure is that participants agreed without being told about it.",
+      "Confidentiality concerns keeping participants' information private; nothing suggests their data were shared.",
+      "Debriefing happens after a study; the failure here happened before participants agreed to take part."
+    ]
+  },
+  {
+    id: "q-informed-assent-1",
+    term: "informed-assent",
+    ced: ["0.7"],
+    skills: ["2.D"],
+    style: "prediction",
+    difficulty: 4,
+    stem: "Dr. Lee plans a study of math anxiety with 9-year-old students and has received signed consent forms from each child's parent. Which additional step is most needed to meet ethical guidelines?",
+    choices: [
+      "Having each child sign a legal consent form in place of the parent's form",
+      "Explaining the study simply to each child and asking whether they agree",
+      "Keeping the children unaware of the study's purpose so they behave naturally",
+      "Asking each child's teacher to sign a second consent form for the school"
+    ],
+    answer: 1,
+    hint: "The parents have agreed, so think about whose agreement is still missing.",
+    explanation: "Children can't give legal consent, so a parent consents for them. Researchers must still explain the study in terms the child understands and get the child's own agreement, which is informed assent.",
+    feedback: [
+      "Children can't legally give consent, so their signature can't replace the parent's; they give assent alongside it.",
+      "Correct: researchers must also get the child's own agreement, in words the child understands, which is informed assent.",
+      "Hiding the purpose would be deception, which isn't needed here and would itself require justification and debriefing.",
+      "A school may need to approve the study, but that doesn't replace the child's own agreement to take part."
+    ]
+  },
+  {
+    id: "q-protection-from-harm-1",
+    term: "protection-from-harm",
+    ced: ["0.7"],
+    skills: ["2.D"],
+    style: "best-example",
+    difficulty: 3,
+    stem: "Which of the following best illustrates a researcher's effort to protect participants from harm?",
+    choices: [
+      "Dr. Ruiz stores each survey in a locked file with no names attached.",
+      "Dr. Bauer later tells participants that the \"other participant\" was an actor.",
+      "Dr. Kaplan explains the study's risks before participants agree to join.",
+      "Dr. Ito ends a stressful task early for anyone upset and offers counseling."
+    ],
+    answer: 3,
+    hint: "Look for the researcher who is reducing physical or emotional risk while the study is happening.",
+    explanation: "Ending a stressful task early and offering counseling directly reduce psychological risk to participants. The other choices show anonymity, debriefing, and informed consent.",
+    feedback: [
+      "Locking unnamed surveys protects anonymity and privacy, a different principle from limiting physical or emotional risk.",
+      "Revealing that a confederate was used is debriefing, which explains deception after the study.",
+      "Explaining risks before people agree is informed consent; it informs participants but doesn't itself reduce the risks.",
+      "Correct: stopping a stressful task early and offering counseling directly reduces the psychological harm participants face."
+    ]
+  },
+  {
+    id: "q-confidentiality-1",
+    term: "confidentiality",
+    ced: ["0.7"],
+    skills: ["2.D"],
+    style: "research",
+    difficulty: 5,
+    stem: "Dr. Moreau interviews 30 adults about past drug use. She writes each person's name on their interview notes so she can schedule follow-up interviews, keeps the notes in a locked cabinet, and publishes only group results. Which of the following statements about her procedures is most accurate?",
+    choices: [
+      "She protected anonymity, because no names appear in the published results.",
+      "She violated confidentiality, because she recorded each participant's name.",
+      "She protected confidentiality, but participants' responses were not anonymous.",
+      "She protected anonymity and confidentiality, so consent was not required."
+    ],
+    answer: 2,
+    hint: "Ask whether Dr. Moreau herself can tell which notes belong to which person.",
+    explanation: "Dr. Moreau knows whose responses are whose, so the data are not anonymous. By locking the notes and publishing only group results, she keeps that information private, which is confidentiality.",
+    feedback: [
+      "Leaving names out of published results isn't anonymity; Dr. Moreau can still link each response to a person.",
+      "Researchers may record names when they need them; confidentiality means keeping that information private, which she did.",
+      "Correct: she knows who said what, so responses aren't anonymous, but she keeps that information private.",
+      "The responses aren't anonymous, and no privacy safeguard removes the need for informed consent."
+    ]
+  },
+  {
+    id: "q-anonymity-1",
+    term: "anonymity",
+    ced: ["0.7"],
+    skills: ["2.D"],
+    style: "best-example",
+    difficulty: 2,
+    stem: "A school counselor wants honest answers on a survey about vaping. Which procedure would best ensure that students' responses are anonymous?",
+    choices: [
+      "Students put unsigned surveys in a sealed box, with no names or ID numbers.",
+      "Students write their names on surveys, and the counselor promises not to share them.",
+      "Students sign a form agreeing to take part before they receive the survey.",
+      "Students learn the survey's true purpose after they turn it in."
+    ],
+    answer: 0,
+    hint: "Ask whether anyone, including the counselor, could tell who filled out each survey.",
+    explanation: "With no names or ID numbers collected, no one can link a survey to the student who completed it. That is anonymity, and it encourages honest answers about sensitive behavior.",
+    feedback: [
+      "Correct: without names or ID numbers, no one can link a response to a student, so the responses are anonymous.",
+      "A promise not to share names protects confidentiality, but the counselor can still link each answer to a student.",
+      "Signing an agreement to participate is informed consent; it doesn't keep answers from being linked to students.",
+      "Explaining a study's purpose afterward is debriefing; it doesn't keep responses from being traced to students."
+    ]
+  },
+  {
+    id: "q-deception-1",
+    term: "deception",
+    ced: ["0.7"],
+    skills: ["2.D"],
+    style: "explain",
+    difficulty: 5,
+    stem: "Dr. Sato tells participants they are in a study of visual perception, but the study actually tests whether people conform to a group's wrong answers. Her institutional review board approves the study. Which of the following best explains why this deception can be allowed?",
+    choices: [
+      "Deception is allowed in any study whose adult participants have signed consent forms.",
+      "Knowing the real purpose would change behavior, and participants will be debriefed.",
+      "Deception is allowed as long as the study's results are kept confidential.",
+      "Studies of conformity involve no risk, so ethical rules about deception don't apply."
+    ],
+    answer: 1,
+    hint: "Think about what would happen to the results if participants knew the study was about conformity.",
+    explanation: "If participants knew the study tested conformity, they might resist going along with the group, ruining the results. Deception is allowed when it is necessary for valid results and is followed by debriefing.",
+    feedback: [
+      "Consent is required, but it doesn't by itself permit deception; deception must also be necessary and followed by debriefing.",
+      "Correct: knowing the real purpose would change how people act, and debriefing afterward reveals the deception.",
+      "Confidentiality protects participants' information, but it doesn't justify misleading them about a study's purpose.",
+      "Conformity studies can cause stress or embarrassment, and rules about deception apply to every study."
+    ]
+  },
+  {
+    id: "q-debriefing-1",
+    term: "debriefing",
+    ced: ["0.7"],
+    skills: ["2.D"],
+    style: "research",
+    difficulty: 1,
+    stem: "At the end of a study, Dr. Ndiaye tells each participant that the \"other student\" who gave wrong answers was a member of the research team, explains the study's real goal, and answers questions. Dr. Ndiaye is",
+    choices: ["obtaining informed consent", "conducting institutional review", "protecting anonymity", "debriefing participants"],
+    answer: 3,
+    hint: "Notice when this conversation takes place.",
+    explanation: "Explaining a study's real purpose and any deception after participation ends is debriefing.",
+    feedback: [
+      "Informed consent happens before a study begins, when participants learn what it involves and agree to take part.",
+      "Institutional review is a committee's approval of a study before it starts, not a conversation with participants afterward.",
+      "Anonymity means responses can't be linked to participants; this conversation reveals the study's purpose instead.",
+      "Correct: explaining the study's real goal and the use of a confederate after the study ends is debriefing."
+    ]
+  },
+  {
+    id: "q-peer-review-1",
+    term: "peer-review",
+    ced: ["0.7", "0.2"],
+    skills: ["2.B"],
+    style: "compare",
+    difficulty: 3,
+    stem: "Which of the following statements about peer review is most accurate?",
+    choices: [
+      "It guarantees that a published finding will replicate in later studies.",
+      "It is done by an institutional review board before a study begins.",
+      "It helps experts catch flaws, but published findings can still be wrong.",
+      "It requires researchers to repeat their own study before they can publish it."
+    ],
+    answer: 2,
+    hint: "Consider what reviewers can and cannot check when they read a finished study.",
+    explanation: "In peer review, other experts evaluate a study before it is published and can catch flaws. Reviewers can't rerun the study, though, so published findings still need replication.",
+    feedback: [
+      "Reviewers judge the study as written but can't rerun it; only replication shows whether a finding holds up.",
+      "Institutional review approves a study's ethics before it begins; peer review evaluates the finished study before publication.",
+      "Correct: other experts screen a study for flaws before publication, but replication is still needed to confirm findings.",
+      "Repeating a study is replication, usually done by other researchers; peer review is experts evaluating the submitted work."
+    ]
   }
 ];
