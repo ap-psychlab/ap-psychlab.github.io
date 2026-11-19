@@ -73,7 +73,7 @@
 /* ---------- Game-over card ---------- */
 #over { margin-bottom: 16px; }
 #over .big {
-  font: 700 3rem/1 var(--font-heading);
+  font: 700 3rem/1 var(--font-body);
   color: var(--heading);
   font-variant-numeric: lining-nums tabular-nums;
 }

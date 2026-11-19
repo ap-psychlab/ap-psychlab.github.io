@@ -1,7 +1,7 @@
 // Psych Vocab Word Search — game logic
 // Terms come from ../../shared/data/terms.js; topic filtering uses ../../shared/data/topics.js.
 // URL options: ?groups=memory,thinking (class topic groups), ?ced=2.3,2.4 (CED topics),
-// ?debug (shows the overlap debug buttons and blocklist stats).
+// ?dev (shows the overlap debug buttons and blocklist stats).
 (function () {
   "use strict";
 
@@ -218,7 +218,7 @@
   const dirType = ([dr, dc]) => (dr === 0 ? "H" : dc === 0 ? "V" : "D");
   const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const PASTELS = 10;
-  const DEBUG = /[?&]debug(=|&|$)/.test(location.search);
+  const DEBUG = /[?&]dev(=|&|$)/.test(location.search);
 
   // ---------- Elements ----------
   const $ = (id) => document.getElementById(id);

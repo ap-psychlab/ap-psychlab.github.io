@@ -764,7 +764,7 @@ var lerp=function(a,b,t){return a+(b-a)*t},clamp=function(v,a,b){return Math.max
 
 /* ================= config (all tunables live here) ================= */
 var config={
-  FORCE_DEBUG:true,            /* Step 1 only: set false in Step 8 */
+  FORCE_DEBUG:false,           /* true shows the debug tools without ?dev (local testing only) */
   ROLL_DELAY:1, ROLL_DELAY_DISTRACT:.4, ROLL_INTERVAL:[10,15],   /* first roll after this long near a station; distractions (plant, box) roll sooner so the cat cannot just run past them (.4 leaves a frame of margin under the 0.5 s limit) */
   REWARD_WINDOW:5, FUSE_SECONDS:10,
   BALL_TO_GATE:10, STRESS_HIDE:.85, DT:1/60, SEED:12345,
@@ -955,7 +955,7 @@ var config={
   ]
 };
 var CFG=config,Q=location.search;
-var DEBUG=CFG.FORCE_DEBUG||/[?&]debug\b/.test(Q),SIM=/[?&]sim\b/.test(Q);
+var DEBUG=CFG.FORCE_DEBUG||/[?&]dev\b/.test(Q),SIM=/[?&]sim\b/.test(Q);   /* ?dev = debug tools, ?sim = headless harness */
 
 /* ================= bus ================= */
 var bus=(function(){

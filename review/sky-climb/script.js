@@ -1,7 +1,7 @@
 // Sky Climb — a platformer quiz: climb 500 ft of floating islands and answer a question at each lantern ledge.
 // Questions: ../../shared/data/questions.js; topic groups: ../../shared/data/topics.js;
 // topic dialog: ../../shared/topic-picker.js.
-// URL options: ?groups=memory,thinking or ?ced=2.3,2.4 (topics), ?debug or ?dev (test tools), ?seed=7 (repeat a layout).
+// URL options: ?groups=memory,thinking or ?ced=2.3,2.4 (topics), ?dev (test tools), ?seed=7 (repeat a layout).
 //
 // Question rule: the climb is split into ten 50 ft bands. The first time the hero lands on a platform in a band,
 // that band's question is asked (once, even if the hero falls and comes back). The top band (450–500 ft) saves
@@ -21,7 +21,7 @@ const SKY_P = 1 / 3;                    // the sky scrolls at a third of the cli
 const $ = (id) => document.getElementById(id);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const params = new URLSearchParams(location.search);
-const DEV = params.has('debug') || params.has('dev') || document.documentElement.hasAttribute('data-dev');
+const DEV = params.has('dev') || document.documentElement.hasAttribute('data-dev');
 
 /* ==== SECTION: CONFIG (physics and difficulty) ==== */
 const CONFIG = {
