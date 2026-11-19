@@ -14,6 +14,7 @@
  *     and tie; under = shirt color, tie = tie color).
  *   face.glasses: true (thin) or "thick"; face.beard: stubble, trim, full or circle
  *     (a trimmed beard joined to the mustache); face.mustache: true adds a mustache.
+ *   face.blush: false leaves off the rosy cheeks.
  *   top.sleeve: upper-arm color; top.fore: forearm color (skin = short or rolled
  *     sleeves, which also adds a cuff); top.stripe: a stripe down the sleeves.
  *   hold: a prop in the guest's left (L) or right (R) hand, as the viewer sees them.
@@ -104,8 +105,8 @@ window.APPSYCH_REUNION_GUESTS = [
     look: {
       build: { h: 1.03, w: 1.02 },
       skin: "skin-2b",
-      hair: { style: "curly", color: "hair-dkbrown" },
-      face: { brows: "soft", mouth: "small", glasses: "thick", beard: "circle" },
+      hair: { style: "curly", color: "hair-espresso" },
+      face: { brows: "soft", mouth: "small", glasses: "thick", beard: "circle", blush: false },
       top: { style: "qzip", main: "cobalt", sleeve: "cobalt", under: "oxford", tie: "mustard" },
       bottom: { pants: "charcoal", shoe: "loafer", shoeColor: "brown" },
       hold: { R: "book" }

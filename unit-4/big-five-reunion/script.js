@@ -96,6 +96,25 @@
     return d;
   }
 
+  // A jagged (messy) outline along a boxy arc from angle a0 to a1 (degrees, clockwise).
+  // Valleys sit on the arc; tufts poke out by amps[i], scaled down toward the sides
+  // and leaning toward +x by `lean` so the hair looks swept.
+  function jagged(cx, cy, rx, ry, a0, a1, amps, lean) {
+    var n = amps.length, d = '', i, a, c, sn, bx, by, k;
+    for (i = 0; i <= n * 2; i++) {
+      a = (a0 + (a1 - a0) * i / (n * 2)) * Math.PI / 180;
+      c = Math.cos(a); sn = Math.sin(a);
+      bx = cx + rx * (c < 0 ? -1 : 1) * Math.pow(Math.abs(c), 0.67);   // squarer than a circle
+      by = cy + ry * (sn < 0 ? -1 : 1) * Math.pow(Math.abs(sn), 0.67);
+      if (i % 2) {
+        k = amps[(i - 1) / 2] * (0.3 + 0.7 * Math.abs(sn));
+        bx += c * k + lean * k; by += sn * k;
+      }
+      d += (i === 0 ? 'M' : ' L') + pt(bx, by);
+    }
+    return d;
+  }
+
   /* ---------- Shared defs (patterns, head clip), added once per page ---------- */
   function ensureDefs() {
     if (document.getElementById('rb-floral')) return;
@@ -466,12 +485,12 @@
       }
     },
     curly: {
-      // Short, a little messy: a bumpy outline just above the head, one curl on the forehead
+      // Short and messy: jagged tufts over a flat-ish top, one curl on the forehead
       front: function (p, c) {
         var line = ' L61 4 Q58 -18 48 -24 Q42 -36 28 -31 Q18 -42 6 -34 Q-6 -43 -18 -32 Q-30 -40 -40 -27 Q-54 -23 -61 4 Z';
-        hairPath(p, bumpy(0, -6, 66, 172, 368, 16, 8, 3) + line, c);
+        hairPath(p, jagged(0, -8, 64, 62, 175, 365, [7, 11, 9, 14, 10, 13, 8, 12, 10, 7], 0.45) + line, c);
         stroke(p, 'M8 -34 q-8 5 -3 11 q5 4 8 -3', c, 4.5);
-        ['M-34 -50 q5 -6 11 -1', 'M2 -57 q5 -6 11 -1', 'M28 -47 q5 -6 11 -1']
+        ['M-36 -52 l8 -7', 'M-6 -58 l9 -8', 'M22 -52 l8 -7']
           .forEach(function (d) { stroke(p, d, 'ink', 2.5).style.opacity = .35; });
       }
     },
@@ -508,7 +527,9 @@
       hairPath(hd, 'M-60 6 Q-62 68 0 72 Q62 68 60 6 Q54 34 36 36 Q24 56 0 56 Q-24 56 -36 36 Q-54 34 -60 6 Z', hair.color, 3);
     }
 
-    [-1, 1].forEach(function (s) { el(hd, 'ellipse', { cx: s * 40, cy: 34, rx: 10, ry: 6, f: 'cheek', op: .55 }); });
+    if (face.blush !== false) {
+      [-1, 1].forEach(function (s) { el(hd, 'ellipse', { cx: s * 40, cy: 34, rx: 10, ry: 6, f: 'cheek', op: .55 }); });
+    }
 
     var look = grp(grp(grp(hd, 'eyes-open'), 'blink'), 'look');
     var happy = grp(hd, 'eyes-happy');
