@@ -3,6 +3,44 @@
 /* Segmented control for the unit system */
 .seg[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
 .seg[aria-pressed="true"]:hover { background: var(--btn-hover); }
+.row .seg-group { margin: 0; }
+
+/* Search box (right of the unit buttons; wraps below on narrow screens) */
+.search { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 12px; }
+.search input[type="search"] {
+  min-height: 44px;
+  width: 240px;
+  max-width: 100%;
+  padding: 0 12px;
+  font: 400 1rem var(--font-body);
+  color: var(--heading);
+  background: var(--bg);
+  border: 1px solid var(--btn);
+  border-radius: var(--radius-btn);
+}
+.search input[type="search"]::placeholder { color: var(--muted); opacity: 1; }
+.opt { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; color: var(--heading); font-size: .95rem; }
+.opt input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--btn); }
+
+/* Terms card header: heading on the left, display toggles on the right */
+.term-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 8px;
+}
+.term-head h2 { margin: 0; }
+.toggles { display: flex; flex-wrap: wrap; gap: 4px; }
+.btn.tog { padding: 0 12px; font-size: .9rem; }
+
+/* Search matches */
+.match .linkish {
+  font: inherit; color: var(--link); background: none; border: 0; padding: 0;
+  text-decoration: underline; cursor: pointer;
+}
+mark { background: var(--honey); color: var(--heading); border-radius: 2px; padding: 0 1px; }
 
 /* ---------- Browser columns ----------
    Page uses <main class="wide">.
@@ -85,11 +123,17 @@
 
 /* Toggles hide content with a class on the list */
 .terms.no-defs .def, .terms.no-defs .aka { display: none; }
+.terms.no-defs .def-hit .def { display: block; }
 .terms.no-codes .codes, .pick.no-codes .sub { display: none; }
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* Phones: while searching, show the results above the unit and topic lists */
+@media (max-width: 759px) {
+  .browser.searching #termCol { order: -1; }
 }
 
 @media (min-width: 760px) {

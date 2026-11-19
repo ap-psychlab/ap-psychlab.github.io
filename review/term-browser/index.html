@@ -16,15 +16,18 @@
 <body>
 <main class="wide">
   <h1>Term Browser</h1>
-  <p class="hint">Pick a unit, then a topic, to see its terms. Switch between the CED's units and our class units, and show or hide definitions and codes.</p>
+  <p class="hint">Pick a unit, then a topic, to see its terms, or type in the search box. Switch between the CED's units and our class units, and show or hide definitions and codes.</p>
 
-  <div class="row" role="group" aria-label="Unit system">
-    <button class="btn ghost seg" id="modeCed" aria-pressed="true">CED units</button>
-    <button class="btn ghost seg" id="modeMine" aria-pressed="false">Class units</button>
-  </div>
   <div class="row">
-    <button class="btn alt" id="defBtn" aria-pressed="true">Definitions: On</button>
-    <button class="btn alt" id="codeBtn" aria-pressed="false">Codes: Off</button>
+    <div class="row seg-group" role="group" aria-label="Unit system">
+      <button class="btn ghost seg" id="modeCed" aria-pressed="true">CED units</button>
+      <button class="btn ghost seg" id="modeMine" aria-pressed="false">Class units</button>
+    </div>
+    <div class="search" role="search">
+      <label class="visually-hidden" for="q">Search terms</label>
+      <input type="search" id="q" placeholder="Search terms…" autocomplete="off" spellcheck="false">
+      <label class="opt"><input type="checkbox" id="qDefs"><span>Include definitions</span></label>
+    </div>
   </div>
 
   <div class="stats" aria-label="Term counts">
@@ -46,8 +49,15 @@
     </section>
 
     <section class="card col" id="termCol" aria-labelledby="termH">
-      <h2 id="termH">Terms</h2>
-      <p class="empty" id="termEmpty">Choose a topic to see its terms.</p>
+      <div class="term-head">
+        <h2 id="termH">Terms</h2>
+        <div class="toggles">
+          <button class="btn alt tog" id="defBtn" aria-pressed="true">Definitions: On</button>
+          <button class="btn alt tog" id="codeBtn" aria-pressed="false">Codes: Off</button>
+        </div>
+      </div>
+      <p class="empty" id="termEmpty">Choose a topic, or search, to see terms.</p>
+      <p class="empty match" id="matchInfo" hidden></p>
       <ul class="terms" id="termList"></ul>
     </section>
   </div>

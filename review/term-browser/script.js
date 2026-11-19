@@ -1,10 +1,35 @@
-// Term Browser — pick a unit, then a topic, to list its terms
+// Term Browser — pick a unit, then a topic, to list its terms, or search them.
+// Search scope: the chosen topic, else the chosen unit, else every term.
+// Unticked "Include definitions" matches term names and aliases only.
 (function () {
   var TERMS = window.APPSYCH_TERMS || [];
   var TOPICS = window.APPSYCH_TOPICS;
   var $ = function (id) { return document.getElementById(id); };
 
-  var state = { mode: "ced", unit: null, topic: null, defs: true, codes: false };
+  var state = { mode: "ced", unit: null, topic: null, defs: true, codes: false, q: "", qDefs: false };
+
+  // Lowercase and straighten curly quotes (Broca’s → broca's). Keeps string length,
+  // so match positions line up with the original text for highlighting.
+  function norm(s) { return String(s).toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"'); }
+
+  function matches(t, q) {
+    if (norm(t.term).indexOf(q) !== -1) return true;
+    for (var i = 0; i < (t.aliases || []).length; i++) if (norm(t.aliases[i]).indexOf(q) !== -1) return true;
+    return state.qDefs && norm(t.definition).indexOf(q) !== -1;
+  }
+
+  // Text with every match of q wrapped in <mark>.
+  function highlight(parent, text, q) {
+    if (!q) { parent.appendChild(document.createTextNode(text)); return parent; }
+    var low = norm(text), from = 0, at;
+    while ((at = low.indexOf(q, from)) !== -1) {
+      if (at > from) parent.appendChild(document.createTextNode(text.slice(from, at)));
+      parent.appendChild(el("mark", null, text.slice(at, at + q.length)));
+      from = at + q.length;
+    }
+    if (from < text.length) parent.appendChild(document.createTextNode(text.slice(from)));
+    return parent;
+  }
 
   // Build a common shape for both unit systems:
   // { key, title, sub, codes, topics: [{ key, title, sub, codes }] }
@@ -113,21 +138,54 @@
     if (topic) say(topic.title + ": " + termsFor(topic.codes).length + " terms");
   }
 
-  function renderTerms(topic) {
+  // What the term list shows: { items, scope } or null when nothing is chosen or typed.
+  function shownTerms(unit, topic) {
+    var q = norm(state.q.trim());
+    if (!q) return topic ? { items: termsFor(topic.codes), scope: null } : null;
+    var scope = topic && topic.key !== "all" ? topic : unit ? { title: unit.title + " (" + unit.sub + ")", codes: unit.codes } : null;
+    var pool = scope ? termsFor(scope.codes) : TERMS;
+    return { items: pool.filter(function (t) { return matches(t, q); }), scope: scope, q: q };
+  }
+
+  function renderTerms(unit, topic) {
     var list = $("termList");
+    var info = $("matchInfo");
     list.innerHTML = "";
+    info.innerHTML = "";
     list.classList.toggle("no-defs", !state.defs);
     list.classList.toggle("no-codes", !state.codes);
-    $("termEmpty").hidden = !!topic;
-    if (!topic) { $("termH").textContent = "Terms"; return; }
-    var items = termsFor(topic.codes);
+    var shown = shownTerms(unit, topic);
+    $("termEmpty").hidden = !!shown;
+    document.querySelector(".browser").classList.toggle("searching", !!(shown && shown.q));
+    info.hidden = !(shown && shown.q);
+    if (!shown) { $("termH").textContent = "Terms"; return; }
+    var items = shown.items;
     $("termH").textContent = "Terms (" + items.length + ")";
+    if (shown.q) {
+      var where = shown.scope ? " in " + shown.scope.title : " in all units";
+      info.appendChild(document.createTextNode(
+        (items.length ? items.length + (items.length === 1 ? " match" : " matches") : "No matches") +
+        " for \u201C" + state.q.trim() + "\u201D" + where + (state.qDefs ? " (names and definitions)." : " (names only).")));
+      if (shown.scope) {
+        info.appendChild(document.createTextNode(" "));
+        var all = el("button", "linkish", "Search all units");
+        all.type = "button";
+        all.addEventListener("click", function () {
+          state.unit = null; state.topic = null; render(); $("q").focus(); announce();
+        });
+        info.appendChild(all);
+      }
+    }
+    var hq = shown.q || "";
     var frag = document.createDocumentFragment();
     items.forEach(function (t) {
       var li = el("li", "term");
-      li.appendChild(el("div", "term-name", t.term));
-      li.appendChild(el("p", "def", t.definition));
-      if (t.aliases && t.aliases.length) li.appendChild(el("p", "aka", "Also: " + t.aliases.join(", ")));
+      // Matched only in its definition: keep that definition visible even with Definitions off.
+      if (hq && state.qDefs && norm(t.term).indexOf(hq) === -1 &&
+          !(t.aliases || []).some(function (a) { return norm(a).indexOf(hq) !== -1; })) li.classList.add("def-hit");
+      li.appendChild(highlight(el("div", "term-name"), t.term, hq));
+      li.appendChild(highlight(el("p", "def"), t.definition, state.qDefs ? hq : ""));
+      if (t.aliases && t.aliases.length) li.appendChild(highlight(el("p", "aka"), "Also: " + t.aliases.join(", "), hq));
       var codes = el("div", "codes");
       t.ced.forEach(function (c) { codes.appendChild(el("span", "chip", "CED " + c)); });
       (t.skills || []).forEach(function (s) { codes.appendChild(el("span", "chip skill", "Skill " + s)); });
@@ -152,7 +210,7 @@
     var topic = currentTopic(unit);
     renderUnits();
     renderTopics(unit);
-    renderTerms(topic);
+    renderTerms(unit, topic);
     renderStats(unit, topic);
     if (focusList) {
       var again = $(focusList).querySelector('[data-key="' + focusKey + '"]');
@@ -185,10 +243,27 @@
     state.codes = !state.codes; setToggle(this, state.codes, "Codes"); render();
   });
 
+  // Search: filter as the player types; announce the count after a short pause.
+  var sayTimer = null;
+  function announce() {
+    clearTimeout(sayTimer);
+    sayTimer = setTimeout(function () {
+      var shown = shownTerms(currentUnit(), currentTopic(currentUnit()));
+      if (shown && shown.q) say($("matchInfo").firstChild.textContent);
+    }, 500);
+  }
+  $("q").addEventListener("input", function () { state.q = this.value; render(); announce(); });
+  $("q").addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && this.value) { e.preventDefault(); this.value = ""; state.q = ""; render(); say("Search cleared"); }
+  });
+  $("qDefs").addEventListener("change", function () { state.qDefs = this.checked; render(); announce(); });
+
   if (!TERMS.length || !TOPICS) {
     $("termEmpty").textContent = "The term bank didn't load. Check that shared/data/terms.js and topics.js exist.";
     $("termEmpty").hidden = false;
     return;
   }
+  // A browser may restore the box after a reload; start from what is shown.
+  state.q = $("q").value; state.qDefs = $("qDefs").checked;
   render();
 })();
