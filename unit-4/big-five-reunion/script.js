@@ -187,7 +187,8 @@
   /* ---------- Legs and shoes ---------- */
   function drawShoe(p, G, bt, side) {
     var boot = bt.shoe === 'boot', hgt = boot ? 30 : 22, wid = boot ? 40 : 43;
-    var x = side < 0 ? -G.legX - (wid - 14) : G.legX - 14;
+    var inner = Math.max(G.legX - 14, 1);
+    var x = side < 0 ? -inner - wid : inner;
     el(p, 'rect', { cls: 'o', x: r(x), y: -hgt, width: wid, height: hgt, rx: 11, f: bt.shoeColor });
     if (bt.shoe === 'sneaker') seg(p, x + 9, -5, x + wid - 9, -5, bt.sole || 'white', 4);
   }
@@ -241,8 +242,8 @@
     scrubs: function (p, G, L, c) {
       var T = G.T;
       el(p, 'path', { cls: 'o', sw: 3, f: L.skin, d: 'M' + pt(-17, T) + ' L' + pt(0, T + 28) + ' L' + pt(17, T) + ' Z' });
-      el(p, 'path', { d: 'M' + pt(16, T + 46) + ' L' + pt(38, T + 46), f: 'none', s: 'ink', sw: 2.5 });
-      el(p, 'rect', { x: 16, y: r(T + 46), width: 22, height: 18, rx: 3, f: 'none', s: 'ink', sw: 2.5 });
+      var pw = Math.min(22, G.tw - 20);
+      el(p, 'rect', { x: 15, y: r(T + 46), width: r(pw), height: 18, rx: 3, f: 'none', s: 'ink', sw: 2.5 });
     },
     overalls: function (p, G, L, c) {
       var T = G.T;
@@ -261,11 +262,12 @@
     },
     sweatervest: function (p, G, L, c) {
       var T = G.T;
-      el(p, 'path', { cls: 'o', sw: 3, f: 'white', d: 'M' + pt(-20, T) + ' L' + pt(0, T + 36) + ' L' + pt(20, T) + ' Z' });
+      var v = Math.min(20, G.tw * .45);
+      el(p, 'path', { cls: 'o', sw: 3, f: 'white', d: 'M' + pt(-v, T) + ' L' + pt(0, T + 36) + ' L' + pt(v, T) + ' Z' });
       el(p, 'path', { f: 'navy', s: 'ink', sw: 2, 'stroke-linejoin': 'round',
         d: 'M' + pt(-4, T + 8) + ' L' + pt(4, T + 8) + ' L' + pt(6, T + 28) + ' L' + pt(0, T + 34) + ' L' + pt(-6, T + 28) + ' Z' });
       el(p, 'rect', { x: -5, y: r(T + 2), width: 10, height: 7, rx: 2, f: 'navy', s: 'ink', sw: 2 });
-      collar(p, T, 'white', 20);
+      collar(p, T, 'white', v);
     },
     track: function (p, G, L, c) {
       var T = G.T, B = G.B;
@@ -281,8 +283,9 @@
       el(p, 'rect', { x: -40, y: r(T + 34), width: 22, height: 20, rx: 3, f: 'none', s: 'ink', sw: 2 });
       seg(p, -40, T + 40, -18, T + 40, 'ink', 2);
       if (c.patch) {
-        el(p, 'ellipse', { cls: 'o', sw: 2, cx: 28, cy: r(T + 42), rx: 16, ry: 9.5, f: 'white' });
-        var t = el(p, 'text', { x: 28, y: r(T + 45.5), 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 700,
+        var px = r(Math.min(28, G.tw - 30));   // clear of the arm on narrow builds
+        el(p, 'ellipse', { cls: 'o', sw: 2, cx: px, cy: r(T + 42), rx: 14, ry: 9, f: 'white' });
+        var t = el(p, 'text', { x: px, y: r(T + 45.5), 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 700,
           'font-family': 'Lato, system-ui, sans-serif', f: 'ink' });
         t.textContent = c.patch;
       }
@@ -316,13 +319,15 @@
       var T = G.T, B = G.B, x;
       seg(p, -sideX(G, B - 12) + 3, B - 12, sideX(G, B - 12) - 3, B - 12, 'ink', 2);
       for (x = -G.bw + 10; x <= G.bw - 10; x += 7) seg(p, x, B - 9, x, B - 3, 'ink', 1.5).style.opacity = .3;
-      el(p, 'path', { cls: 'o', sw: 3, f: c.under, d: 'M' + pt(-18, T) + ' L' + pt(0, T + 40) + ' L' + pt(18, T) + ' Z' });
+      var v = Math.min(18, G.tw * .42);
+      el(p, 'path', { cls: 'o', sw: 3, f: c.under, d: 'M' + pt(-v, T) + ' L' + pt(0, T + 40) + ' L' + pt(v, T) + ' Z' });
       el(p, 'path', { f: c.tie, s: 'ink', sw: 2, 'stroke-linejoin': 'round',
         d: 'M' + pt(-4, T + 9) + ' L' + pt(4, T + 9) + ' L' + pt(6, T + 31) + ' L' + pt(0, T + 37) + ' L' + pt(-6, T + 31) + ' Z' });
       el(p, 'rect', { x: -5, y: r(T + 3), width: 10, height: 7, rx: 2, f: c.tie, s: 'ink', sw: 2 });
-      collar(p, T, c.under, 19);
+      collar(p, T, c.under, v + 1);
       [-1, 1].forEach(function (s) {
-        el(p, 'path', { cls: 'o', sw: 3, f: c.main, d: 'M' + pt(s * 17, T - 1) + ' L' + pt(s * 36, T - 5) + ' L' + pt(s * 30, T + 15) + ' Z' });
+        el(p, 'path', { cls: 'o', sw: 3, f: c.main, d: 'M' + pt(s * (v - 1), T - 1) + ' L' + pt(s * Math.min(36, G.tw - 5), T - 5) +
+          ' L' + pt(s * Math.min(30, G.tw - 9), T + 15) + ' Z' });
       });
       seg(p, 0, T + 40, 0, T + 58, 'ink', 2.5);
       el(p, 'rect', { cls: 'o', sw: 2, x: -3, y: r(T + 41), width: 6, height: 11, rx: 2, f: 'silver' });
@@ -360,7 +365,8 @@
       el(up, 'path', { cls: 'o', sw: 3, f: 'url(#rb-stars)',
         d: 'M' + pt(-31, T + 6) + ' L' + pt(-12, T + 6) + ' L' + pt(-10, T + 80) + ' L' + pt(-33, T + 80) + ' Z' });
       [-29, -24, -19, -14].forEach(function (x) { seg(up, x, T + 82, x, T + 89, 'midnight', 2.5); });
-      el(up, 'rect', { cls: 'o', sw: 3, x: -44, y: T - 10, width: 88, height: 24, rx: 12, f: 'url(#rb-stars)' });
+      var sh = Math.min(44, G.tw + 4);
+      el(up, 'rect', { cls: 'o', sw: 3, x: r(-sh), y: T - 10, width: r(sh * 2), height: 24, rx: 12, f: 'url(#rb-stars)' });
     }
     if (has(L, 'headphones')) {
       var band = 'M' + pt(-39, T + 6) + ' Q' + pt(-48, T - 62) + ' ' + pt(0, T - 66) + ' Q' + pt(48, T - 62) + ' ' + pt(39, T + 6);
@@ -385,9 +391,10 @@
       el(up, 'circle', { cls: 'o', sw: 2, cx: 12, cy: T + 42.5, r: 5.5, f: 'silver' });
     }
     if (has(L, 'nametag')) {
-      el(up, 'rect', { cls: 'o', sw: 2, x: -37, y: T + 38, width: 26, height: 20, rx: 2, f: 'white' });
-      el(up, 'rect', { x: -36, y: T + 39, width: 24, height: 6, f: 'tag' });
-      stroke(up, 'M' + pt(-32, T + 52) + ' q3 -3 6 0 t6 0 t5 0', 'ink', 1.5);
+      var nx = -Math.min(37, G.tw - 4);
+      el(up, 'rect', { cls: 'o', sw: 2, x: r(nx), y: T + 38, width: 26, height: 20, rx: 2, f: 'white' });
+      el(up, 'rect', { x: r(nx + 1), y: T + 39, width: 24, height: 6, f: 'tag' });
+      stroke(up, 'M' + pt(nx + 5, T + 52) + ' q3 -3 6 0 t6 0 t5 0', 'ink', 1.5);
     }
   }
 
@@ -737,7 +744,7 @@
     el(p, 'ellipse', { cx: x - 7, cy: y - 10, rx: 4, ry: 7, f: 'white', op: .45 });
   }
   function bunting(p, x0, y0, x1, y1, sag, n) {
-    var mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + sag, cols = ['maroon', 'gold', 'cream'], i, t, u, x, y;
+    var mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + sag, cols = ['maroon', 'gold', 'teal'], i, t, u, x, y;
     stroke(p, 'M' + pt(x0, y0) + ' Q' + pt(mx, my) + ' ' + pt(x1, y1), 'ink', 2);
     for (i = 0; i < n; i++) {
       t = (i + 0.5) / n; u = 1 - t;
