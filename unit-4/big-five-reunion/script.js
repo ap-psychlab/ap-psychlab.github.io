@@ -271,6 +271,21 @@
         stroke(p, 'M' + pt(s * 30, T + 10) + ' L' + pt(s * 25, T + 22), 'white', 2).style.opacity = .35;
       });
     },
+    qzip: function (p, G, L, c) {               // quarter-zip sweater, unzipped over a shirt and tie
+      var T = G.T, B = G.B, x;
+      seg(p, -sideX(G, B - 12) + 3, B - 12, sideX(G, B - 12) - 3, B - 12, 'ink', 2);
+      for (x = -G.bw + 10; x <= G.bw - 10; x += 7) seg(p, x, B - 9, x, B - 3, 'ink', 1.5).style.opacity = .3;
+      el(p, 'path', { cls: 'o', sw: 3, f: c.under, d: 'M' + pt(-18, T) + ' L' + pt(0, T + 40) + ' L' + pt(18, T) + ' Z' });
+      el(p, 'path', { f: c.tie, s: 'ink', sw: 2, 'stroke-linejoin': 'round',
+        d: 'M' + pt(-4, T + 9) + ' L' + pt(4, T + 9) + ' L' + pt(6, T + 31) + ' L' + pt(0, T + 37) + ' L' + pt(-6, T + 31) + ' Z' });
+      el(p, 'rect', { x: -5, y: r(T + 3), width: 10, height: 7, rx: 2, f: c.tie, s: 'ink', sw: 2 });
+      collar(p, T, c.under, 19);
+      [-1, 1].forEach(function (s) {
+        el(p, 'path', { cls: 'o', sw: 3, f: c.main, d: 'M' + pt(s * 17, T - 1) + ' L' + pt(s * 36, T - 5) + ' L' + pt(s * 30, T + 15) + ' Z' });
+      });
+      seg(p, 0, T + 40, 0, T + 58, 'ink', 2.5);
+      el(p, 'rect', { cls: 'o', sw: 2, x: -3, y: r(T + 41), width: 6, height: 11, rx: 2, f: 'silver' });
+    },
     buttonshirt: function (p, G, L, c) {
       var T = G.T, B = G.B;
       seg(p, 0, T + 12, 0, B - 2, 'ink', 2);
@@ -438,6 +453,20 @@
         });
       }
     },
+    curly: {
+      back: function (p, c) {
+        hairPath(p, scallop(0, -38, 60, 14, 12), c);
+      },
+      front: function (p, c) {
+        // Fill only, so no outline crosses the curls; then outline the hairline
+        var line = 'Q60 -20 50 -26 Q46 -40 30 -34 Q20 -47 6 -38 Q-6 -49 -18 -36 Q-32 -45 -42 -30 Q-56 -26 -62 2';
+        el(p, 'path', { d: 'M-62 2 Q-70 -72 0 -72 Q70 -72 62 2 ' + line + ' Z', f: c });
+        stroke(p, 'M62 2 ' + line, 'ink', 4);
+        stroke(p, 'M8 -38 q-9 6 -3 13 q6 4 9 -3', c, 4.5);
+        ['M-34 -58 q6 -7 13 -1', 'M2 -62 q6 -7 13 -1', 'M28 -52 q6 -7 13 -1', 'M-16 -80 q6 -6 12 0', 'M20 -84 q6 -6 12 0']
+          .forEach(function (d) { stroke(p, d, 'ink', 2.5).style.opacity = .35; });
+      }
+    },
     spiky: {
       front: function (p, c) {
         hairPath(p, 'M-60 -6 L-72 -44 L-52 -48 L-58 -86 L-30 -68 L-20 -104 L2 -74 L22 -102 L32 -68 L60 -84 L52 -46 L72 -42 L60 -6 Q30 -40 0 -42 Q-30 -40 -60 -6 Z', c);
@@ -460,6 +489,8 @@
     if (face.beard === 'stubble') {
       el(hd, 'path', { 'clip-path': 'url(#rb-headclip)', f: hair.color, op: .22,
         d: 'M-64 14 Q-60 66 0 66 Q60 66 64 14 Q52 40 34 46 Q16 52 0 50 Q-16 52 -34 46 Q-52 40 -64 14 Z' });
+    } else if (face.beard === 'trim') {
+      hairPath(hd, 'M-61 6 Q-60 62 0 66 Q60 62 61 6 Q57 30 42 37 Q28 54 0 55 Q-28 54 -42 37 Q-57 30 -61 6 Z', hair.color, 3);
     } else if (face.beard === 'full') {
       hairPath(hd, 'M-60 6 Q-62 68 0 72 Q62 68 60 6 Q54 34 36 36 Q24 56 0 56 Q-24 56 -36 36 Q-54 34 -60 6 Z', hair.color, 3);
     }
@@ -478,10 +509,12 @@
     (BROWS[face.brows] || BROWS.soft).forEach(function (d) { stroke(brows, d, 'ink', face.brows === 'grumpy' ? 5 : 3.5); });
 
     if (face.glasses) {
-      [-42, 4].forEach(function (x) {
-        el(hd, 'rect', { x: x, y: -4, width: 38, height: 28, rx: 9, f: 'white', fo: .3, s: 'ink', sw: 3.5 });
+      var thick = face.glasses === 'thick';
+      [thick ? -45 : -42, thick ? 5 : 4].forEach(function (x) {
+        el(hd, 'rect', { x: x, y: thick ? -6 : -4, width: thick ? 40 : 38, height: thick ? 30 : 28, rx: thick ? 4 : 9,
+          f: 'white', fo: .3, s: thick ? 'black' : 'ink', sw: thick ? 6 : 3.5 });
       });
-      stroke(hd, 'M-4 8 Q0 4 4 8', 'ink', 3.5);
+      stroke(hd, 'M-5 8 Q0 4 5 8', thick ? 'black' : 'ink', thick ? 5 : 3.5);
     }
 
     // Mouths: the default expression, plus the shrug and cheer versions
@@ -531,6 +564,10 @@
       el(pr, 'rect', { x: x - 14, y: y + 3, width: 28, height: 34, rx: 1, f: 'paper' });
       [12, 19, 26].forEach(function (d) { seg(pr, x - 9, y + d, x + 9, y + d, 'gray', 1.5); });
       el(pr, 'rect', { cls: 'o', sw: 2, x: x - 7, y: y - 10, width: 14, height: 8, rx: 2, f: 'silver' });
+    } else if (type === 'book') {
+      el(pr, 'rect', { cls: 'o', sw: 3, x: x - 14, y: y - 4, width: 28, height: 36, rx: 2, f: 'teal' });
+      el(pr, 'rect', { x: x + 9, y: y - 2, width: 3, height: 32, f: 'paper' });
+      el(pr, 'rect', { x: x - 9, y: y + 14, width: 15, height: 4, rx: 1, f: 'paper' });
     } else if (type === 'honey') {
       el(pr, 'rect', { cls: 'o', sw: 3, x: x - 15, y: y - 2, width: 30, height: 32, rx: 8, f: 'honey' });
       el(pr, 'rect', { cls: 'o', sw: 2.5, x: x - 13, y: y - 8, width: 26, height: 8, rx: 3, f: 'brown' });

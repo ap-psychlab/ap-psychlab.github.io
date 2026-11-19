@@ -10,7 +10,9 @@
  *   art palette in style.css (--a-<name>). "skin" uses the guest's skin color.
  *   build: h scales leg length, w scales body width.
  *   top.style: vest, hawaiian, scrubs, overalls, sweatervest, track, workshirt,
- *     blazer, coat, leather, buttonshirt.
+ *     blazer, coat, leather, buttonshirt, qzip (quarter-zip sweater over a shirt
+ *     and tie; under = shirt color, tie = tie color).
+ *   face.glasses: true (thin) or "thick"; face.beard: stubble, trim or full.
  *   top.sleeve: upper-arm color; top.fore: forearm color (skin = short or rolled
  *     sleeves, which also adds a cuff); top.stripe: a stripe down the sleeves.
  *   hold: a prop in the guest's left (L) or right (R) hand, as the viewer sees them.
@@ -67,7 +69,7 @@ window.APPSYCH_REUNION_GUESTS = [
     id: "june", name: "June Castillo", job: "muralist",
     answers: { o: 5, c: 1, e: 3, a: 4, s: 3 },
     then: "", now: [],
-    spot: "table", activity: "sketch",
+    spot: "dance", activity: "free-dance",
     look: {
       build: { h: 0.97, w: 1 },
       skin: "skin-3",
@@ -94,18 +96,18 @@ window.APPSYCH_REUNION_GUESTS = [
     }
   },
   {
-    id: "rosa", name: "Rosa Delgado", job: "PE teacher",
-    answers: { o: 2, c: 4, e: 4, a: 3, s: 4 },
+    id: "teacher", name: "Your Name Here", job: "psychology teacher",
+    answers: { o: 5, c: 4, e: 1, a: 4, s: 2 },
     then: "", now: [],
-    spot: "dance", activity: "step-touch",
+    spot: "table", activity: "people-watch",
     look: {
-      build: { h: 1, w: 1 },
-      skin: "skin-3",
-      hair: { style: "ponytail", color: "hair-dkbrown" },
-      face: { brows: "soft", mouth: "smile" },
-      top: { style: "track", main: "red", sleeve: "red", stripe: true },
-      bottom: { pants: "charcoal", stripe: true, shoe: "sneaker", shoeColor: "white", sole: "silver" },
-      extras: ["whistle"]
+      build: { h: 1.03, w: 1.02 },
+      skin: "skin-2",
+      hair: { style: "curly", color: "hair-dkbrown" },
+      face: { brows: "soft", mouth: "small", glasses: "thick", beard: "trim", mustache: true },
+      top: { style: "qzip", main: "maroon", sleeve: "maroon", under: "oxford", tie: "mustard" },
+      bottom: { pants: "navy", shoe: "loafer", shoeColor: "brown" },
+      hold: { R: "book" }
     }
   },
   {
