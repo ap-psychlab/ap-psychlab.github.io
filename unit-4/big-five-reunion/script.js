@@ -11,7 +11,7 @@
  *   g.guest[data-base=stand|sit|lean][data-pose=idle|wave|shrug|cheer|cross][data-act=...]
  *     ellipse.shadow
  *     g.hop > g.lean
- *       g.legs-stand (g.legL, g.legR) / g.legs-sit
+ *       g.legs-stand (g.legL, g.legR) / g.legs-sit (shins, then knee fronts under the hem)
  *       g.seat (--sit) > g.upper (breathing)
  *         torso and outfit, neck extras, head (g.headPose > g.head), g.armL, g.armR
  *   Arms have two segments: g.arm (rotates at the shoulder) > g.fore (rotates at the
@@ -199,6 +199,14 @@
       if (bt.stripe) seg(lg, side * (G.legX + 6), top + 16, side * (G.legX + 6), -24, 'white', 3);
       drawShoe(lg, G, bt, side);
     });
+    if (sit) {
+      // Thighs point at the viewer: only the knee fronts show below the hem, shaded for a little depth
+      [-1, 1].forEach(function (side) {
+        var kx = side * (G.legX + 1) - 16;
+        el(p, 'rect', { cls: 'o', x: r(kx), y: -64, width: 32, height: 28, rx: 10, f: bt.pants });
+        el(p, 'rect', { x: r(kx + 2.5), y: -49, width: 27, height: 10.5, rx: 8, f: 'ink', op: .18 });
+      });
+    }
   }
 
   /* ---------- Torso and outfits ---------- */
@@ -377,9 +385,9 @@
       el(up, 'circle', { cls: 'o', sw: 2, cx: 12, cy: T + 42.5, r: 5.5, f: 'silver' });
     }
     if (has(L, 'nametag')) {
-      el(up, 'rect', { cls: 'o', sw: 2, x: -42, y: T + 38, width: 28, height: 20, rx: 2, f: 'white' });
-      el(up, 'rect', { x: -41, y: T + 39, width: 26, height: 6, f: 'tag' });
-      stroke(up, 'M' + pt(-37, T + 52) + ' q3 -3 6 0 t6 0 t6 0', 'ink', 1.5);
+      el(up, 'rect', { cls: 'o', sw: 2, x: -37, y: T + 38, width: 26, height: 20, rx: 2, f: 'white' });
+      el(up, 'rect', { x: -36, y: T + 39, width: 24, height: 6, f: 'tag' });
+      stroke(up, 'M' + pt(-32, T + 52) + ' q3 -3 6 0 t6 0 t5 0', 'ink', 1.5);
     }
   }
 
@@ -667,10 +675,7 @@
     drawLegs(grp(lean, 'legs-stand'), G, L, false);
     drawLegs(grp(lean, 'legs-sit'), G, L, true);
     var up = grp(grp(lean, 'seat', null, '--sit:' + G.sit + 'px;'), 'upper');
-    var knees = grp(lean, 'knees');   // seated thighs, seen end-on in front of the lap
-    [-1, 1].forEach(function (s) {
-      el(knees, 'rect', { cls: 'o', x: r(s * G.legX - 14), y: -68, width: 28, height: 26, rx: 13, f: L.bottom.pants });
-    });
+
     drawTop(up, G, L);
     drawNeck(up, G, L);
     drawHead(up, G, L);
@@ -775,6 +780,13 @@
       seg(g, 1348, 195, 1532, 195, 'white', 8);
       el(g, 'rect', { cls: 'o', sw: 3, x: 1326, y: 280, width: 228, height: 12, rx: 3, f: 'white' });
 
+      // School pennant on the wall
+      seg(g, 852, 138, 852, 272, 'brown', 6);
+      el(g, 'path', { cls: 'o', d: 'M856 150 L1236 205 L856 260 Z', f: 'maroon' });
+      el(g, 'rect', { cls: 'o', sw: 3, x: 856, y: 150, width: 22, height: 110, f: 'gold' });
+      txt(g, 986, 212, 'McCRAE HILL', 28, 'cream');
+      txt(g, 974, 234, 'HIGH SCHOOL', 14, 'gold');
+
       // Stage: curtain, valance, speakers, platform
       el(g, 'rect', { x: 360, y: 170, width: 400, height: 262, f: 'curtain' });
       for (x = 384; x < 760; x += 36) seg(g, x, 186, x, 428, 'curtain-dk', 6).style.opacity = .7;
@@ -796,7 +808,7 @@
       seg(g, 470, 40, 440, 0, 'ink', 2);
       seg(g, 1130, 40, 1160, 0, 'ink', 2);
       el(g, 'rect', { x: 470, y: 30, width: 660, height: 70, rx: 6, f: 'cream', s: 'gold', sw: 5 });
-      txt(g, 800, 77, 'WELCOME BACK, CLASS OF 2006!', 34, 'maroon');
+      txt(g, 800, 77, 'WELCOME BACK, CLASS OF 2007!', 34, 'maroon');
       bunting(g, 0, 16, 440, 28, 54, 9);
       bunting(g, 1160, 28, 1600, 16, 54, 9);
       el(g, 'circle', { cls: 'o', cx: 700, cy: 186, r: 30, f: 'silver' });
@@ -837,7 +849,7 @@
 
       // Balloons tied to the left speaker and the top of the bleachers
       balloon(g, 382, 252, 'gold', 403, 316);
-      balloon(g, 424, 238, 'maroon', 403, 316);
+      balloon(g, 424, 238, 'teal', 403, 316);
       balloon(g, 452, 262, 'cream', 403, 316);
       balloon(g, 1548, 300, 'maroon', 1570, 344);
       balloon(g, 1576, 278, 'gold', 1570, 344);
@@ -887,7 +899,7 @@
       seg(g, 236, 588, 262, 582, 'ink', 3);
     },
 
-    // Round table: tablecloth, centerpiece, Sam's honey jar, Owen's open book
+    // Round table: tablecloth, centerpiece, Sam's honey jar, Alex's open book
     table: function (g) {
       var T = TABLE, x0 = T.cx - T.rx, x1 = T.cx + T.rx;
       el(g, 'path', { cls: 'o', f: 'cream', d: 'M' + x0 + ' ' + T.cy + ' L' + x0 + ' ' + (T.cy + 50) + ' Q' + T.cx + ' ' + (T.cy + 82) + ' ' +

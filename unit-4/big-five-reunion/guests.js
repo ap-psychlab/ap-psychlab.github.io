@@ -26,7 +26,7 @@ window.APPSYCH_REUNION_GUESTS = [
     then: "", now: [],
     spot: "snacks", activity: "pitch",
     look: {
-      build: { h: 1.08, w: 1 },
+      build: { h: 1.08, w: 1.0 },
       skin: "skin-5",
       hair: { style: "fade", color: "hair-black" },
       face: { brows: "cocky", mouth: "smirk" },
@@ -37,12 +37,12 @@ window.APPSYCH_REUNION_GUESTS = [
     }
   },
   {
-    id: "benny", name: "Benny Szabo", job: "wedding DJ",
+    id: "benny", name: "Benny Doyle", job: "wedding DJ",
     answers: { o: 3, c: 2, e: 5, a: 4, s: 2 },
     then: "", now: [],
     spot: "dj", activity: "dj",
     look: {
-      build: { h: 0.95, w: 1.1 },
+      build: { h: 0.95, w: 1.15 },
       skin: "skin-1",
       hair: { style: "tall", color: "hair-auburn" },
       face: { brows: "soft", mouth: "grin" },
@@ -57,7 +57,7 @@ window.APPSYCH_REUNION_GUESTS = [
     then: "", now: [],
     spot: "table", activity: "sip",
     look: {
-      build: { h: 1, w: 0.96 },
+      build: { h: 1, w: 0.9 },
       skin: "skin-2",
       hair: { style: "messybun", color: "hair-lightbrown" },
       face: { brows: "soft", mouth: "small" },
@@ -73,7 +73,7 @@ window.APPSYCH_REUNION_GUESTS = [
     then: "", now: [],
     spot: "dance", activity: "free-dance",
     look: {
-      build: { h: 0.97, w: 1 },
+      build: { h: 0.97, w: 0.95 },
       skin: "skin-3",
       hair: { style: "bunpencil", color: "hair-dkbrown" },
       face: { brows: "soft", mouth: "smile" },
@@ -88,7 +88,7 @@ window.APPSYCH_REUNION_GUESTS = [
     then: "", now: [],
     spot: "table", activity: "watch",
     look: {
-      build: { h: 1.02, w: 0.92 },
+      build: { h: 1.02, w: 0.85 },
       skin: "skin-1",
       hair: { style: "sidepart", color: "hair-blond" },
       face: { brows: "worried", mouth: "small" },
@@ -98,18 +98,17 @@ window.APPSYCH_REUNION_GUESTS = [
     }
   },
   {
-    id: "teacher", name: "Owen Hartley", job: "psychology teacher",
+    id: "teacher", name: "Alex Pena", job: "psychology teacher",
     answers: { o: 5, c: 4, e: 1, a: 4, s: 2 },
     then: "", now: [],
     spot: "table", activity: "people-watch",
     look: {
-      build: { h: 1.03, w: 1.02 },
+      build: { h: 1.03, w: 0.86 },
       skin: "skin-2b",
       hair: { style: "curly", color: "hair-espresso" },
       face: { brows: "soft", mouth: "small", glasses: "thick", beard: "circle", blush: false },
       top: { style: "qzip", main: "cobalt", sleeve: "cobalt", under: "oxford", tie: "mustard" },
-      bottom: { pants: "charcoal", shoe: "loafer", shoeColor: "brown" },
-      hold: { R: "book" }
+      bottom: { pants: "charcoal", shoe: "loafer", shoeColor: "brown" }
     }
   },
   {
@@ -118,7 +117,7 @@ window.APPSYCH_REUNION_GUESTS = [
     then: "", now: [],
     spot: "wall", activity: "lean-cross",
     look: {
-      build: { h: 1, w: 1.15 },
+      build: { h: 1, w: 1.2 },
       skin: "skin-2",
       hair: { style: "cap", color: "hair-gray", hat: "forest" },
       face: { brows: "grumpy", mouth: "flat", beard: "stubble", mustache: true },
@@ -132,7 +131,7 @@ window.APPSYCH_REUNION_GUESTS = [
     then: "", now: [],
     spot: "checkin", activity: "greet",
     look: {
-      build: { h: 0.9, w: 0.95 },
+      build: { h: 0.9, w: 0.88 },
       skin: "skin-2",
       hair: { style: "bob", color: "hair-black" },
       face: { brows: "soft", mouth: "grin", ears: false },
@@ -148,7 +147,7 @@ window.APPSYCH_REUNION_GUESTS = [
     then: "", now: [],
     spot: "window", activity: "stargaze",
     look: {
-      build: { h: 1.08, w: 0.95 },
+      build: { h: 1.08, w: 0.9 },
       skin: "skin-6",
       hair: { style: "locbun", color: "hair-black" },
       face: { brows: "soft", mouth: "small", glasses: true },
@@ -178,7 +177,7 @@ window.APPSYCH_REUNION_GUESTS = [
     then: "", now: [],
     spot: "table", activity: "nod",
     look: {
-      build: { h: 1.05, w: 1.12 },
+      build: { h: 1.05, w: 1.15 },
       skin: "skin-5",
       hair: { style: "straw", color: "hair-black", hat: "straw" },
       face: { brows: "soft", mouth: "smile", beard: "full" },

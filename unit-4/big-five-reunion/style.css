@@ -118,7 +118,7 @@
 .guest g { transform-box: view-box; }   /* origins are set in local px by the builder */
 
 /* Hidden by default; shown by base or pose */
-.guest .legs-sit, .guest .knees,
+.guest .legs-sit,
 .guest .m-open, .guest .m-wavy, .guest .eyes-happy { display: none; }
 
 /* Arms at rest */
@@ -148,7 +148,7 @@
 .guest[data-base="sit"] .seat { transform: translateY(var(--sit)); }
 .guest[data-base="sit"] .legs-stand,
 .guest[data-base="sit"] .coat-skirt { display: none; }
-.guest[data-base="sit"] .legs-sit, .guest[data-base="sit"] .knees { display: inline; }
+.guest[data-base="sit"] .legs-sit { display: inline; }
 
 .guest[data-base="lean"] .lean { transform: rotate(4deg); }
 .guest[data-base="lean"] .legR { transform: rotate(13deg); }
@@ -279,10 +279,17 @@
 .guest[data-act="nod"] .headPose { animation: rb-nodslow 3s ease-in-out infinite; animation-delay: var(--d, 0s); }
 @keyframes rb-nodslow { 0%, 45%, 100% { transform: rotate(0); } 10%, 30% { transform: translateY(3px) rotate(2deg); } 20% { transform: rotate(0); } }
 
-/* Owen: chin in hand, watching the room */
-.guest[data-act="people-watch"] .armL { transform: rotate(-60deg); }
-.guest[data-act="people-watch"] .armL .fore { transform: rotate(-107deg); }
-.guest[data-act="people-watch"] .headPose { transform: rotate(-5deg); }
+/* Alex: watches the room, shifting between chin on one hand, hands folded, chin on the other */
+.guest[data-act="people-watch"] .armL { transform: rotate(-60deg); animation: rb-pwLA 13s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="people-watch"] .armL .fore { transform: rotate(-107deg); animation: rb-pwLF 13s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="people-watch"] .armR { animation: rb-pwRA 13s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="people-watch"] .armR .fore { animation: rb-pwRF 13s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="people-watch"] .headPose { transform: rotate(-5deg); animation: rb-pwH 13s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-pwLA { 0%, 30%, 100% { transform: rotate(-60deg); } 36%, 58% { transform: rotate(-15deg); } 64%, 94% { transform: rotate(12deg); } }
+@keyframes rb-pwLF { 0%, 30%, 100% { transform: rotate(-107deg); } 36%, 58% { transform: rotate(-65deg); } 64%, 94% { transform: rotate(-6deg); } }
+@keyframes rb-pwRA { 0%, 30%, 100% { transform: rotate(-12deg); } 36%, 58% { transform: rotate(15deg); } 64%, 94% { transform: rotate(60deg); } }
+@keyframes rb-pwRF { 0%, 30%, 100% { transform: rotate(6deg); } 36%, 58% { transform: rotate(65deg); } 64%, 94% { transform: rotate(107deg); } }
+@keyframes rb-pwH { 0%, 30%, 100% { transform: rotate(-5deg); } 36%, 58% { transform: rotate(0deg); } 64%, 94% { transform: rotate(5deg); } }
 .guest[data-act="people-watch"] .look { animation: rb-scan 7s ease-in-out infinite; animation-delay: var(--d, 0s); }
 @keyframes rb-scan { 0%, 18%, 100% { transform: translateX(-3px); } 28%, 52% { transform: translateX(3px); } 62%, 88% { transform: translate(0, 1px); } }
 
