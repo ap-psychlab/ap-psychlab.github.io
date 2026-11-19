@@ -15,10 +15,36 @@
 <body>
 <main class="wide">
   <h1>Big Five Reunion</h1>
+  <p class="hint">Click or tap each guest (or use the guest list) to rate their personality. In the room, the arrow keys move between guests and Enter opens a profile.</p>
 
-  <section id="soon" class="card">
-    <p>This demo is still being built. Check back soon!</p>
-  </section>
+  <div class="stats" id="stats">
+    <div class="stat"><span>Guests met</span><strong id="statMet">0 / 11</strong></div>
+    <div class="stat"><span>Score</span><strong id="statScore">–</strong></div>
+  </div>
+
+  <div class="room-wrap">
+    <svg id="room" class="room" viewBox="0 0 1600 800" role="group" aria-label="The reunion in the school gym"></svg>
+  </div>
+
+  <h2 id="listTitle">Guest list</h2>
+  <ul class="guest-list" id="guestList" aria-labelledby="listTitle"></ul>
+
+  <div class="row dev-bar" id="devBar" hidden>
+    <button class="btn ghost" type="button" id="devRateAll">Rate everyone (dev)</button>
+    <button class="btn ghost" type="button" id="devClear">Clear ratings (dev)</button>
+  </div>
+
+  <dialog id="profile" class="profile" aria-labelledby="pfName">
+    <div class="pf-head">
+      <h2 id="pfName">Guest</h2>
+      <button class="btn ghost" type="button" id="pfClose">Close</button>
+    </div>
+    <p class="pf-job" id="pfJob"></p>
+    <p class="hint">The profile, sliders and scoring come in the next step.</p>
+    <div class="row" id="pfDev" hidden>
+      <button class="btn alt" type="button" id="pfMark">Mark as rated (dev)</button>
+    </div>
+  </dialog>
 
   <section id="gallery" class="gal-controls" hidden>
     <h2>Guest gallery (dev)</h2>

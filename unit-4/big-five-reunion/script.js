@@ -3,11 +3,12 @@
  * Test options (URL):
  *   ?dev   debug tools: the guest gallery (every guest in every pose)
  *
- * Step 1: character builder + dev gallery. The room, profile dialog and scoring
- * come in later steps (see "Big Five Reunion - Plan.md").
+ * Step 2: the room (scene, guests and their activity loops, badges, guest list,
+ * stats). The profile dialog is a stub; sliders and scoring come in step 3
+ * (see "Big Five Reunion - Plan.md").
  *
  * Character rig (local coordinates: feet at 0,0, y up is negative):
- *   g.guest[data-base=stand|sit|lean][data-pose=idle|wave|shrug|cheer|cross]
+ *   g.guest[data-base=stand|sit|lean][data-pose=idle|wave|shrug|cheer|cross][data-act=...]
  *     ellipse.shadow
  *     g.hop > g.lean
  *       g.legs-stand (g.legL, g.legR) / g.legs-sit
@@ -15,7 +16,8 @@
  *         torso and outfit, neck extras, head (g.headPose > g.head), g.armL, g.armR
  *   Arms have two segments: g.arm (rotates at the shoulder) > g.fore (rotates at the
  *   elbow). Each arm is drawn in two passes (all outlines, then all fills) so the
- *   elbow stays seamless; both g.fore copies share the same CSS. Poses live in style.css.
+ *   elbow stays seamless; both g.fore copies share the same CSS. Poses and room
+ *   activities (data-act, from guests.js "activity") live in style.css.
  */
 (function () {
   'use strict';
@@ -503,7 +505,7 @@
 
   function drawHead(up, G, L) {
     var face = L.face || {}, hair = L.hair || {}, H = HAIR[hair.style] || HAIR.fade;
-    var pos = el(up, 'g', { transform: 'translate(0 ' + G.headY + ')' });
+    var pos = el(up, 'g', { cls: 'headWrap', transform: 'translate(0 ' + G.headY + ')' });
     var hp = grp(pos, 'headPose', [0, 58]);
     var hd = grp(hp, 'head', [0, 58]);
 
@@ -647,7 +649,8 @@
   }
 
   /* ---------- Build one guest ---------- */
-  // opts: base (stand|sit|lean), pose (idle|wave|shrug|cheer|cross), delay (s, negative)
+  // opts: base (stand|sit|lean), pose (idle|wave|shrug|cheer|cross), act (room activity),
+  //       delay (s, negative)
   function buildGuest(guest, opts) {
     opts = opts || {};
     ensureDefs();
@@ -655,7 +658,9 @@
     var delay = opts.delay != null ? opts.delay : -Math.random() * 6;
     var root = el(null, 'g', { cls: 'guest', 'data-id': guest.id, 'data-base': opts.base || 'stand',
       'data-pose': opts.pose || 'idle', st: '--d:' + delay.toFixed(2) + 's;' });
+    if (opts.act) root.setAttribute('data-act', opts.act);
     if (has(L, 'sling')) root.setAttribute('data-sling', '');
+    root.__geo = G;
 
     el(root, 'ellipse', { cls: 'shadow', cx: 0, cy: 1, rx: r(66 * G.w), ry: 9, f: 'ink', fo: .15 });
     var lean = grp(grp(root, 'hop'), 'lean', [0, 0]);
@@ -675,16 +680,411 @@
     return root;
   }
 
-  /* ---------- Dev gallery ---------- */
-  function drawChair(svg) {
-    var c = el(svg, 'g', { 'class': 'g-chair' });
+  /* ---------- Chair (seated guests, local coordinates) ---------- */
+  function drawChair(parent) {
+    var c = el(parent, 'g', { 'class': 'g-chair' });
     el(c, 'rect', { x: -54, y: -196, width: 108, height: 140, rx: 12, f: 'chair', s: 'ink', sw: 4 });
     [-1, 1].forEach(function (s) { seg(c, s * 62, -58, s * 62, 0, 'ink', 9); seg(c, s * 62, -58, s * 62, 0, 'chair-dk', 4); });
     el(c, 'rect', { x: -72, y: -70, width: 144, height: 14, rx: 6, f: 'chair-dk', s: 'ink', sw: 4 });
   }
 
+  /* ---------- Room scene (1600 x 800) ---------- */
+  // Feet position, scale and body base for each guest. List order doesn't matter;
+  // keyboard and guest-list order go left to right by x.
+  var SPOTS = {
+    kim:     { x: 322,  y: 672, s: .48 },
+    benny:   { x: 560,  y: 436, s: .44 },
+    jax:     { x: 540,  y: 752, s: .50 },
+    june:    { x: 762,  y: 692, s: .50 },
+    marcus:  { x: 900,  y: 602, s: .47 },
+    theo:    { x: 990,  y: 712, s: .48, base: 'sit' },
+    hannah:  { x: 1080, y: 712, s: .48, base: 'sit' },
+    sam:     { x: 1170, y: 712, s: .48, base: 'sit' },
+    teacher: { x: 1260, y: 712, s: .48, base: 'sit' },
+    gil:     { x: 1312, y: 528, s: .45, base: 'lean', pose: 'cross' },
+    amara:   { x: 1500, y: 672, s: .50 }
+  };
+  var TABLE = { cx: 1125, cy: 706, rx: 190, ry: 30 };
+  // Drawing order, back to front: scene parts (strings) and guests (ids)
+  var LAYERS = ['back', 'benny', 'booth', 'gil', 'marcus', 'amara', 'june', 'checkin', 'kim',
+                'theo', 'hannah', 'sam', 'teacher', 'table', 'jax'];
+  var DOING = {
+    greet: 'greeting people by the check-in table',
+    dj: 'DJing on the stage',
+    'dance-wild': 'dancing', 'free-dance': 'dancing',
+    pitch: 'talking by the snack table',
+    watch: 'sitting at the round table', sip: 'sitting at the round table',
+    nod: 'sitting at the round table', 'people-watch': 'sitting at the round table',
+    'lean-cross': 'leaning against the bleachers',
+    stargaze: 'standing by the window'
+  };
+
+  function txt(p, x, y, str, size, color) {
+    var t = el(p, 'text', { x: x, y: y, 'text-anchor': 'middle', 'font-size': size, 'font-weight': 700,
+      'font-family': 'Lato, system-ui, sans-serif', f: color });
+    t.textContent = str;
+    return t;
+  }
+  function balloon(p, x, y, color, ax, ay) {
+    stroke(p, 'M' + pt(x, y + 28) + ' Q' + pt((x + ax) / 2 + 10, (y + ay) / 2) + ' ' + pt(ax, ay), 'ink', 1.5);
+    el(p, 'path', { d: 'M' + pt(x - 5, y + 30) + ' L' + pt(x + 5, y + 30) + ' L' + pt(x, y + 23) + ' Z', f: color, s: 'ink', sw: 2 });
+    el(p, 'ellipse', { cls: 'o', sw: 3, cx: x, cy: y, rx: 21, ry: 26, f: color });
+    el(p, 'ellipse', { cx: x - 7, cy: y - 10, rx: 4, ry: 7, f: 'white', op: .45 });
+  }
+  function bunting(p, x0, y0, x1, y1, sag, n) {
+    var mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + sag, cols = ['maroon', 'gold', 'cream'], i, t, u, x, y;
+    stroke(p, 'M' + pt(x0, y0) + ' Q' + pt(mx, my) + ' ' + pt(x1, y1), 'ink', 2);
+    for (i = 0; i < n; i++) {
+      t = (i + 0.5) / n; u = 1 - t;
+      x = u * u * x0 + 2 * u * t * mx + t * t * x1;
+      y = u * u * y0 + 2 * u * t * my + t * t * y1;
+      el(p, 'path', { cls: 'o', sw: 2, f: cols[i % 3], d: 'M' + pt(x - 14, y - 1) + ' L' + pt(x + 14, y - 1) + ' L' + pt(x, y + 26) + ' Z' });
+    }
+  }
+
+  var SCENE = {
+    back: function (g) {
+      var i, x, y;
+      // Wall, wainscot and floor
+      el(g, 'rect', { x: 0, y: 0, width: 1600, height: 470, f: 'wall' });
+      el(g, 'rect', { x: 0, y: 398, width: 1600, height: 72, f: 'wall-trim' });
+      seg(g, 0, 398, 1600, 398, 'wall-line', 3);
+      el(g, 'rect', { x: 0, y: 470, width: 1600, height: 330, f: 'floor' });
+      [492, 518, 548, 583, 624, 671, 724, 784].forEach(function (yy) { seg(g, 0, yy, 1600, yy, 'floor-line', 2); });
+      seg(g, 0, 470, 1600, 470, 'ink', 3);
+      stroke(g, 'M140 800 Q800 556 1460 800', 'court', 6).style.opacity = .75;
+
+      // Doors and EXIT sign
+      el(g, 'rect', { cls: 'o', x: 36, y: 238, width: 198, height: 232, f: 'wall-line' });
+      [46, 136].forEach(function (dx) {
+        el(g, 'rect', { cls: 'o', sw: 3, x: dx, y: 248, width: 88, height: 222, f: 'door' });
+        el(g, 'rect', { cls: 'o', sw: 3, x: dx + 20, y: 268, width: 48, height: 70, rx: 3, f: 'door-glass' });
+        seg(g, dx + 10, 382, dx + 78, 382, 'silver', 7);
+      });
+      el(g, 'rect', { cls: 'o', sw: 3, x: 95, y: 198, width: 80, height: 32, rx: 4, f: 'red' });
+      txt(g, 135, 221, 'EXIT', 21, 'white');
+
+      // Night window above the bleachers
+      el(g, 'rect', { cls: 'o', x: 1336, y: 106, width: 208, height: 178, rx: 6, f: 'white' });
+      el(g, 'rect', { x: 1348, y: 118, width: 184, height: 154, f: 'midnight' });
+      [[1370, 142, 2.6], [1410, 172, 2], [1394, 234, 2.4], [1452, 136, 2], [1516, 214, 2.6], [1470, 252, 2], [1428, 208, 1.6], [1508, 252, 1.8], [1372, 194, 1.6]]
+        .forEach(function (st) { el(g, 'circle', { cx: st[0], cy: st[1], r: st[2], f: 'star' }); });
+      el(g, 'circle', { cx: 1494, cy: 152, r: 17, f: 'moon' });
+      el(g, 'circle', { cx: 1502, cy: 146, r: 15, f: 'midnight' });
+      seg(g, 1440, 118, 1440, 272, 'white', 8);
+      seg(g, 1348, 195, 1532, 195, 'white', 8);
+      el(g, 'rect', { cls: 'o', sw: 3, x: 1326, y: 280, width: 228, height: 12, rx: 3, f: 'white' });
+
+      // Stage: curtain, valance, speakers, platform
+      el(g, 'rect', { x: 360, y: 170, width: 400, height: 262, f: 'curtain' });
+      for (x = 384; x < 760; x += 36) seg(g, x, 186, x, 428, 'curtain-dk', 6).style.opacity = .7;
+      var val = 'M350 158 L770 158 L770 192';
+      for (i = 0; i < 10; i++) val += ' A21 13 0 0 1 ' + (770 - (i + 1) * 42) + ' 192';
+      el(g, 'path', { cls: 'o', sw: 3, d: val + ' Z', f: 'curtain-dk' });
+      [372, 686].forEach(function (sx) {
+        el(g, 'rect', { cls: 'o', sw: 3, x: sx, y: 316, width: 62, height: 114, rx: 5, f: 'speaker' });
+        el(g, 'circle', { cx: sx + 31, cy: 348, r: 15, f: 'deck', s: 'ink', sw: 3 });
+        el(g, 'circle', { cx: sx + 31, cy: 396, r: 22, f: 'deck', s: 'ink', sw: 3 });
+        el(g, 'circle', { cx: sx + 31, cy: 396, r: 8, f: 'speaker' });
+      });
+      el(g, 'rect', { cls: 'o', sw: 3, x: 340, y: 428, width: 440, height: 16, f: 'stage' });
+      el(g, 'rect', { cls: 'o', sw: 3, x: 340, y: 444, width: 440, height: 48, f: 'stage-dk' });
+      for (x = 395; x < 780; x += 55) seg(g, x, 446, x, 490, 'ink', 1.5).style.opacity = .3;
+
+      // Banner, bunting, disco ball
+      seg(g, 700, 0, 700, 160, 'ink', 2);
+      seg(g, 470, 40, 440, 0, 'ink', 2);
+      seg(g, 1130, 40, 1160, 0, 'ink', 2);
+      el(g, 'rect', { x: 470, y: 30, width: 660, height: 70, rx: 6, f: 'cream', s: 'gold', sw: 5 });
+      txt(g, 800, 77, 'WELCOME BACK, CLASS OF 2006!', 34, 'maroon');
+      bunting(g, 0, 16, 440, 28, 54, 9);
+      bunting(g, 1160, 28, 1600, 16, 54, 9);
+      el(g, 'circle', { cls: 'o', cx: 700, cy: 186, r: 30, f: 'silver' });
+      for (i = -2; i <= 2; i++) {
+        stroke(g, 'M' + pt(670 + 2, 186 + i * 11) + ' Q700 ' + r(186 + i * 11 + 4) + ' ' + pt(730 - 2, 186 + i * 11), 'gray', 1.5);
+        stroke(g, 'M' + pt(700 + i * 11, 158) + ' Q' + r(700 + i * 13) + ' 186 ' + pt(700 + i * 11, 214), 'gray', 1.5);
+      }
+      el(g, 'rect', { x: 684, y: 168, width: 9, height: 9, f: 'white' });
+      el(g, 'rect', { x: 707, y: 194, width: 7, height: 7, f: 'white', op: .8 });
+
+      // Dance floor (checkered, in perspective) with moving light spots
+      var rows = 5, cols = 8, y0 = 560, rh = 46;
+      function lx(yy) { return 440 - (yy - y0) * 0.25; }
+      function rx(yy) { return 900 + (yy - y0) * 0.25; }
+      for (i = 0; i < rows; i++) {
+        var ya = y0 + i * rh, yb = ya + rh;
+        for (var c = 0; c < cols; c++) {
+          var xa1 = lx(ya) + (rx(ya) - lx(ya)) * c / cols, xa2 = lx(ya) + (rx(ya) - lx(ya)) * (c + 1) / cols;
+          var xb1 = lx(yb) + (rx(yb) - lx(yb)) * c / cols, xb2 = lx(yb) + (rx(yb) - lx(yb)) * (c + 1) / cols;
+          el(g, 'path', { f: (i + c) % 2 ? 'tile-1' : 'tile-2',
+            d: 'M' + pt(xa1, ya) + ' L' + pt(xa2, ya) + ' L' + pt(xb2, yb) + ' L' + pt(xb1, yb) + ' Z' });
+        }
+      }
+      el(g, 'path', { f: 'none', s: 'ink', sw: 3, d: 'M' + pt(lx(y0), y0) + ' L' + pt(rx(y0), y0) + ' L' + pt(rx(y0 + rows * rh), y0 + rows * rh) +
+        ' L' + pt(lx(y0 + rows * rh), y0 + rows * rh) + ' Z' });
+      [[520, 600, 'light-1', 0], [700, 640, 'light-2', -1.6], [830, 700, 'light-3', -3.1], [600, 740, 'light-2', -2.2], [760, 590, 'light-3', -4]]
+        .forEach(function (sp) {
+          el(g, 'ellipse', { cls: 'spot', cx: sp[0], cy: sp[1], rx: 40, ry: 13, f: sp[2], st: 'animation-delay:' + sp[3] + 's;' });
+        });
+
+      // Bleachers (top tier first so lower tiers overlap it)
+      el(g, 'rect', { cls: 'o', sw: 3, x: 1270, y: 342, width: 14, height: 128, f: 'bleacher-dk' });
+      for (i = 3; i >= 0; i--) {
+        y = 440 - i * 32;
+        el(g, 'rect', { x: 1280, y: y + 10, width: 330, height: 24, f: 'bleacher-dk' });
+        el(g, 'rect', { cls: 'o', sw: 3, x: 1276, y: y, width: 334, height: 12, rx: 3, f: 'bleacher' });
+      }
+
+      // Balloons tied to the left speaker and the top of the bleachers
+      balloon(g, 382, 252, 'gold', 403, 316);
+      balloon(g, 424, 238, 'maroon', 403, 316);
+      balloon(g, 452, 262, 'cream', 403, 316);
+      balloon(g, 1548, 300, 'maroon', 1570, 344);
+      balloon(g, 1576, 278, 'gold', 1570, 344);
+
+      // Snack table against the wall
+      el(g, 'rect', { cls: 'o', sw: 3, x: 800, y: 506, width: 220, height: 52, f: 'gold' });
+      for (x = 830; x < 1020; x += 30) seg(g, x, 510, x, 556, 'ink', 1.5).style.opacity = .25;
+      el(g, 'rect', { cls: 'o', sw: 3, x: 796, y: 496, width: 228, height: 12, rx: 3, f: 'gold' });
+      el(g, 'path', { cls: 'o', sw: 2.5, d: 'M822 474 Q826 497 850 497 Q874 497 878 474 Z', f: 'glass' });
+      el(g, 'path', { d: 'M825 482 Q850 488 875 482 Q871 495 850 495 Q829 495 825 482 Z', f: 'punch', op: .9 });
+      el(g, 'ellipse', { cx: 850, cy: 474, rx: 28, ry: 5, f: 'punch', s: 'ink', sw: 2.5 });
+      [[892, 'red'], [910, 'white'], [928, 'red']].forEach(function (cp) {
+        el(g, 'path', { cls: 'o', sw: 2, f: cp[1], d: 'M' + (cp[0] - 7) + ' 480 L' + (cp[0] + 7) + ' 480 L' + (cp[0] + 5) + ' 496 L' + (cp[0] - 5) + ' 496 Z' });
+      });
+      el(g, 'ellipse', { cls: 'o', sw: 2, cx: 975, cy: 494, rx: 30, ry: 5, f: 'white' });
+      [[962, 487], [978, 485], [992, 488], [970, 480]].forEach(function (ck) {
+        el(g, 'circle', { cx: ck[0], cy: ck[1], r: 6.5, f: 'kraft', s: 'ink', sw: 1.5 });
+      });
+    },
+
+    // DJ booth on the stage, drawn in front of Benny
+    booth: function (g) {
+      var i;
+      el(g, 'rect', { cls: 'o', sw: 3, x: 466, y: 384, width: 188, height: 56, f: 'deck' });
+      el(g, 'rect', { cls: 'o', sw: 3, x: 458, y: 374, width: 204, height: 14, rx: 3, f: 'speaker' });
+      el(g, 'ellipse', { cx: 515, cy: 374, rx: 30, ry: 6, f: 'record', s: 'ink', sw: 2 });
+      el(g, 'ellipse', { cx: 605, cy: 374, rx: 30, ry: 6, f: 'record', s: 'ink', sw: 2 });
+      var hs = [14, 26, 20, 32, 18, 28, 12];
+      for (i = 0; i < hs.length; i++) {
+        el(g, 'rect', { x: 498 + i * 18, y: 430 - hs[i], width: 10, height: hs[i], rx: 2, f: i % 2 ? 'light-1' : 'light-3' });
+      }
+    },
+
+    // Check-in table with name tags and balloons
+    checkin: function (g) {
+      balloon(g, 74, 506, 'maroon', 92, 592);
+      balloon(g, 108, 490, 'gold', 92, 592);
+      balloon(g, 138, 512, 'cream', 92, 592);
+      el(g, 'rect', { cls: 'o', sw: 3, x: 80, y: 602, width: 210, height: 52, f: 'maroon' });
+      el(g, 'rect', { cls: 'o', sw: 3, x: 76, y: 592, width: 218, height: 12, rx: 3, f: 'maroon' });
+      txt(g, 185, 637, 'CHECK-IN', 20, 'cream');
+      [[150, 584, -8], [176, 583, 4], [204, 585, -2]].forEach(function (t) {
+        var tg = el(g, 'g', { transform: 'rotate(' + t[2] + ' ' + t[0] + ' ' + t[1] + ')' });
+        el(tg, 'rect', { cls: 'o', sw: 1.5, x: t[0] - 12, y: t[1] - 8, width: 24, height: 15, rx: 2, f: 'white' });
+        el(tg, 'rect', { x: t[0] - 11, y: t[1] - 7, width: 22, height: 5, f: 'tag' });
+      });
+      seg(g, 236, 588, 262, 582, 'ink', 3);
+    },
+
+    // Round table: tablecloth, centerpiece, Sam's honey jar, Owen's open book
+    table: function (g) {
+      var T = TABLE, x0 = T.cx - T.rx, x1 = T.cx + T.rx;
+      el(g, 'path', { cls: 'o', f: 'cream', d: 'M' + x0 + ' ' + T.cy + ' L' + x0 + ' ' + (T.cy + 50) + ' Q' + T.cx + ' ' + (T.cy + 82) + ' ' +
+        x1 + ' ' + (T.cy + 50) + ' L' + x1 + ' ' + T.cy + ' Z' });
+      el(g, 'ellipse', { cls: 'o', cx: T.cx, cy: T.cy, rx: T.rx, ry: T.ry, f: 'cream' });
+      stroke(g, 'M' + (x0 + 2) + ' ' + (T.cy + 14) + ' Q' + T.cx + ' ' + (T.cy + 46) + ' ' + (x1 - 2) + ' ' + (T.cy + 14), 'gold', 4);
+      el(g, 'rect', { cls: 'o', sw: 2.5, x: T.cx - 8, y: T.cy - 20, width: 16, height: 20, rx: 4, f: 'glass' });
+      [[-10, -34, 'maroon'], [0, -40, 'gold'], [10, -33, 'maroon']].forEach(function (fl) {
+        seg(g, T.cx, T.cy - 16, T.cx + fl[0], T.cy + fl[1], 'forest', 2);
+        el(g, 'circle', { cx: T.cx + fl[0], cy: T.cy + fl[1], r: 6, f: fl[2], s: 'ink', sw: 2 });
+      });
+      var hx = SPOTS.sam.x + 14, bx = SPOTS.teacher.x, by = T.cy + 8;
+      el(g, 'rect', { cls: 'o', sw: 2.5, x: hx - 9, y: T.cy - 6, width: 18, height: 20, rx: 5, f: 'honey' });
+      el(g, 'rect', { cls: 'o', sw: 2, x: hx - 10, y: T.cy - 11, width: 20, height: 6, rx: 2, f: 'brown' });
+      el(g, 'path', { cls: 'o', sw: 2.5, f: 'paper', d: 'M' + (bx - 28) + ' ' + by + ' L' + bx + ' ' + (by + 4) + ' L' + (bx + 28) + ' ' + by +
+        ' L' + (bx + 28) + ' ' + (by - 10) + ' L' + bx + ' ' + (by - 6) + ' L' + (bx - 28) + ' ' + (by - 10) + ' Z' });
+      seg(g, bx, by - 6, bx, by + 4, 'ink', 2);
+    }
+  };
+
+  /* ---------- Room state and UI ---------- */
+  var room = {
+    svg: null, list: null, dialog: null,
+    items: {},       // id -> { guest, gst, ov, badge, btn }
+    order: [],       // ids, left to right
+    rated: {},       // id -> true
+    current: 0,      // roving tab stop
+    openId: null
+  };
+
+  function guestById(id) {
+    for (var i = 0; i < GUESTS.length; i++) if (GUESTS[i].id === id) return GUESTS[i];
+    return null;
+  }
+  function ariaFor(it) {
+    var gu = it.guest;
+    return gu.name + ', ' + gu.job + ', ' + (DOING[gu.activity] || 'at the reunion') + '. ' +
+      (room.rated[gu.id] ? 'Rated.' : 'Not rated yet.');
+  }
+
+  function placeGuest(parent, gu) {
+    var sp = SPOTS[gu.id];
+    var gst = el(parent, 'g', { cls: 'gst', 'data-id': gu.id, role: 'button', tabindex: -1 });
+    var hit = el(gst, 'rect', { cls: 'hit' });
+    var pos = el(gst, 'g', { transform: 'translate(' + sp.x + ' ' + sp.y + ') scale(' + sp.s + ')' });
+    if (sp.base === 'sit') drawChair(pos);
+    var gEl = buildGuest(gu, { base: sp.base || 'stand', pose: sp.pose || 'idle', act: gu.activity });
+    pos.appendChild(gEl);
+    return { guest: gu, sp: sp, gst: gst, hit: hit, gEl: gEl };
+  }
+
+  // Ring, name label and status badge for one guest, drawn in the top overlay layer
+  function addOverlay(ovLayer, it) {
+    var sp = it.sp, G = it.gEl.__geo, hb = it.gEl.querySelector('.headWrap').getBBox();
+    var topLocal = G.headY + hb.y + (sp.base === 'sit' ? G.sit : 0);
+    var top = sp.y + sp.s * topLocal, half = 74 * sp.s * (G.w || 1) + 8;
+    var bottom = sp.base === 'sit' ? TABLE.cy - TABLE.ry : sp.y + 10;
+
+    it.hit.setAttribute('x', r(sp.x - half)); it.hit.setAttribute('y', r(top - 6));
+    it.hit.setAttribute('width', r(half * 2)); it.hit.setAttribute('height', r(bottom - top + 6));
+
+    var ov = el(ovLayer, 'g', { cls: 'ov-item', 'aria-hidden': 'true' });
+    var ring = el(ov, 'g', { cls: 'ring' });
+    [['ring-out'], ['ring-in']].forEach(function (c) {
+      el(ring, 'rect', { cls: c[0], x: r(sp.x - half), y: r(top - 10), width: r(half * 2), height: r(bottom - top + 16), rx: 18 });
+    });
+    var bwrap = el(ov, 'g', { transform: 'translate(' + sp.x + ' ' + r(top - 30) + ')' });
+    var badge = el(bwrap, 'g', { cls: 'badge badge-bob', st: 'animation-delay:' + (-Math.random() * 2).toFixed(2) + 's;' });
+    el(badge, 'circle', { r: 19 });
+    var bt = el(badge, 'text', { y: 9, 'text-anchor': 'middle' });
+    bt.textContent = '?';
+    var label = el(ov, 'g', { cls: 'label', transform: 'translate(' + sp.x + ' ' + r(top - 72) + ')' });
+    var lw = it.guest.name.length * 12.5 + 28;
+    el(label, 'rect', { x: r(-lw / 2), y: -18, width: r(lw), height: 36, rx: 10 });
+    var lt = el(label, 'text', { y: 8, 'text-anchor': 'middle' });
+    lt.textContent = it.guest.name;
+    it.ov = ov; it.badge = badge; it.badgeText = bt;
+  }
+
+  function highlight(id, on) {
+    var it = room.items[id];
+    if (it) it.ov.classList.toggle('on', on);
+  }
+
+  function setCurrent(i, focus) {
+    room.current = (i + room.order.length) % room.order.length;
+    room.order.forEach(function (id, k) { room.items[id].gst.setAttribute('tabindex', k === room.current ? 0 : -1); });
+    if (focus) room.items[room.order[room.current]].gst.focus();
+  }
+
+  function refresh(id) {
+    var it = room.items[id], done = !!room.rated[id];
+    it.badge.classList.toggle('done', done);
+    it.badgeText.textContent = done ? '✓' : '?';
+    it.gst.setAttribute('aria-label', ariaFor(it));
+    it.btn.classList.toggle('done', done);
+    it.btn.querySelector('.gl-mark').textContent = done ? '✓' : '?';
+    it.btn.setAttribute('aria-label', it.guest.name + ', ' + (done ? 'rated' : 'not rated yet'));
+  }
+  function refreshStats() {
+    var n = room.order.filter(function (id) { return room.rated[id]; }).length;
+    document.getElementById('statMet').textContent = n + ' / ' + room.order.length;
+  }
+  function markRated(id, on) {
+    if (on) room.rated[id] = true; else delete room.rated[id];
+    refresh(id);
+    refreshStats();
+  }
+
+  /* Profile dialog: a stub until step 3 (name, job, close) */
+  function openProfile(id) {
+    var gu = guestById(id);
+    room.openId = id;
+    document.getElementById('pfName').textContent = gu.name;
+    document.getElementById('pfJob').textContent = gu.job;
+    room.svg.classList.add('paused');
+    room.dialog.showModal();
+  }
+
+  function initRoom() {
+    room.svg = document.getElementById('room');
+    room.list = document.getElementById('guestList');
+    room.dialog = document.getElementById('profile');
+    var svg = room.svg;
+
+    LAYERS.forEach(function (name) {
+      if (SCENE[name]) {
+        SCENE[name](el(svg, 'g', { 'aria-hidden': 'true', cls: 'scene' }));
+      } else {
+        var gu = guestById(name);
+        if (gu && SPOTS[gu.id]) room.items[gu.id] = placeGuest(svg, gu);
+      }
+    });
+    var ovLayer = el(svg, 'g', { cls: 'overlay' });
+    room.order = Object.keys(room.items).sort(function (a, b) {
+      return (SPOTS[a].x - SPOTS[b].x) || (SPOTS[a].y - SPOTS[b].y);
+    });
+
+    room.order.forEach(function (id, k) {
+      var it = room.items[id];
+      addOverlay(ovLayer, it);
+
+      // Guest list button
+      var li = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn ghost gl-btn';
+      btn.innerHTML = '<span class="gl-mark" aria-hidden="true">?</span><span class="gl-name"></span>';
+      btn.querySelector('.gl-name').textContent = it.guest.name;
+      btn.addEventListener('click', function () { openProfile(id); });
+      li.appendChild(btn);
+      room.list.appendChild(li);
+      it.btn = btn;
+
+      // Room guest: pointer, focus and keyboard
+      it.gst.addEventListener('click', function () { setCurrent(k); openProfile(id); });
+      it.gst.addEventListener('pointerenter', function () { highlight(id, true); });
+      it.gst.addEventListener('pointerleave', function () { if (document.activeElement !== it.gst) highlight(id, false); });
+      it.gst.addEventListener('focus', function () { setCurrent(k); highlight(id, true); });
+      it.gst.addEventListener('blur', function () { highlight(id, false); });
+      refresh(id);
+    });
+    setCurrent(0);
+    refreshStats();
+
+    svg.addEventListener('keydown', function (e) {
+      var k = e.key, i = room.current;
+      if (k === 'ArrowRight' || k === 'ArrowDown') setCurrent(i + 1, true);
+      else if (k === 'ArrowLeft' || k === 'ArrowUp') setCurrent(i - 1, true);
+      else if (k === 'Home') setCurrent(0, true);
+      else if (k === 'End') setCurrent(room.order.length - 1, true);
+      else if (k === 'Enter' || k === ' ') openProfile(room.order[i]);
+      else return;
+      e.preventDefault();
+    });
+
+    document.getElementById('pfClose').addEventListener('click', function () { room.dialog.close(); });
+    room.dialog.addEventListener('close', function () { room.svg.classList.remove('paused'); room.openId = null; });
+
+    if (DEV) {
+      document.getElementById('pfDev').hidden = false;
+      document.getElementById('devBar').hidden = false;
+      document.getElementById('pfMark').addEventListener('click', function () {
+        markRated(room.openId, true);
+        room.dialog.close();
+      });
+      document.getElementById('devRateAll').addEventListener('click', function () {
+        room.order.forEach(function (id) { markRated(id, true); });
+      });
+      document.getElementById('devClear').addEventListener('click', function () {
+        room.order.forEach(function (id) { markRated(id, false); });
+      });
+    }
+  }
+
+  /* ---------- Dev gallery ---------- */
   function initGallery() {
-    document.getElementById('soon').hidden = true;
     var sec = document.getElementById('gallery'), gal = document.getElementById('gal');
     sec.hidden = false;
 
@@ -722,5 +1122,6 @@
     });
   }
 
+  initRoom();
   if (DEV) initGallery();
 })();

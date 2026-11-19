@@ -77,10 +77,41 @@
   --a-paint-2: #4F9A94;
   --a-paint-3: #8C6BB0;
 
-  /* Gallery props */
+  /* Chairs */
   --a-chair: #B08A63;
   --a-chair-dk: #8F6B48;
+
+  /* Gym scene */
+  --a-wall: #EADFCB;
+  --a-wall-trim: #D3BE9C;
+  --a-wall-line: #B89D78;
+  --a-floor: #DDB27C;
+  --a-floor-line: #C89A62;
+  --a-court: #F7F4EE;
+  --a-door: #9DB6C8;
+  --a-door-glass: #DCE8F0;
+  --a-moon: #F7F4EE;
+  --a-maroon: #8E3B46;
+  --a-curtain: #8E3B46;
+  --a-curtain-dk: #742E38;
+  --a-stage: #A8774C;
+  --a-stage-dk: #86592F;
+  --a-speaker: #2E2B2D;
+  --a-deck: #46424A;
+  --a-record: #1F1C1E;
+  --a-tile-1: #3E3550;
+  --a-tile-2: #5D4E78;
+  --a-light-1: #F2CF5B;
+  --a-light-2: #E98A6B;
+  --a-light-3: #8FD3E0;
+  --a-bleacher: #C99A62;
+  --a-bleacher-dk: #A97E4F;
+  --a-glass: #DCE8F0;
+  --a-punch: #E0606A;
 }
+
+/* Dialog backdrop (::backdrop doesn't inherit from :root in older browsers) */
+:root, ::backdrop { --a-backdrop: rgba(59, 42, 32, .5); }
 
 /* ---------- Character rig ---------- */
 .guest .o { stroke: var(--a-ink); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
@@ -166,8 +197,154 @@
 .guest[data-sling] .armL .fore { transform: rotate(-96deg) !important; animation: none !important; }
 .guest[data-sling] .armL .hand { display: inline !important; }
 
+/* ---------- Room activities (data-act) ----------
+   Each activity sets a still pose (used under reduced motion) and a loop. */
+
+/* Kim: waves at people coming in */
+.guest[data-act="greet"] .armR { transform: rotate(-118deg); animation: rb-greet-arm 4.5s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="greet"] .armR .fore { transform: rotate(-30deg); animation: rb-greet-fore 4.5s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-greet-arm { 0%, 55%, 100% { transform: rotate(-12deg); } 12%, 42% { transform: rotate(-118deg); } }
+@keyframes rb-greet-fore { 0%, 55%, 100% { transform: rotate(6deg); } 12%, 22%, 32%, 42% { transform: rotate(-22deg); } 17%, 27%, 37% { transform: rotate(-66deg); } }
+
+/* Benny: scratches with one hand, pumps the other, nods to the beat */
+.guest[data-act="dj"] .armR { transform: rotate(-15deg); }
+.guest[data-act="dj"] .armR .fore { transform: rotate(100deg); animation: rb-scratch .5s ease-in-out infinite alternate; }
+@keyframes rb-scratch { from { transform: rotate(86deg); } to { transform: rotate(114deg); } }
+.guest[data-act="dj"] .armL { transform: rotate(150deg); animation: rb-pump-arm .5s ease-in-out infinite alternate; }
+@keyframes rb-pump-arm { from { transform: rotate(138deg); } to { transform: rotate(160deg); } }
+.guest[data-act="dj"] .armL .fore { transform: rotate(15deg); }
+.guest[data-act="dj"] .headPose { animation: rb-nod .5s ease-in-out infinite alternate; }
+@keyframes rb-nod { from { transform: rotate(0); } to { transform: translateY(3px) rotate(3deg); } }
+
+/* Jax: disco point with his free arm, bouncing */
+.guest[data-act="dance-wild"] .armR { transform: rotate(-150deg); animation: rb-disco-arm 1s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="dance-wild"] .armR .fore { transform: rotate(-8deg); animation: rb-disco-fore 1s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-disco-arm { 0%, 40%, 100% { transform: rotate(-150deg); } 50%, 90% { transform: rotate(-30deg); } }
+@keyframes rb-disco-fore { 0%, 40%, 100% { transform: rotate(-8deg); } 50%, 90% { transform: rotate(60deg); } }
+.guest[data-act="dance-wild"] .hop { animation: rb-bounce .5s ease-in-out infinite alternate; }
+@keyframes rb-bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+.guest[data-act="dance-wild"] .headPose { animation: rb-headbob 1s ease-in-out infinite alternate; }
+@keyframes rb-headbob { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+
+/* June: sways with both arms up */
+.guest[data-act="free-dance"] .lean { animation: rb-sway-body 1.6s ease-in-out infinite alternate; }
+@keyframes rb-sway-body { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+.guest[data-act="free-dance"] .armL { transform: rotate(135deg); animation: rb-flowL 1.6s ease-in-out infinite alternate; }
+.guest[data-act="free-dance"] .armR { transform: rotate(-135deg); animation: rb-flowR 1.6s ease-in-out infinite alternate; }
+@keyframes rb-flowL { from { transform: rotate(120deg); } to { transform: rotate(150deg); } }
+@keyframes rb-flowR { from { transform: rotate(-150deg); } to { transform: rotate(-120deg); } }
+.guest[data-act="free-dance"] .armL .fore { transform: rotate(25deg); animation: rb-flowFL .8s ease-in-out infinite alternate; }
+.guest[data-act="free-dance"] .armR .fore { transform: rotate(-25deg); animation: rb-flowFR .8s ease-in-out infinite alternate; }
+@keyframes rb-flowFL { from { transform: rotate(5deg); } to { transform: rotate(40deg); } }
+@keyframes rb-flowFR { from { transform: rotate(-40deg); } to { transform: rotate(-5deg); } }
+.guest[data-act="free-dance"] .headPose { transform: rotate(4deg); animation: rb-headbob 1.6s ease-in-out infinite alternate-reverse; }
+
+/* Marcus: talks with his free hand */
+.guest[data-act="pitch"] .armL { transform: rotate(32deg); animation: rb-talkA 1.3s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="pitch"] .armL .fore { transform: rotate(80deg); animation: rb-talkF 1.3s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-talkA { 0%, 100% { transform: rotate(25deg); } 30% { transform: rotate(42deg); } 60% { transform: rotate(30deg); } }
+@keyframes rb-talkF { 0%, 100% { transform: rotate(70deg); } 30% { transform: rotate(100deg); } 60% { transform: rotate(60deg); } }
+.guest[data-act="pitch"] .headPose { animation: rb-talkhead 2.6s ease-in-out infinite alternate; }
+@keyframes rb-talkhead { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+
+/* Gil: leans with arms crossed (base and pose set by the room), taps a foot */
+.guest[data-act="lean-cross"] .legL { animation: rb-tap 1.4s ease-in-out infinite; }
+@keyframes rb-tap { 0%, 30%, 60%, 100% { transform: translateY(0); } 15%, 45% { transform: translateY(-5px); } }
+
+/* Amara: hands clasped, gazing up */
+.guest[data-act="stargaze"] .armL { transform: rotate(-10deg); }
+.guest[data-act="stargaze"] .armL .fore { transform: rotate(-50deg); }
+.guest[data-act="stargaze"] .armR { transform: rotate(10deg); }
+.guest[data-act="stargaze"] .armR .fore { transform: rotate(50deg); }
+.guest[data-act="stargaze"] .look { transform: translate(1px, -3px); animation: rb-lookup 8s ease-in-out infinite; }
+@keyframes rb-lookup { 0%, 100% { transform: translate(-2px, -3px); } 50% { transform: translate(3px, -4px); } }
+.guest[data-act="stargaze"] .headPose { animation: rb-tilt 8s ease-in-out infinite; }
+@keyframes rb-tilt { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+
+/* Theo: keeps checking his watch */
+.guest[data-act="watch"] .armL { transform: rotate(50deg); animation: rb-watchA 5s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="watch"] .armL .fore { transform: rotate(-150deg); animation: rb-watchF 5s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-watchA { 0%, 52%, 100% { transform: rotate(12deg); } 12%, 40% { transform: rotate(50deg); } }
+@keyframes rb-watchF { 0%, 52%, 100% { transform: rotate(-6deg); } 12%, 40% { transform: rotate(-150deg); } }
+.guest[data-act="watch"] .headPose { transform: rotate(-7deg); animation: rb-watchH 5s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-watchH { 0%, 52%, 100% { transform: rotate(0); } 14%, 38% { transform: rotate(-7deg); } }
+
+/* Hannah: sips her coffee */
+.guest[data-act="sip"] .armR { transform: rotate(60deg); animation: rb-sipA 6s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.guest[data-act="sip"] .armR .fore { transform: rotate(107deg); animation: rb-sipF 6s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-sipA { 0%, 48%, 100% { transform: rotate(-12deg); } 14%, 34% { transform: rotate(60deg); } }
+@keyframes rb-sipF { 0%, 48%, 100% { transform: rotate(6deg); } 14%, 34% { transform: rotate(107deg); } }
+
+/* Sam: listens and nods */
+.guest[data-act="nod"] .headPose { animation: rb-nodslow 3s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-nodslow { 0%, 45%, 100% { transform: rotate(0); } 10%, 30% { transform: translateY(3px) rotate(2deg); } 20% { transform: rotate(0); } }
+
+/* Owen: chin in hand, watching the room */
+.guest[data-act="people-watch"] .armL { transform: rotate(-60deg); }
+.guest[data-act="people-watch"] .armL .fore { transform: rotate(-107deg); }
+.guest[data-act="people-watch"] .headPose { transform: rotate(-5deg); }
+.guest[data-act="people-watch"] .look { animation: rb-scan 7s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-scan { 0%, 18%, 100% { transform: translateX(-3px); } 28%, 52% { transform: translateX(3px); } 62%, 88% { transform: translate(0, 1px); } }
+
+/* ---------- Room ---------- */
+.room-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: var(--a-wall);
+  margin-bottom: 16px;
+}
+.room { display: block; width: 100%; height: auto; }
+.gst { cursor: pointer; outline: none; }
+.gst .hit { fill: transparent; }
+.spot { opacity: .4; transform-box: fill-box; animation: rb-spot 5s ease-in-out infinite alternate; }
+@keyframes rb-spot { from { transform: translateX(-34px); opacity: .25; } to { transform: translateX(34px); opacity: .6; } }
+
+/* Overlay: hover/focus ring, name label, status badge (UI, so site tokens) */
+.overlay { pointer-events: none; }
+.ov-item .ring, .ov-item .label { opacity: 0; transition: opacity .15s; }
+.ov-item.on .ring, .ov-item.on .label { opacity: 1; }
+.ring-out { fill: none; stroke: var(--bg); stroke-width: 10; }
+.ring-in { fill: none; stroke: var(--heading); stroke-width: 4; }
+.label rect { fill: var(--bg); stroke: var(--heading); stroke-width: 2; }
+.label text { fill: var(--heading); font: 700 22px var(--font-body); }
+.badge circle { fill: var(--btn2); stroke: var(--heading); stroke-width: 3; }
+.badge.done circle { fill: var(--sage); }
+.badge text { fill: var(--heading); font: 700 26px var(--font-body); }
+.badge-bob { animation: rb-badge 2.4s ease-in-out infinite; }
+@keyframes rb-badge { 50% { transform: translateY(-5px); } }
+.room.paused * { animation-play-state: paused !important; }
+
+/* Guest list */
+.guest-list { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.gl-btn { display: inline-flex; align-items: center; gap: 8px; padding: 0 16px 0 8px; }
+.gl-mark {
+  display: inline-grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--btn2); border: 2px solid var(--heading);
+  color: var(--heading); font-size: .95rem; line-height: 1;
+}
+.gl-btn.done .gl-mark { background: var(--sage); }
+.dev-bar { justify-content: flex-start; }
+
+/* Profile dialog */
+.profile {
+  width: min(640px, calc(100vw - 32px));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.profile::backdrop { background: var(--a-backdrop); }
+.pf-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pf-head h2 { margin: 0; }
+.pf-job { margin: 0; }
+
 @media (prefers-reduced-motion: reduce) {
-  .guest, .guest * { animation: none !important; transition: none !important; }
+  .guest, .guest *, .room * { animation: none !important; transition: none !important; }
 }
 
 /* Paused (dev gallery "Animate" off, and later while a dialog is open) */
