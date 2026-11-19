@@ -776,7 +776,7 @@ function renderQuestion() {
   const hint = $('hintBtn'); hint.hidden = answered; hint.disabled = it.hintUsed;
   hint.setAttribute('aria-expanded', it.hintUsed ? 'true' : 'false'); hint.textContent = it.hintUsed ? 'Hint shown' : 'Show hint';
   const cont = $('contBtn'); cont.disabled = !answered; cont.textContent = last ? 'Open the chest' : 'Keep climbing';
-  $('qTip').textContent = answered ? 'Select the other choices to read their feedback.' : 'Pick an answer with a click or tap, or press 1–4.';
+  $('qTip').textContent = answered ? 'Select a choice to show or hide its feedback.' : 'Pick an answer with a click or tap, or press 1–4.';
 }
 function choose(orig) {
   const it = quiz.deck[quiz.cur];
@@ -787,7 +787,7 @@ function choose(orig) {
       : 'Incorrect. The correct answer is ' + LETTERS[it.order.indexOf(it.q.answer)] + '. ' + it.q.feedback[orig]);
     $('contBtn').focus({ preventScroll: true });
   } else {                                                       // afterwards, choices open and close their feedback
-    if (it.seen.has(orig) && orig !== it.pick) it.seen.delete(orig); else it.seen.add(orig);
+    if (it.seen.has(orig)) it.seen.delete(orig); else it.seen.add(orig);
     renderQuestion();
     if (it.seen.has(orig)) say(it.q.feedback[orig]);
     const again = $('choices').querySelector('[data-orig="' + orig + '"]'); if (again) again.focus({ preventScroll: true });

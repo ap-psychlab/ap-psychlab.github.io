@@ -101,6 +101,27 @@ button.choice:hover { border-color: var(--btn); }
 .explain p + p { margin-top: 8px; }
 
 .nav { margin-bottom: 8px; }
+
+/* Question area: card, then terms, then nav on narrow screens. From 1000px, once the
+   "Terms used in this question" card is shown, it moves to the right and the question area
+   widens past the 900px column (up to 1300px) so the question card keeps its width. */
+.q-cols { display: grid; grid-template-columns: minmax(0, 1fr); }
+.q-cols > .qcard { margin-bottom: 0; }
+.q-cols > .term-help { margin: 16px 0 0; }
+.q-nav { margin-top: 16px; }
+@media (min-width: 1000px) {
+  .q-cols:has(> .term-help:not([hidden])) {
+    --q-w: min(1300px, calc(100vw - 56px));
+    width: var(--q-w);
+    margin-inline: calc((100% - var(--q-w)) / 2);
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    grid-template-rows: auto 1fr;
+    column-gap: 24px;
+    align-items: start;
+  }
+  .q-cols > .qcard, .q-cols > .q-nav { grid-column: 1; }
+  .q-cols > .term-help { grid-column: 2; grid-row: 1 / span 2; margin: 0; position: sticky; top: 16px; }
+}
 #playHint:empty { display: none; }
 
 /* ---------- Results ---------- */
@@ -125,6 +146,7 @@ button.choice:hover { border-color: var(--btn); }
 .badge.correct { background: var(--sage); border-color: var(--sage); }
 .badge.wrong { background: var(--bg); border: 1px dashed var(--error); }
 .badge.skip { background: transparent; }
+.badge.fixed { background: var(--bg); border: 2px solid var(--sage); }
 @media (max-width: 520px) {
   .res-row { grid-template-columns: 2em minmax(0, 1fr) auto; }
   .res-stem { grid-column: 2 / 4; grid-row: 1; }
@@ -174,6 +196,7 @@ button.choice:hover { border-color: var(--btn); }
 .qbox.correct { background: var(--sage); border-color: var(--sage); }
 .qbox.wrong { background: var(--bg); border: 2px dashed var(--error); }
 .qbox.skip { border-color: var(--muted); }
+.qbox.fixed { background: var(--bg); border: 3px double var(--sage); }
 .qbox .qi { font-size: .75rem; line-height: 1; }
 .qbox[aria-current="true"]::after {
   content: ""; position: absolute; left: 20%; right: 20%; bottom: -7px;

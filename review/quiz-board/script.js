@@ -380,7 +380,8 @@
   const dlg = $("qDialog");
   function openTile(t, revealed) {
     if (t.used) { say("That tile has been used."); return; }
-    V = { tile: t, revealed: !!revealed, hint: false, choices: G.opts.choices, miss: new Set(), fb: new Set() };
+    V = { tile: t, revealed: !!revealed, hint: false, choices: G.opts.choices, miss: new Set(),
+      fb: new Set(revealed ? [t.q.answer] : []) };   // fb: choices whose feedback is open
     renderQuestion();
     if (!dlg.open) {
       if (typeof dlg.showModal === "function") dlg.showModal();
@@ -406,14 +407,15 @@
       const isAns = orig === q.answer;
       if (!V.choices && !isAns) return;
       const li = el("li");
-      const c = el(V.revealed && V.choices ? "button" : "div", "choice");
+      const c = el(V.revealed ? "button" : "div", "choice");
       if (c.tagName === "BUTTON") {
         c.type = "button";
+        c.setAttribute("data-orig", orig);
         c.setAttribute("aria-expanded", V.fb.has(orig) ? "true" : "false");
         c.addEventListener("click", () => {
           if (V.fb.has(orig)) V.fb.delete(orig); else V.fb.add(orig);
           renderQuestion();
-          const again = $("choices").querySelectorAll("button.choice")[pos];
+          const again = $("choices").querySelector('[data-orig="' + orig + '"]');
           if (again) again.focus({ preventScroll: true });
           if (V.fb.has(orig)) say(q.feedback[orig]);
         });
@@ -495,6 +497,7 @@
   function reveal() {
     if (!V || V.revealed) return;
     V.revealed = true;
+    V.fb.add(V.tile.q.answer);   // the correct answer's feedback starts open
     renderQuestion();
     sfx("reveal");
     const q = V.tile.q;

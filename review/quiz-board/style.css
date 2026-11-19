@@ -195,6 +195,15 @@ button.choice:hover { border-color: var(--btn); }
 .hint-box { border-left: 4px solid var(--accent); }
 .explain { border-left: 4px solid var(--sage); }
 
+/* "Terms used in this question": a card on the right once the answer is shown (stacks below on narrow screens) */
+.qb-body .term-help { font-size: clamp(1rem, .9rem + .3vw, 1.2rem); }
+@media (min-width: 1000px) {
+  .qb-body:has(> .term-help:not([hidden])) {
+    display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; align-items: start;
+  }
+  .qb-body > .term-help { margin: 0; position: sticky; top: 16px; }
+}
+
 /* Award buttons */
 .award-label { margin: 0 0 4px; text-align: center; font-weight: 700; color: var(--heading); }
 .award {

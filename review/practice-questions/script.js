@@ -6,6 +6,10 @@
 // Timing rule: a question's time is all the time it was on screen (across visits, not
 // counting time while the page is hidden or a dialog is open) up to the student's last
 // answer change. In endless mode the first pick is final, so the clock stops there.
+//
+// Retry missed: replays only the questions still missed, in the same mode, without starting
+// over. The score keeps first answers only; a question answered correctly on a retry is
+// marked "Correct on Retry". Review shows the first answer and the latest retry answer.
 (function () {
   "use strict";
 
@@ -59,9 +63,16 @@
   }
   const anyDialogOpen = () => !!document.querySelector("dialog[open]");
   const isRight = (it) => it.pick != null && it.pick === it.q.answer;
-  const resultOf = (it) => (it.pick == null ? "skip" : isRight(it) ? "correct" : "wrong");
-  const RESULT_TEXT = { correct: "Correct", wrong: "Incorrect", skip: "Unanswered" };
-  const RESULT_ICON = { correct: "✓", wrong: "✗", skip: "–" };
+  const lastRetry = (it) => (it.retries.length ? it.retries[it.retries.length - 1] : null);
+  const fixedOnRetry = (it) => !isRight(it) && it.retries.some(isRight);
+  const stillMissed = (it) => !isRight(it) && !fixedOnRetry(it);
+  function resultOf(it) {
+    if (isRight(it)) return "correct";
+    if (fixedOnRetry(it)) return "fixed";
+    return it.pick == null && !it.retries.length ? "skip" : "wrong";
+  }
+  const RESULT_TEXT = { correct: "Correct", fixed: "Correct on Retry", wrong: "Incorrect", skip: "Unanswered" };
+  const RESULT_ICON = { correct: "✓", fixed: "↻", wrong: "✗", skip: "–" };
 
   if (!BANK.length || !TOPICS || !PICKER) {
     const note = $("setupNote");
@@ -141,22 +152,40 @@
   });
 
   // ---------- Session ----------
-  // S = { mode, phase: "play" | "review" | "results", index, items, queue }
-  // item = { q, order, pick, viewMs, timeMs, hintUsed, seen }
+  // S = { mode, phase: "play" | "review" | "results", index, items, queue, round, exhausted }
+  //   items: the session's questions (first answers); round: the retry being played, or null
+  // item = { q, order, pick, viewMs, timeMs, hintUsed, seen, fbReady, retries, src }
   //   order: original choice indexes in display order; pick: original index of the answer
-  //   seen: choices whose feedback is open (endless mode, after answering)
+  //   seen: choices whose feedback is open once answers are shown (the correct answer and a
+  //     wrong pick start open; every choice can be opened or closed)
+  //   fbReady: seen has its starting set; retries: answered retry items (oldest first)
+  //   src: for a retry item, the session item it retries
   let S = null;
 
-  function makeItem(q) {
+  function makeItem(q, src) {
     const order = [0, 1, 2, 3];
     return { q: q, order: q.shuffle === false ? order : shuffle(order), pick: null,
-      viewMs: 0, timeMs: null, hintUsed: false, seen: new Set() };
+      viewMs: 0, timeMs: null, hintUsed: false, seen: new Set(), fbReady: false,
+      retries: [], src: src || null };
+  }
+  // The questions being played (a retry round) or reviewed (the session)
+  const cur = () => (S.phase === "play" && S.round ? S.round : S.items);
+
+  // Starting feedback once answers are shown: the correct answer plus any wrong answer
+  // (first try or latest retry). Choices already opened or closed by the student stay that way.
+  function readyFeedback(it) {
+    if (it.fbReady) return;
+    it.fbReady = true;
+    it.seen.add(it.q.answer);
+    if (it.pick != null) it.seen.add(it.pick);
+    const r = lastRetry(it);
+    if (r) it.seen.add(r.pick);
   }
 
   function startSession(mode, questions) {
     stopClock();
-    S = { mode: mode, phase: "play", index: 0, items: [], queue: [] };
-    if (mode === "quiz") S.items = questions.map(makeItem);
+    S = { mode: mode, phase: "play", index: 0, items: [], queue: [], round: null, exhausted: false };
+    if (mode === "quiz") S.items = questions.map((q) => makeItem(q));
     else { S.queue = questions.slice(); S.items.push(makeItem(S.queue.shift())); }
     show("play");
     renderPlay(true);
@@ -173,11 +202,11 @@
   let shownAt = null;
   function clockShouldRun() {
     if (!S || S.phase !== "play" || document.hidden || anyDialogOpen()) return false;
-    const it = S.items[S.index];
+    const it = cur()[S.index];
     return !(S.mode === "endless" && it.pick != null);
   }
   function stopClock() {
-    if (shownAt != null && S) S.items[S.index].viewMs += performance.now() - shownAt;
+    if (shownAt != null && S) cur()[S.index].viewMs += performance.now() - shownAt;
     shownAt = null;
   }
   function startClock() {
@@ -187,58 +216,73 @@
   window.addEventListener("pagehide", stopClock);
 
   // ---------- Question view (play and review) ----------
+  function addTag(body, icon, text) {
+    const tag = el("span", "tag");
+    const i = el("span", "icon", icon);
+    i.setAttribute("aria-hidden", "true");
+    tag.appendChild(i);
+    tag.appendChild(document.createTextNode(text));
+    body.appendChild(tag);
+  }
+
   function renderPlay(fresh) {
-    const it = S.items[S.index], q = it.q;
+    const items = cur(), it = items[S.index], q = it.q;
     const review = S.phase === "review";
+    const retry = !review && !!S.round;
     const quiz = S.mode === "quiz";
     const answered = it.pick != null;
     const reveal = review || (!quiz && answered);
-    const last = S.index === S.items.length - 1;
+    const last = S.index === items.length - 1;
+    const r = review ? lastRetry(it) : null;   // latest answered retry, shown in review
+    if (reveal) readyFeedback(it);
 
-    $("qNum").textContent = quiz || review
-      ? "Question " + (S.index + 1) + " of " + S.items.length
-      : "Question " + (S.index + 1);
+    $("qNum").textContent = (retry ? "Retry: " : "") + (quiz || review || retry
+      ? "Question " + (S.index + 1) + " of " + items.length
+      : "Question " + (S.index + 1));
     let status = "";
-    if (review) status = RESULT_ICON[resultOf(it)] + " " + RESULT_TEXT[resultOf(it)] + " · Time: " + fmtTime(it.timeMs);
-    else if (!quiz && answered) status = "Time: " + fmtTime(it.timeMs);
+    if (review) {
+      status = RESULT_ICON[resultOf(it)] + " " + RESULT_TEXT[resultOf(it)] + " · Time: " + fmtTime(it.timeMs);
+      if (r) status += " · Retry time: " + fmtTime(r.timeMs);
+    } else if (!quiz && answered) status = "Time: " + fmtTime(it.timeMs);
     $("qStatus").textContent = status;
     $("stem").textContent = q.stem;
     if (window.APPSYCH_FIGURES) APPSYCH_FIGURES.mount($("qFigure"), q.figure);
 
-    // Choices
+    // Choices: in a quiz they select an answer; once answers are shown they open and close feedback
     const list = $("choices");
     list.innerHTML = "";
     it.order.forEach((orig, pos) => {
       const li = el("li");
-      const isAns = orig === q.answer, isPick = orig === it.pick;
-      const c = el(review ? "div" : "button", "choice");
-      if (!review) { c.type = "button"; c.setAttribute("data-orig", orig); }
+      const isAns = orig === q.answer, isPick = orig === it.pick, isRetry = !!r && orig === r.pick;
+      const c = el("button", "choice");
+      c.type = "button";
+      c.setAttribute("data-orig", orig);
       const letter = el("span", "letter", LETTERS[pos]);
       letter.setAttribute("aria-hidden", "true");
       c.appendChild(letter);
       const body = el("span", "cbody");
       body.appendChild(el("span", "sr-only", "Choice " + LETTERS[pos] + ": "));
       body.appendChild(el("span", "ctext", q.choices[orig]));
-      if (reveal && (isAns || isPick)) {
-        const tag = el("span", "tag");
-        const icon = el("span", "icon", isAns ? "✓" : "✗");
-        icon.setAttribute("aria-hidden", "true");
-        tag.appendChild(icon);
-        tag.appendChild(document.createTextNode(isAns ? (isPick ? "Your answer: correct" : "Correct answer") : "Your answer: incorrect"));
-        body.appendChild(tag);
-        c.classList.add(isAns ? "is-answer" : "is-wrong");
+      if (reveal) {
+        if (isPick) addTag(body, isAns ? "✓" : "✗", (r ? "First answer: " : "Your answer: ") + (isAns ? "correct" : "incorrect"));
+        if (isRetry) addTag(body, isAns ? "↻" : "✗", "Retry answer: " + (isAns ? "correct" : "incorrect"));
+        if (isAns && !isPick && !isRetry) addTag(body, "✓", "Correct answer");
+        if (isAns) c.classList.add("is-answer");
+        else if (isPick || isRetry) c.classList.add("is-wrong");
       }
       c.appendChild(body);
       if (quiz && !review) c.setAttribute("aria-pressed", isPick ? "true" : "false");
       li.appendChild(c);
 
-      const open = review || (!quiz && answered && it.seen.has(orig));
-      if (!quiz && answered && !review) c.setAttribute("aria-expanded", open ? "true" : "false");
-      if (open) {
-        const fb = el("p", "fb " + (isAns ? "good" : "bad"), q.feedback[orig]);
-        fb.id = "fb-" + pos;
-        if (!review) c.setAttribute("aria-controls", fb.id);
-        li.appendChild(fb);
+      if (reveal) {
+        const open = it.seen.has(orig);
+        c.setAttribute("aria-expanded", open ? "true" : "false");
+        if (open) {
+          const fb = el("p", "fb " + (isAns ? "good" : "bad"), q.feedback[orig]);
+          fb.id = "fb-" + pos;
+          c.setAttribute("aria-controls", fb.id);
+          li.appendChild(fb);
+        }
       }
       list.appendChild(li);
     });
@@ -251,7 +295,10 @@
     ex.hidden = !reveal;
     ex.innerHTML = "";
     if (reveal) {
-      if (review && !answered) ex.appendChild(el("p", null, "This question was not answered, so it counts as wrong."));
+      if (review && !answered) {
+        ex.appendChild(el("p", null, r ? "This question was not answered the first time, so it counts as wrong in your score."
+          : "This question was not answered, so it counts as wrong."));
+      }
       const p = el("p");
       p.appendChild(el("strong", null, "Explanation: "));
       p.appendChild(document.createTextNode(q.explanation));
@@ -265,6 +312,7 @@
     // Buttons for this phase
     $("listBtn").hidden = !(quiz || review);
     $("submitBtn").hidden = !(quiz && !review);
+    $("submitBtn").textContent = retry ? "Submit retry" : "Submit quiz";
     $("finishBtn").hidden = !(!quiz && !review);
     $("backBtn").hidden = !review;
     const prev = $("prevBtn"), next = $("nextBtn"), hint = $("hintBtn");
@@ -275,15 +323,16 @@
     hint.setAttribute("aria-expanded", it.hintUsed ? "true" : "false");
     hint.textContent = it.hintUsed ? "Hint shown" : "Show hint";
     if (review) { next.textContent = "Next"; next.disabled = last; }
-    else if (quiz) { next.textContent = last ? "Submit quiz" : "Next"; next.disabled = false; }
+    else if (quiz) { next.textContent = last ? (retry ? "Submit retry" : "Submit quiz") : "Next"; next.disabled = false; }
     else {
-      next.textContent = answered && !S.queue.length ? "See results" : "Next question";
+      next.textContent = answered && (retry ? last : !S.queue.length) ? "See results" : "Next question";
       next.disabled = !answered;
     }
     let tip = "";
-    if (!quiz && !review && !answered) tip = "Pick an answer to continue.";
-    else if (!quiz && !review) tip = "Select the other choices to read their feedback.";
-    else if (quiz && !review) tip = "You can skip questions and change answers until you submit.";
+    if (reveal) tip = "Select a choice to show or hide its feedback.";
+    else if (!quiz) tip = "Pick an answer to continue.";
+    else tip = "You can skip questions and change answers until you submit.";
+    if (retry && !reveal) tip += " Your first score stays the same; questions you get right now are marked Correct on Retry.";
     $("playHint").textContent = tip;
 
     renderPlayStats();
@@ -312,12 +361,25 @@
     const avg = times.length ? times.reduce((a, b) => a + b, 0) / times.length : null;
     return { total: items.length, answered: answered.length, correct: correct, avg: avg };
   }
+  // "2 / 5": questions fixed on a retry out of those missed the first time
+  function retrySummary() {
+    const missed = S.items.filter((it) => !isRight(it));
+    return missed.filter(fixedOnRetry).length + " / " + missed.length;
+  }
 
   function renderPlayStats() {
     const box = $("playStats");
     if (S.phase === "review") {
       const s = summary(S.items);
-      renderStats(box, [["Score", s.correct + " / " + s.total], ["Avg time", fmtTime(s.avg)]]);
+      const tiles = [["Score", s.correct + " / " + s.total]];
+      if (S.items.some((it) => it.retries.length)) tiles.push(["Correct on Retry", retrySummary()]);
+      tiles.push(["Avg time", fmtTime(s.avg)]);
+      renderStats(box, tiles);
+    } else if (S.round) {
+      const s = summary(S.round);
+      renderStats(box, S.mode === "quiz"
+        ? [["Retry question", (S.index + 1) + " / " + s.total], ["Answered", s.answered + " / " + s.total]]
+        : [["Retry question", (S.index + 1) + " / " + s.total], ["Correct", String(s.correct)]]);
     } else if (S.mode === "quiz") {
       const s = summary(S.items);
       renderStats(box, [["Question", (S.index + 1) + " / " + s.total], ["Answered", s.answered + " / " + s.total]]);
@@ -333,7 +395,7 @@
   }
 
   function go(i) {
-    if (i < 0 || i >= S.items.length) return;
+    if (i < 0 || i >= cur().length) return;
     stopClock();
     S.index = i;
     renderPlay(true);
@@ -341,28 +403,27 @@
   }
 
   function choose(orig) {
-    const it = S.items[S.index];
-    if (S.phase !== "play") return;
-    if (S.mode === "quiz") {
+    if (S.phase !== "play" && S.phase !== "review") return;
+    const it = cur()[S.index];
+    if (S.phase === "review" || (S.mode === "endless" && it.pick != null)) {
+      // Once answers are shown, every choice opens and closes its feedback
+      if (it.seen.has(orig)) it.seen.delete(orig); else it.seen.add(orig);
+      renderPlay(false);
+      if (it.seen.has(orig)) say(it.q.feedback[orig]);
+    } else if (S.mode === "quiz") {
       if (it.pick === orig) return;
       stopClock();
       it.pick = orig;
       it.timeMs = it.viewMs;   // time up to the latest answer change
       startClock();
       renderPlay(false);
-    } else if (it.pick == null) {
+    } else {
       stopClock();               // first pick is final in endless mode
       it.pick = orig;
       it.timeMs = it.viewMs;
-      it.seen.add(orig);
-      renderPlay(false);
+      renderPlay(false);         // opens the feedback for the pick and the correct answer
       say(isRight(it) ? "Correct. " + it.q.feedback[orig]
         : "Incorrect. The correct answer is " + LETTERS[it.order.indexOf(it.q.answer)] + ". " + it.q.feedback[orig]);
-    } else {
-      // After answering, choices open and close their feedback
-      if (it.seen.has(orig) && orig !== it.pick) it.seen.delete(orig); else it.seen.add(orig);
-      renderPlay(false);
-      if (it.seen.has(orig)) say(it.q.feedback[orig]);
     }
     const again = $("choices").querySelector('[data-orig="' + orig + '"]');
     if (again) again.focus({ preventScroll: true });
@@ -377,11 +438,11 @@
   $("nextBtn").addEventListener("click", () => {
     if (S.phase === "review") go(S.index + 1);
     else if (S.mode === "quiz") {
-      if (S.index === S.items.length - 1) trySubmit(); else go(S.index + 1);
+      if (S.index === cur().length - 1) trySubmit(); else go(S.index + 1);
     } else nextEndless();
   });
   $("hintBtn").addEventListener("click", () => {
-    const it = S.items[S.index];
+    const it = cur()[S.index];
     it.hintUsed = true;
     renderPlay(false);
     say("Hint: " + it.q.hint);
@@ -389,8 +450,12 @@
   });
 
   function nextEndless() {
-    const it = S.items[S.index];
+    const it = cur()[S.index];
     if (it.pick == null) return;
+    if (S.round) {   // a retry round has all its questions from the start
+      if (S.index === S.round.length - 1) finish(); else go(S.index + 1);
+      return;
+    }
     if (!S.queue.length) { finish(); return; }
     stopClock();
     S.items.push(makeItem(S.queue.shift()));
@@ -413,11 +478,13 @@
   function openList() {
     stopClock();
     const review = S.phase === "review";
+    const items = cur();
     const grid = $("qgrid");
     grid.innerHTML = "";
-    S.items.forEach((it, i) => {
+    items.forEach((it, i) => {
       const state = review ? resultOf(it) : it.pick == null ? "open" : "done";
-      const words = { open: "unanswered", done: "answered", correct: "correct", wrong: "incorrect", skip: "unanswered" }[state];
+      const words = { open: "unanswered", done: "answered", correct: "correct", fixed: "correct on retry",
+        wrong: "incorrect", skip: "unanswered" }[state];
       const li = el("li");
       const b = el("button", "qbox " + state);
       b.type = "button";
@@ -435,11 +502,14 @@
     });
     const legend = $("listLegend");
     legend.innerHTML = "";
-    const s = summary(S.items);
+    const s = summary(items);
     if (review) {
-      const wrong = S.items.filter((it) => resultOf(it) === "wrong").length;
-      $("listCount").textContent = s.correct + " correct, " + wrong + " incorrect, " + (s.total - s.answered) + " unanswered. Select a number to review that question.";
+      const n = (st) => items.filter((it) => resultOf(it) === st).length;
+      const fixed = n("fixed");
+      $("listCount").textContent = n("correct") + " correct, " + (fixed ? fixed + " correct on retry, " : "") +
+        n("wrong") + " incorrect, " + n("skip") + " unanswered. Select a number to review that question.";
       legend.appendChild(legendItem("correct", "Correct", "✓"));
+      if (fixed) legend.appendChild(legendItem("fixed", "Correct on Retry", "↻"));
       legend.appendChild(legendItem("wrong", "Incorrect", "✗"));
       legend.appendChild(legendItem("skip", "Unanswered", "–"));
     } else {
@@ -449,8 +519,8 @@
     }
     legend.appendChild(legendItem("open cur", "Current question"));
     showDlg(listDialog);
-    const cur = grid.querySelector('[aria-current="true"]');
-    if (cur) cur.focus();
+    const curBox = grid.querySelector('[aria-current="true"]');
+    if (curBox) curBox.focus();
   }
   $("listBtn").addEventListener("click", openList);
   $("listCloseBtn").addEventListener("click", () => closeDlg(listDialog));
@@ -460,11 +530,13 @@
   // ---------- Submitting ----------
   const submitDialog = $("submitDialog");
   function trySubmit() {
-    const unanswered = S.items.filter((it) => it.pick == null).length;
+    const items = cur();
+    const unanswered = items.filter((it) => it.pick == null).length;
     if (!unanswered) { finish(); return; }
     stopClock();
     $("subText").textContent = plural(unanswered, "question is", "questions are") + " unanswered out of " +
-      S.items.length + ". Unanswered questions are counted as wrong.";
+      items.length + ". " + (S.round ? "Unanswered retry questions stay marked as missed."
+        : "Unanswered questions are counted as wrong.");
     showDlg(submitDialog);
     $("keepBtn").focus();
   }
@@ -479,12 +551,21 @@
   // ---------- Results ----------
   function finish() {
     stopClock();
-    if (S.mode === "endless") {
+    if (S.round) {
+      // Keep each answered retry with its session question; unanswered ones change nothing
+      S.round.forEach((r) => {
+        if (r.pick == null) return;
+        const src = r.src;
+        src.retries.push(r);
+        if (src.fbReady) { src.seen.add(src.q.answer); src.seen.add(r.pick); }
+      });
+      S.round = null;
+    } else if (S.mode === "endless") {
       const last = S.items[S.items.length - 1];
       if (last && last.pick == null) S.items.pop();   // the question on screen wasn't answered
       if (!S.items.length) { S = null; show("setup"); updateSetup(); $("startBtn").focus(); return; }
+      S.exhausted = !S.queue.length;
     }
-    S.exhausted = S.mode === "endless" && !S.queue.length;
     S.phase = "results";
     renderResults();
     show("results");
@@ -500,14 +581,17 @@
       ["Avg time", fmtTime(s.avg)]
     ];
     if (S.mode === "quiz" && s.answered < s.total) tiles.push(["Unanswered", String(s.total - s.answered)]);
+    const retried = S.items.some((it) => it.retries.length);
+    if (retried) tiles.splice(2, 0, ["Correct on Retry", retrySummary()]);
     renderStats($("resStats"), tiles);
 
     const notes = [];
     if (S.mode === "quiz" && s.answered < s.total) notes.push("Unanswered questions count as wrong and aren't included in the average time.");
     if (S.exhausted) notes.push("You answered every question in the topics you chose.");
+    if (retried) notes.push("Score, accuracy, and time count first answers only. Questions you later got right are marked Correct on Retry.");
     $("resNote").textContent = notes.join(" ");
 
-    const missed = S.items.filter((it) => !isRight(it)).length;
+    const missed = S.items.filter(stillMissed).length;
     $("retryBtn").hidden = missed === 0;
     $("retryBtn").textContent = "Retry missed (" + missed + ")";
 
@@ -549,9 +633,16 @@
     show("results");
     $("resH").focus({ preventScroll: true });
   });
+  // Retry only the questions still missed; the session and its score are kept
   $("retryBtn").addEventListener("click", () => {
-    const missed = S.items.filter((it) => !isRight(it)).map((it) => it.q);
-    startSession(S.mode, shuffle(missed));
+    const missed = S.items.filter(stillMissed);
+    if (!missed.length) return;
+    S.round = shuffle(missed).map((it) => makeItem(it.q, it));
+    S.phase = "play";
+    S.index = 0;
+    show("play");
+    renderPlay(true);
+    startClock();
   });
   $("newBtn").addEventListener("click", () => {
     S = null;

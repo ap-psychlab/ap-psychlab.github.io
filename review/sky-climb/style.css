@@ -166,6 +166,16 @@
 .hint-box { border-left: 4px solid var(--accent); }
 .explain p { margin: 0; }
 
+/* "Terms used in this question": a card on the right once answered; the dialog widens to fit
+   (stacks below on narrow screens) */
+@media (min-width: 1000px) {
+  .sc-dialog:has(.term-help:not([hidden])) { width: min(1040px, calc(100% - 24px)); }
+  .q-body:has(> .term-help:not([hidden])) {
+    display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: start;
+  }
+  .q-body > .term-help { margin: 0; position: sticky; top: 0; }
+}
+
 /* Summit results */
 .res-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .res-list details { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); }

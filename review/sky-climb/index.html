@@ -68,13 +68,15 @@
       <h2 id="qTitle" tabindex="-1">Question 1 of 10</h2>
       <span id="qWhere"></span>
     </div>
-    <div class="sc-dlg-body">
-      <p class="stem" id="stem"></p>
-      <div class="q-figure" id="qFigure" hidden></div>
-      <ol class="choices" id="choices" aria-label="Answer choices"></ol>
-      <p class="hint-box" id="hintBox" hidden></p>
-      <div class="explain" id="explain" hidden></div>
-      <div class="term-help" id="termHelp" hidden></div>
+    <div class="sc-dlg-body q-body">
+      <div class="q-main">
+        <p class="stem" id="stem"></p>
+        <div class="q-figure" id="qFigure" hidden></div>
+        <ol class="choices" id="choices" aria-label="Answer choices"></ol>
+        <p class="hint-box" id="hintBox" hidden></p>
+        <div class="explain" id="explain" hidden></div>
+      </div>
+      <aside class="card term-help" id="termHelp" aria-label="Terms used in this question" hidden></aside>
     </div>
     <div class="sc-dlg-foot">
       <div class="row">

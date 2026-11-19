@@ -55,6 +55,8 @@
 
 /* ---------- "Terms used in this question" (term help) ---------- */
 .term-help { margin: 16px 0 0; }
+/* As a side card (class="card term-help"): pages place it to the right of the question */
+.term-help.card { padding: 12px; }
 .th-title { margin: 0 0 8px; font-weight: 700; color: var(--heading); }
 .th-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .th-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); }

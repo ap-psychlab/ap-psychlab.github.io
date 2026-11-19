@@ -77,25 +77,31 @@
       <button class="btn alt" id="backBtn" type="button">Back to results</button>
     </div>
 
-    <article class="card qcard" aria-labelledby="qNum">
-      <div class="qmeta">
-        <h2 id="qNum" tabindex="-1">Question 1</h2>
-        <span id="qStatus"></span>
-      </div>
-      <p class="stem" id="stem"></p>
-      <div class="q-figure" id="qFigure" hidden></div>
-      <ol class="choices" id="choices" aria-label="Answer choices"></ol>
-      <p class="hint-box" id="hintBox" hidden></p>
-      <div class="explain" id="explain" hidden></div>
-      <div class="term-help" id="termHelp" hidden></div>
-    </article>
+    <!-- Question, then nav; "Terms used in this question" sits to the right once answers are shown -->
+    <div class="q-cols">
+      <article class="card qcard" aria-labelledby="qNum">
+        <div class="qmeta">
+          <h2 id="qNum" tabindex="-1">Question 1</h2>
+          <span id="qStatus"></span>
+        </div>
+        <p class="stem" id="stem"></p>
+        <div class="q-figure" id="qFigure" hidden></div>
+        <ol class="choices" id="choices" aria-label="Answer choices"></ol>
+        <p class="hint-box" id="hintBox" hidden></p>
+        <div class="explain" id="explain" hidden></div>
+      </article>
 
-    <div class="row nav">
-      <button class="btn ghost" id="prevBtn" type="button">Previous</button>
-      <button class="btn ghost" id="hintBtn" type="button" aria-expanded="false" aria-controls="hintBox">Show hint</button>
-      <button class="btn" id="nextBtn" type="button">Next</button>
+      <aside class="card term-help" id="termHelp" aria-label="Terms used in this question" hidden></aside>
+
+      <div class="q-nav">
+        <div class="row nav">
+          <button class="btn ghost" id="prevBtn" type="button">Previous</button>
+          <button class="btn ghost" id="hintBtn" type="button" aria-expanded="false" aria-controls="hintBox">Show hint</button>
+          <button class="btn" id="nextBtn" type="button">Next</button>
+        </div>
+        <p class="hint center" id="playHint"></p>
+      </div>
     </div>
-    <p class="hint center" id="playHint"></p>
   </section>
 
   <!-- ---------- Results ---------- -->
