@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Big Five Reunion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<link rel="stylesheet" href="style.css">
+<script src="guests.js" defer></script>
+<script src="script.js" defer></script>
+</head>
+<body>
+<main class="wide">
+  <h1>Big Five Reunion</h1>
+
+  <section id="soon" class="card">
+    <p>This demo is still being built. Check back soon!</p>
+  </section>
+
+  <section id="gallery" class="gal-controls" hidden>
+    <h2>Guest gallery (dev)</h2>
+    <p class="hint">Every guest in every pose. Body and Arms apply to all guests.</p>
+    <div class="row" role="group" aria-label="Body">
+      <span class="lbl">Body</span>
+      <button class="btn ghost" type="button" data-base="stand" aria-pressed="true">Stand</button>
+      <button class="btn ghost" type="button" data-base="sit" aria-pressed="false">Sit</button>
+      <button class="btn ghost" type="button" data-base="lean" aria-pressed="false">Lean</button>
+    </div>
+    <div class="row" role="group" aria-label="Arms">
+      <span class="lbl">Arms</span>
+      <button class="btn ghost" type="button" data-pose="idle" aria-pressed="true">Idle</button>
+      <button class="btn ghost" type="button" data-pose="wave" aria-pressed="false">Wave</button>
+      <button class="btn ghost" type="button" data-pose="shrug" aria-pressed="false">Shrug</button>
+      <button class="btn ghost" type="button" data-pose="cheer" aria-pressed="false">Cheer</button>
+      <button class="btn ghost" type="button" data-pose="cross" aria-pressed="false">Cross</button>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="galAnim" checked> Animate</label>
+    </div>
+    <div class="gal" id="gal" data-base="stand"></div>
+  </section>
+</main>
+</body>
+</html>

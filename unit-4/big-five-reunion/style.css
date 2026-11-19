@@ -1,0 +1,192 @@
+/* Big Five Reunion: demo styles (built on ../../shared/theme.css) */
+
+:root {
+  /* ---------- Art palette (characters and scene only) ---------- */
+  --a-ink: #3B2A20;
+  --a-cheek: #E8907E;
+  --a-mouth: #8A3E30;
+
+  --a-skin-1: #F8DCC8;
+  --a-skin-2: #F2C6A0;
+  --a-skin-3: #DDA477;
+  --a-skin-4: #B97A4E;
+  --a-skin-5: #8D5A36;
+  --a-skin-6: #5E3B24;
+
+  --a-hair-black: #2B211C;
+  --a-hair-dkbrown: #4A3122;
+  --a-hair-lightbrown: #A9794A;
+  --a-hair-auburn: #A0522D;
+  --a-hair-blond: #E2C26E;
+  --a-hair-gray: #9E978E;
+
+  --a-white: #F7F4EE;
+  --a-cream: #EFE2C8;
+  --a-silver: #C9CDD2;
+  --a-gold: #D6A23A;
+  --a-black: #2E2B2D;
+  --a-gray: #8C8C8F;
+  --a-charcoal: #46424A;
+  --a-brown: #7A5234;
+  --a-navy: #34476B;
+  --a-sky: #A9C6E0;
+  --a-khaki: #C9B48A;
+  --a-khaki-dk: #9C8A63;
+  --a-red: #C2453A;
+  --a-scrub: #6FA7B8;
+  --a-plum: #6E4F6B;
+  --a-mustard: #D9A93C;
+  --a-denim: #5878A6;
+  --a-teal: #4F9A94;
+  --a-steel: #7F95A8;
+  --a-forest: #4B6043;
+  --a-jeans: #4D6A92;
+  --a-jeans-lt: #7590B6;
+  --a-coral: #E07A65;
+  --a-leather: #4B4A50;
+  --a-olive: #8A8F4E;
+  --a-straw: #E3C278;
+  --a-lanyard: #3E6FA8;
+  --a-tag: #C94A3D;
+  --a-bandage: #F3DCC0;
+
+  /* Patterns */
+  --a-tropic: #2F8F83;
+  --a-flower-1: #F6E3A1;
+  --a-flower-2: #E98A6B;
+  --a-vest: #9DB08A;
+  --a-vest-dk: #7D9069;
+  --a-midnight: #26355A;
+  --a-star: #F2CF5B;
+
+  /* Props */
+  --a-phone: #2E3440;
+  --a-screen: #8FB3D9;
+  --a-cup: #F7F4EE;
+  --a-kraft: #B98B5E;
+  --a-board: #B07B4A;
+  --a-paper: #FFFDF7;
+  --a-honey: #E0A12E;
+  --a-pencil: #F2C14E;
+  --a-eraser: #E89AA0;
+  --a-paint-1: #E07A65;
+  --a-paint-2: #4F9A94;
+  --a-paint-3: #8C6BB0;
+
+  /* Gallery props */
+  --a-chair: #B08A63;
+  --a-chair-dk: #8F6B48;
+}
+
+/* ---------- Character rig ---------- */
+.guest .o { stroke: var(--a-ink); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.guest g { transform-box: view-box; }   /* origins are set in local px by the builder */
+
+/* Hidden by default; shown by base or pose */
+.guest .legs-sit, .guest .knees,
+.guest .m-open, .guest .m-wavy, .guest .eyes-happy { display: none; }
+
+/* Arms at rest */
+.guest .arm, .guest .fore, .guest .headPose, .guest .brows, .guest .lean, .guest .legR {
+  transition: transform .35s ease;
+}
+.guest .armL { transform: rotate(12deg); }
+.guest .armR { transform: rotate(-12deg); }
+.guest .armL .fore { transform: rotate(-6deg); }
+.guest .armR .fore { transform: rotate(6deg); }
+
+/* Idle loops (delays desynced per guest with --d) */
+.guest .upper { animation: rb-breathe 3.4s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes rb-breathe { 50% { transform: translateY(2.5px); } }
+
+.guest .head { animation: rb-sway 6.2s ease-in-out infinite; animation-delay: calc(var(--d, 0s) * 1.6); }
+@keyframes rb-sway { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+
+.guest .blink { transform-box: fill-box; transform-origin: center;
+  animation: rb-blink 4.8s infinite; animation-delay: calc(var(--d, 0s) * 2.3); }
+@keyframes rb-blink { 0%, 93%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+
+.guest .look { animation: rb-look 9s ease-in-out infinite; animation-delay: calc(var(--d, 0s) * 3.1); }
+@keyframes rb-look { 0%, 38%, 70%, 100% { transform: translateX(0); } 42%, 66% { transform: translateX(3px); } }
+
+/* ---------- Bases ---------- */
+.guest[data-base="sit"] .seat { transform: translateY(var(--sit)); }
+.guest[data-base="sit"] .legs-stand,
+.guest[data-base="sit"] .coat-skirt { display: none; }
+.guest[data-base="sit"] .legs-sit, .guest[data-base="sit"] .knees { display: inline; }
+
+.guest[data-base="lean"] .lean { transform: rotate(4deg); }
+.guest[data-base="lean"] .legR { transform: rotate(13deg); }
+
+/* ---------- Poses ---------- */
+/* Wave: right arm up, forearm waving */
+.guest[data-pose="wave"] .armR { transform: rotate(-118deg); }
+.guest[data-pose="wave"] .armR .fore { animation: rb-wave .45s ease-in-out infinite alternate; }
+@keyframes rb-wave { from { transform: rotate(-22deg); } to { transform: rotate(-66deg); } }
+
+/* Shrug: elbows bent, palms out, head tilt, brows up, wavy mouth */
+.guest[data-pose="shrug"] .armL { transform: rotate(28deg); }
+.guest[data-pose="shrug"] .armL .fore { transform: rotate(72deg); }
+.guest[data-pose="shrug"] .armR { transform: rotate(-28deg); }
+.guest[data-pose="shrug"] .armR .fore { transform: rotate(-72deg); }
+.guest[data-pose="shrug"] .headPose { transform: rotate(-8deg); }
+.guest[data-pose="shrug"] .brows { transform: translateY(-5px); }
+.guest[data-pose="shrug"] .m-def { display: none; }
+.guest[data-pose="shrug"] .m-wavy { display: inline; }
+
+/* Cheer: both arms up and pumping, hopping, happy eyes, open mouth */
+.guest[data-pose="cheer"] .armL { transform: rotate(140deg); }
+.guest[data-pose="cheer"] .armR { transform: rotate(-140deg); }
+.guest[data-pose="cheer"] .armL .fore { animation: rb-pumpL .35s ease-in-out infinite alternate; }
+.guest[data-pose="cheer"] .armR .fore { animation: rb-pumpR .35s ease-in-out infinite alternate; }
+@keyframes rb-pumpL { from { transform: rotate(-4deg); } to { transform: rotate(22deg); } }
+@keyframes rb-pumpR { from { transform: rotate(4deg); } to { transform: rotate(-22deg); } }
+.guest[data-pose="cheer"] .hop { animation: rb-hop .7s ease-in-out infinite; }
+@keyframes rb-hop { 0%, 70%, 100% { transform: translateY(0); } 35% { transform: translateY(-28px); } }
+.guest .shadow { transform-box: fill-box; transform-origin: center; }
+.guest[data-pose="cheer"] .shadow { animation: rb-shadow .7s ease-in-out infinite; }
+@keyframes rb-shadow { 0%, 70%, 100% { transform: scale(1); } 35% { transform: scale(.7); opacity: .5; } }
+.guest[data-pose="cheer"] .brows { transform: translateY(-4px); }
+.guest[data-pose="cheer"] .m-def, .guest[data-pose="cheer"] .eyes-open { display: none; }
+.guest[data-pose="cheer"] .m-open, .guest[data-pose="cheer"] .eyes-happy { display: inline; }
+
+/* Cross: arms folded over the chest, hands tucked */
+.guest[data-pose="cross"] .armL { transform: rotate(8deg); }
+.guest[data-pose="cross"] .armL .fore { transform: rotate(-112deg); }
+.guest[data-pose="cross"] .armR { transform: rotate(-8deg); }
+.guest[data-pose="cross"] .armR .fore { transform: rotate(112deg); }
+.guest[data-pose="cross"] .hand, .guest[data-pose="cross"] .prop { display: none; }
+
+/* Jax's left arm stays in its sling whatever the pose */
+.guest[data-sling] .armL { transform: rotate(6deg) !important; }
+.guest[data-sling] .armL .fore { transform: rotate(-96deg) !important; animation: none !important; }
+.guest[data-sling] .armL .hand { display: inline !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .guest, .guest * { animation: none !important; transition: none !important; }
+}
+
+/* Paused (dev gallery "Animate" off, and later while a dialog is open) */
+.paused .guest, .paused .guest * { animation-play-state: paused !important; }
+
+/* ---------- Dev gallery ---------- */
+.rb-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.gal-controls .row { margin-bottom: 8px; }
+.gal-controls .lbl { font-weight: 700; color: var(--heading); min-width: 56px; }
+.gal-controls .btn[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
+.gal-controls label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+
+.gal {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.gcard { padding: 8px 8px 12px; text-align: center; }
+.gcard svg { display: block; width: 100%; height: auto; background: var(--bg-alt); border-radius: 8px; }
+.gcard h3 { margin: 8px 0 0; }
+.gcard p { margin: 0; font-size: .9rem; }
+.gcard .job { color: var(--muted); }
+.gcard .traits { font-variant-numeric: lining-nums tabular-nums; color: var(--text); }
+.gal:not([data-base="sit"]) .g-chair { display: none; }
