@@ -12,7 +12,8 @@
  *   top.style: vest, hawaiian, scrubs, overalls, sweatervest, track, workshirt,
  *     blazer, coat, leather, buttonshirt, qzip (quarter-zip sweater over a shirt
  *     and tie; under = shirt color, tie = tie color).
- *   face.glasses: true (thin) or "thick"; face.beard: stubble, trim or full.
+ *   face.glasses: true (thin) or "thick"; face.beard: stubble, trim, full or circle
+ *     (a trimmed beard joined to the mustache); face.mustache: true adds a mustache.
  *   top.sleeve: upper-arm color; top.fore: forearm color (skin = short or rolled
  *     sleeves, which also adds a cuff); top.stripe: a stripe down the sleeves.
  *   hold: a prop in the guest's left (L) or right (R) hand, as the viewer sees them.
@@ -96,17 +97,17 @@ window.APPSYCH_REUNION_GUESTS = [
     }
   },
   {
-    id: "teacher", name: "Your Name Here", job: "psychology teacher",
+    id: "teacher", name: "Owen Hartley", job: "psychology teacher",
     answers: { o: 5, c: 4, e: 1, a: 4, s: 2 },
     then: "", now: [],
     spot: "table", activity: "people-watch",
     look: {
       build: { h: 1.03, w: 1.02 },
-      skin: "skin-2",
+      skin: "skin-2b",
       hair: { style: "curly", color: "hair-dkbrown" },
-      face: { brows: "soft", mouth: "small", glasses: "thick", beard: "trim", mustache: true },
-      top: { style: "qzip", main: "maroon", sleeve: "maroon", under: "oxford", tie: "mustard" },
-      bottom: { pants: "navy", shoe: "loafer", shoeColor: "brown" },
+      face: { brows: "soft", mouth: "small", glasses: "thick", beard: "circle" },
+      top: { style: "qzip", main: "cobalt", sleeve: "cobalt", under: "oxford", tie: "mustard" },
+      bottom: { pants: "charcoal", shoe: "loafer", shoeColor: "brown" },
       hold: { R: "book" }
     }
   },

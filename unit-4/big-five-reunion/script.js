@@ -84,6 +84,18 @@
     return d + ' Z';
   }
 
+  // An open bumpy (curly) outline along a circle, from angle a0 to a1 (degrees, clockwise).
+  // Every other point sits `jitter` further out so the curls look uneven.
+  function bumpy(cx, cy, R, a0, a1, n, b, jitter) {
+    var d = '', i, a, rr;
+    for (i = 0; i <= n; i++) {
+      a = (a0 + (a1 - a0) * i / n) * Math.PI / 180;
+      rr = R + (i % 2 ? jitter || 0 : 0);
+      d += (i === 0 ? 'M' : ' A' + b + ' ' + b + ' 0 0 1 ') + pt(cx + rr * Math.cos(a), cy + rr * Math.sin(a));
+    }
+    return d;
+  }
+
   /* ---------- Shared defs (patterns, head clip), added once per page ---------- */
   function ensureDefs() {
     if (document.getElementById('rb-floral')) return;
@@ -454,16 +466,12 @@
       }
     },
     curly: {
-      back: function (p, c) {
-        hairPath(p, scallop(0, -38, 60, 14, 12), c);
-      },
+      // Short, a little messy: a bumpy outline just above the head, one curl on the forehead
       front: function (p, c) {
-        // Fill only, so no outline crosses the curls; then outline the hairline
-        var line = 'Q60 -20 50 -26 Q46 -40 30 -34 Q20 -47 6 -38 Q-6 -49 -18 -36 Q-32 -45 -42 -30 Q-56 -26 -62 2';
-        el(p, 'path', { d: 'M-62 2 Q-70 -72 0 -72 Q70 -72 62 2 ' + line + ' Z', f: c });
-        stroke(p, 'M62 2 ' + line, 'ink', 4);
-        stroke(p, 'M8 -38 q-9 6 -3 13 q6 4 9 -3', c, 4.5);
-        ['M-34 -58 q6 -7 13 -1', 'M2 -62 q6 -7 13 -1', 'M28 -52 q6 -7 13 -1', 'M-16 -80 q6 -6 12 0', 'M20 -84 q6 -6 12 0']
+        var line = ' L61 4 Q58 -18 48 -24 Q42 -36 28 -31 Q18 -42 6 -34 Q-6 -43 -18 -32 Q-30 -40 -40 -27 Q-54 -23 -61 4 Z';
+        hairPath(p, bumpy(0, -6, 66, 172, 368, 16, 8, 3) + line, c);
+        stroke(p, 'M8 -34 q-8 5 -3 11 q5 4 8 -3', c, 4.5);
+        ['M-34 -50 q5 -6 11 -1', 'M2 -57 q5 -6 11 -1', 'M28 -47 q5 -6 11 -1']
           .forEach(function (d) { stroke(p, d, 'ink', 2.5).style.opacity = .35; });
       }
     },
@@ -491,6 +499,11 @@
         d: 'M-64 14 Q-60 66 0 66 Q60 66 64 14 Q52 40 34 46 Q16 52 0 50 Q-16 52 -34 46 Q-52 40 -64 14 Z' });
     } else if (face.beard === 'trim') {
       hairPath(hd, 'M-61 6 Q-60 62 0 66 Q60 62 61 6 Q57 30 42 37 Q28 54 0 55 Q-28 54 -42 37 Q-57 30 -61 6 Z', hair.color, 3);
+    } else if (face.beard === 'circle') {
+      // Trimmed beard joined to the mustache, with an opening around the mouth
+      el(hd, 'path', { cls: 'o', sw: 3, f: hair.color, 'fill-rule': 'evenodd',
+        d: 'M-61 6 Q-60 62 0 66 Q60 62 61 6 Q57 30 42 37 L22 37 Q12 26 0 31 Q-12 26 -22 37 L-42 37 Q-57 30 -61 6 Z ' +
+           'M-15 41 Q0 36 15 41 Q14 52 0 52 Q-14 52 -15 41 Z' });
     } else if (face.beard === 'full') {
       hairPath(hd, 'M-60 6 Q-62 68 0 72 Q62 68 60 6 Q54 34 36 36 Q24 56 0 56 Q-24 56 -36 36 Q-54 34 -60 6 Z', hair.color, 3);
     }
