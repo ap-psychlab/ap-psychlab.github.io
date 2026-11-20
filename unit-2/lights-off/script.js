@@ -6,6 +6,9 @@
  * Public option:
  *   ?mode=practice | timed   open in that mode (default: practice)
  *
+ * Dev tools (?dev): Turn all off, Time left 10 s, Show fewest-moves solution, Show algorithm
+ * steps, Solve one step, Solve all (algorithm), Load mental set board, plus an info line.
+ *
  * Board cells are numbered 0–24, row by row (cell = row × 5 + column, 0-based).
  * The plan ("Lights Off - Plan.md") lists the remaining build steps.
  */
@@ -20,6 +23,13 @@
     medium: { min: 6, max: 8, label: 'Medium' },
     hard: { min: 11, max: 15, label: 'Hard' }
   };
+  // Stuck alert (Practice only): fires once per puzzle when moves reach fewest possible +
+  // STUCK_EXTRA_MOVES, or when the lit count hasn't gone below its lowest so far for
+  // STUCK_FLAT_PRESSES presses in a row.
+  var STUCK_EXTRA_MOVES = 10, STUCK_FLAT_PRESSES = 8;
+  // The mental set board (tutorial step 5; dev "Load mental set board" in Practice):
+  // from all off, press top row column 2, top row column 5, row 4 column 4.
+  var MENTAL_SET_PRESSES = [1, 4, 18];
 
   var $ = function (id) { return document.getElementById(id); };
   var NS = 'http://www.w3.org/2000/svg';
@@ -135,6 +145,70 @@
     return n;
   }
 
+  /* ---------- Stepper: the algorithm's valid presses from any board ---------- */
+  // makeStepper(['shortcut']) follows one method; ['shortcut', 'lookup'] accepts either
+  // (for analyzing a player's presses later). step(b) returns the valid set, not one cell:
+  //   { phase: 'chase', row, cols, cells, from }   row = highest lit row (0–3); press below each light
+  //   { phase: 'bottom', cells, bottom, fresh }    top-row presses to fix the bottom row
+  //   { phase: 'done', cells: [] }
+  // pending (method → top-row cells still to press) is needed because after the first top-row
+  // press rows 1–2 light up again, and a stateless rule would jump back to chasing.
+  function chaseStep(b) {
+    for (var r = 0; r < N - 1; r++) {
+      var cols = [];
+      for (var c = 0; c < N; c++) if (b[r * N + c]) cols.push(c);
+      if (cols.length) {
+        return {
+          phase: 'chase', row: r, cols: cols,
+          cells: cols.map(function (c) { return (r + 1) * N + c; }),
+          from: cols.map(function (c) { return r * N + c; })
+        };
+      }
+    }
+    return null;
+  }
+  function makeStepper(methods) {
+    var pending = null, afterTop = false;
+    function open() { return pending ? methods.filter(function (m) { return pending[m] && pending[m].length; }) : []; }
+    function finished() { return pending ? methods.filter(function (m) { return pending[m] && !pending[m].length; }) : []; }
+    function step(b) {
+      if (allOff(b)) return { phase: 'done', cells: [] };
+      var fresh = false;
+      if (pending && !open().length) { pending = null; afterTop = true; }
+      if (!pending) {
+        var ch = chaseStep(b);
+        if (ch) { ch.again = afterTop; return ch; }
+        // Rows 1–4 are dark and row 5 isn't: fill pending with each method's top-row presses.
+        pending = {};
+        methods.forEach(function (m) { pending[m] = (m === 'lookup' ? lookupPresses : shortcutPresses)(bottomOf(b)); });
+        fresh = true;
+      }
+      var cells = [];
+      open().forEach(function (m) { pending[m].forEach(function (t) { if (cells.indexOf(t) < 0) cells.push(t); }); });
+      var res = { phase: 'bottom', cells: cells.sort(function (p, q) { return p - q; }), fresh: fresh, methods: open() };
+      // A method whose top-row presses are all made has moved on to the second chase.
+      if (finished().length) {
+        var ch2 = chaseStep(b);
+        if (ch2) { res.chase = ch2; res.cells = res.cells.concat(ch2.cells); }
+      }
+      return res;
+    }
+    // Call with the board BEFORE press i. Returns true if i was one of the algorithm's steps.
+    function note(b, i) {
+      var s = step(b), ok = s.cells.indexOf(i) >= 0;
+      if (!ok) { pending = null; afterTop = false; return false; }
+      if (s.phase === 'chase') { afterTop = s.again; return true; }
+      if (s.chase && s.chase.cells.indexOf(i) >= 0) { pending = null; afterTop = true; return true; }
+      methods.forEach(function (m) {
+        if (!pending[m] || !pending[m].length || pending[m].indexOf(i) < 0) delete pending[m];
+        else pending[m] = pending[m].filter(function (t) { return t !== i; });
+      });
+      return true;
+    }
+    function reset() { pending = null; afterTop = false; }
+    return { step: step, note: note, reset: reset };
+  }
+
   function fillLookupTable() {
     var best = LOOKUP, tb = document.querySelector('#lookup tbody');
     Object.keys(best).sort(function (a, b) { return a.length - b.length || (a < b ? -1 : 1); })
@@ -196,6 +270,27 @@
         g.addEventListener('keydown', function (e) { keyNav(e, idx); });
       })(i);
     }
+    guideLayer = el('g', { 'class': 'guide-layer', 'aria-hidden': 'true' }, svg);
+  }
+
+  // Algorithm-step highlight: a pulsing ring on every valid press (any order works), each with
+  // an arrow from the light it chases. Drawn on a layer above the cells; ignores the pointer.
+  var guideLayer = null;
+  function drawGuide(cellsToRing, from) {
+    while (guideLayer.firstChild) guideLayer.removeChild(guideLayer.firstChild);
+    cellsToRing.forEach(function (i, k) {
+      var x = (i % N) * 100, y = Math.floor(i / N) * 100;
+      var g = el('g', { 'class': 'guide' }, guideLayer);
+      el('rect', { x: x + 13, y: y + 13, width: 74, height: 74, rx: 9, 'class': 'guide-case' }, g);
+      el('rect', { x: x + 13, y: y + 13, width: 74, height: 74, rx: 9, 'class': 'guide-ring' }, g);
+      var src = from && from[k];
+      if (src != null) {
+        var cx = x + 50, y0 = Math.floor(src / N) * 100 + 80, tip = y + 12;
+        el('line', { x1: cx, y1: y0, x2: cx, y2: tip - 8, 'class': 'guide-case' }, g);
+        el('line', { x1: cx, y1: y0, x2: cx, y2: tip - 8, 'class': 'guide-arrow' }, g);
+        el('polygon', { points: (cx - 8) + ',' + (tip - 11) + ' ' + (cx + 8) + ',' + (tip - 11) + ' ' + cx + ',' + tip, 'class': 'guide-head' }, g);
+      }
+    });
   }
 
   var focusIdx = 0;
@@ -223,13 +318,18 @@
   var board = emptyBoard(), startBoard = [], moves = 0, locked = true, puzzleFewest = 0;
   var mode = 'practice', practiceLevel = 'easy';
   var running = false, endTime = 0, timer = null, solved = 0, totalMoves = 0, totalFewest = 0;
+  // Guided mode and the stuck alert (Practice)
+  var algoMethod = 'shortcut', stepper = makeStepper(['shortcut']), curStep = null, prevStep = null;
+  var guiding = false, guideStartMoves = 0, guidedPresses = 0, offScript = 0, devSteps = false;
+  var stuckShown = false, lowestLit = 0, flatPresses = 0;
 
   function render() {
     for (var i = 0; i < TOTAL; i++) {
       var on = board[i];
       cells[i].classList.toggle('on', on);
       tiles[i].classList.toggle('lit', on);
-      cells[i].setAttribute('aria-label', 'Row ' + (Math.floor(i / N) + 1) + ', column ' + (i % N + 1) + ', ' + (on ? 'on' : 'off'));
+      var mark = guiding && !locked && curStep && curStep.cells.indexOf(i) >= 0;
+      cells[i].setAttribute('aria-label', 'Row ' + (Math.floor(i / N) + 1) + ', column ' + (i % N + 1) + ', ' + (on ? 'on' : 'off') + (mark ? ', algorithm step' : ''));
       cells[i].setAttribute('aria-disabled', locked ? 'true' : 'false');
     }
     svg.classList.toggle('locked', locked);
@@ -239,7 +339,17 @@
     $('tTotal').textContent = totalMoves;
     $('pFewest').textContent = puzzleFewest;
     $('tFewest').textContent = puzzleFewest;
+    var showRings = mode === 'practice' && !locked && curStep && (guiding || devSteps);
+    drawGuide(showRings ? curStep.cells : [], showRings ? stepFrom(curStep) : null);
+    $('legendGuide').classList.toggle('show', !!(showRings && guiding));
     if (DEV) devRender();
+  }
+  // Source light for each valid press (null for top-row presses, which chase nothing).
+  function stepFrom(st) {
+    if (st.phase === 'chase') return st.from;
+    var out = st.cells.map(function () { return null; });
+    if (st.chase) st.chase.cells.forEach(function (c, k) { out[st.cells.indexOf(c)] = st.chase.from[k]; });
+    return out;
   }
 
   function say(t) { var l = $('live'); l.textContent = ''; setTimeout(function () { l.textContent = t; }, 30); }
@@ -250,6 +360,9 @@
   function loadBoard(b) {
     board = b; startBoard = b.slice(); moves = 0; locked = false;
     puzzleFewest = fewest(b);
+    endGuide(); hideStuck(); devStopAll();
+    lowestLit = litCount(b); flatPresses = 0;
+    stepper.reset(); prevStep = null; curStep = stepper.step(board);
     clearPreview(); render();
   }
   function loadPuzzle(level) {
@@ -259,15 +372,37 @@
 
   function press(i) {
     if (locked) return;
+    var ok = mode === 'practice' ? stepper.note(board, i) : true;
     applyPress(board, i); moves++;
     clickSound();
+    if (mode === 'practice') {
+      prevStep = curStep; curStep = stepper.step(board);
+      if (guiding) { if (ok) guidedPresses++; else offScript++; }
+    }
     clearPreview(); render();
-    if (allOff(board)) onSolved(); else preview(i);
+    if (allOff(board)) { onSolved(); return; }
+    preview(i);
+    if (mode === 'practice') {
+      if (guiding) updateGuideText(!ok);
+      else checkStuck();
+    }
   }
 
   function onSolved() {
+    var wasGuiding = guiding;
+    endGuide(); hideStuck();
     locked = true; render(); chime();
-    if (mode === 'practice') {
+    if (mode === 'practice' && wasGuiding) {
+      var pure = guideStartMoves === 0 && offScript === 0;
+      showMsg('<h2>Solved in ' + moves + ' move' + (moves === 1 ? '' : 's') + '!</h2>' +
+        (pure
+          ? '<p class="compare">Algorithm: <strong>' + moves + '</strong> moves · Fewest possible: <strong>' + puzzleFewest + '</strong></p>' +
+            '<p>Following the algorithm step by step guaranteed a solution' +
+            (moves > puzzleFewest ? ', but it took ' + (moves - puzzleFewest) + ' more press' + (moves - puzzleFewest === 1 ? '' : 'es') + ' than the fewest possible. That\'s the cost of certainty: an algorithm always works, but it isn\'t always the shortest path.</p>' : ', and this time it matched the fewest possible.</p>')
+          : '<p class="compare">You: <strong>' + moves + '</strong> moves (' + guidedPresses + ' following the algorithm) · Fewest possible: <strong>' + puzzleFewest + '</strong></p>' +
+            '<p>The algorithm picked up from the board as it was and still reached a solution. Press <strong>Restart this puzzle</strong> and then <strong>Guide me</strong> to see the algorithm on its own.</p>'));
+      say('Solved in ' + moves + ' moves. The fewest possible was ' + puzzleFewest + '.');
+    } else if (mode === 'practice') {
       showMsg('<h2>Solved in ' + moves + ' move' + (moves === 1 ? '' : 's') + '!</h2>' +
         '<p class="compare">You: <strong>' + moves + '</strong> · Fewest possible: <strong>' + puzzleFewest + '</strong>' +
         (moves === puzzleFewest ? ' · You matched it!' : '') + '</p>' +
@@ -286,6 +421,7 @@
 
   /* ---------- Practice ---------- */
   function newPractice() {
+    stuckShown = false;
     hideMsg(); loadPuzzle(practiceLevel);
     say('New ' + LEVELS[practiceLevel].label.toLowerCase() + ' puzzle. ' + litCount(board) + ' lights on.');
   }
@@ -303,6 +439,112 @@
       newPractice();
     });
   });
+
+  /* ---------- Guided mode (Practice) ---------- */
+  // Strict algorithm, never optimal play: guidance follows the chase even when a shortcut exists.
+  function colList(cols) {
+    var n = cols.map(function (c) { return c + 1; });
+    return n.length === 1 ? String(n[0]) : n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
+  }
+  function chaseText(st) {
+    var r = st.row + 1, one = st.cols.length === 1;
+    var t = one
+      ? 'Row ' + r + ' has a light in column ' + colList(st.cols) + '. Press the cell directly below it (row ' + (r + 1) + ', column ' + colList(st.cols) + ') to turn it off.'
+      : 'Row ' + r + ' has lights in columns ' + colList(st.cols) + '. Press the cell directly below each one (in row ' + (r + 1) + '), in any order. Each press turns off the light above it without touching the rest of row ' + r + '.';
+    if (st.again && prevStep && prevStep.phase === 'bottom') t = 'Top-row presses done. Now chase the lights down again. ' + t;
+    return t;
+  }
+  function shortcutText(bottom) {
+    var rules = [[3, 4], [1, 4], [3]], parts = [], count = {};
+    for (var c = 0; c < 3; c++) {
+      if (!bottom[c]) continue;
+      parts.push('column ' + (c + 1) + ' is on, so press top-row ' + colList(rules[c]));
+      rules[c].forEach(function (t) { count[t] = (count[t] || 0) + 1; });
+    }
+    var t = 'Shortcut (it looks only at columns 1 to 3 of the bottom row): ' + parts.join('; ') + '.', cancel = false;
+    // A top-row cell can come up at most twice (5 in columns 1 and 2, 4 in columns 1 and 3).
+    var twice = Object.keys(count).filter(function (k) { return count[k] === 2; }).map(Number);
+    if (twice.length) {
+      cancel = true;
+      t += twice.length === 1
+        ? ' Top-row ' + colList(twice) + ' comes up twice, so skip it: two presses cancel.'
+        : ' Top-row ' + colList(twice) + ' each come up twice, so skip them: two presses cancel.';
+    }
+    // One rule and nothing cancels: the rule already names the presses.
+    if (parts.length === 1 && !cancel) return t.slice(0, -1) + (Object.keys(count).length > 1 ? ', in any order.' : '.');
+    return t + ' ' + pressText(Object.keys(count).filter(function (k) { return count[k] % 2; }).map(Number).sort());
+  }
+  function pressText(cells) {
+    return 'Press top-row ' + colList(cells) + (cells.length > 1 ? ', in any order.' : '.');
+  }
+  function guideText(st) {
+    if (st.phase === 'chase') return chaseText(st);
+    if (st.phase !== 'bottom') return '';
+    var tops = st.cells.filter(function (c) { return c < N; });
+    if (st.fresh) {
+      var bottom = bottomOf(board), lit = [];
+      bottom.forEach(function (on, c) { if (on) lit.push(c); });
+      var t = 'Rows 1 to 4 are dark, but row 5 still has ' + (lit.length === 1 ? 'a light in column ' : 'lights in columns ') + colList(lit) +
+        '. The chase can\'t go further, because there\'s no row below, so fix it from the top. ';
+      t += algoMethod === 'lookup'
+        ? 'Full lookup: the bottom-row pattern ' + lit.map(function (c) { return c + 1; }).join(', ') + ' is in the table. ' + pressText(tops)
+        : shortcutText(bottom);
+      return t + ' Then chase the lights down again.';
+    }
+    return 'Keep going with the top row. ' + pressText(tops) + ' Then chase the lights down again.';
+  }
+  function updateGuideText(off) {
+    var note = $('guideNote');
+    note.hidden = !off;
+    var text = guideText(curStep);
+    $('guideText').textContent = text;
+    say((off ? 'That wasn\'t one of the algorithm\'s steps. ' : '') + text);
+  }
+  function startGuide() {
+    if (locked || mode !== 'practice') return;
+    hideStuck(); hideMsg();
+    guiding = true; guideStartMoves = moves; guidedPresses = 0; offScript = 0;
+    stepper.reset(); prevStep = null; curStep = stepper.step(board);
+    $('guideBtn').hidden = true;
+    $('guideCard').hidden = false;
+    render();
+    updateGuideText(false);
+  }
+  function endGuide() {
+    guiding = false;
+    $('guideBtn').hidden = false;
+    $('guideCard').hidden = true;
+    $('guideNote').hidden = true;
+  }
+  $('guideBtn').addEventListener('click', startGuide);
+  $('stopGuide').addEventListener('click', function () { endGuide(); render(); say('Guidance off.'); $('guideBtn').focus(); });
+  $('algoSel').addEventListener('change', function () {
+    setAlgorithm(this.value);
+    if (guiding) { stepper.reset(); prevStep = null; curStep = stepper.step(board); render(); updateGuideText(false); }
+  });
+  function setAlgorithm(m) {
+    algoMethod = m === 'lookup' ? 'lookup' : 'shortcut';
+    $('algoSel').value = algoMethod;
+    stepper = makeStepper([algoMethod]);
+    curStep = stepper.step(board); prevStep = null;
+    render();
+  }
+
+  /* ---------- Stuck alert (Practice) ---------- */
+  function checkStuck() {
+    var n = litCount(board);
+    if (n < lowestLit) { lowestLit = n; flatPresses = 0; } else flatPresses++;
+    if (stuckShown) return;
+    if (moves >= puzzleFewest + STUCK_EXTRA_MOVES || flatPresses >= STUCK_FLAT_PRESSES) {
+      stuckShown = true;
+      $('stuckMsg').hidden = false;
+      $('guideBtn').hidden = true; // the alert has its own Guide me button
+      say('Stuck? Hunches are fast but don\'t always work. An algorithm always does.');
+    }
+  }
+  function hideStuck() { $('stuckMsg').hidden = true; if (!guiding) $('guideBtn').hidden = false; }
+  $('stuckGuide').addEventListener('click', startGuide);
+  $('stuckKeep').addEventListener('click', function () { hideStuck(); say('Keep trying.'); });
 
   /* ---------- Timed ---------- */
   function timedLevel() { return solved < 3 ? 'easy' : (solved < 6 ? 'medium' : 'hard'); }
@@ -336,9 +578,9 @@
 
   /* ---------- Modes ---------- */
   function setMode(m) {
-    clearInterval(timer); running = false;
+    clearInterval(timer); running = false; devStopAll();
     mode = m;
-    hideMsg(); clearPreview();
+    hideMsg(); clearPreview(); endGuide(); hideStuck(); stuckShown = false;
     $('modePractice').setAttribute('aria-pressed', m === 'practice' ? 'true' : 'false');
     $('modeTimed').setAttribute('aria-pressed', m === 'timed' ? 'true' : 'false');
     $('panelPractice').hidden = m !== 'practice';
@@ -435,7 +677,17 @@
       'From here: fewest ' + best.length + ' · Algorithm 1 (shortcut) ' + algorithmMoves(board, 'shortcut') +
       ' · Algorithm 2 (lookup) ' + algorithmMoves(board, 'lookup') +
       ' · all 4 solutions: ' + sols.map(function (p) { return p.length; }).join(', ') +
-      '. Puzzle fewest (from the start): ' + puzzleFewest + '.';
+      '. Puzzle fewest (from the start): ' + puzzleFewest + '.' +
+      (mode === 'practice' && curStep ? ' Algorithm (' + algoMethod + ') valid set: ' + curStep.phase + ' [' +
+        curStep.cells.map(function (c) { return 'r' + (Math.floor(c / N) + 1) + 'c' + (c % N + 1); }).join(' ') + '].' : '');
+  }
+  var devAllTimer = null;
+  function devStopAll() { clearInterval(devAllTimer); devAllTimer = null; }
+  function devOneStep() {
+    if (locked || mode !== 'practice' || !curStep || !curStep.cells.length) { devStopAll(); return; }
+    var i = curStep.cells[0];
+    focusIdx = i; setRoving(); press(i);
+    if (locked) devStopAll();
   }
   function initDev() {
     $('devBar').hidden = false;
@@ -457,6 +709,24 @@
       if (running) endTime = Date.now() + 10000;
     });
     $('devSolve').textContent = 'Turn all off (dev)';
+    $('devSteps').addEventListener('click', function () {
+      devSteps = !devSteps;
+      this.setAttribute('aria-pressed', devSteps ? 'true' : 'false');
+      render();
+    });
+    $('devStep').addEventListener('click', function () { devStopAll(); devOneStep(); });
+    $('devAll').addEventListener('click', function () {
+      devStopAll();
+      devAllTimer = setInterval(devOneStep, matchMedia('(prefers-reduced-motion: reduce)').matches ? 30 : 160);
+    });
+    $('devMental').addEventListener('click', function () {
+      if (mode !== 'practice') return;
+      devStopAll(); stuckShown = false; hideMsg();
+      var b = emptyBoard();
+      MENTAL_SET_PRESSES.forEach(function (i) { applyPress(b, i); });
+      loadBoard(b);
+      say('Mental set board loaded.');
+    });
   }
 
   /* ---------- Start ---------- */

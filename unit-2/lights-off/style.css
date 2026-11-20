@@ -111,6 +111,17 @@ body.glow-blue {
 .will-ring { fill: none; stroke: var(--bg); stroke-opacity: 0; stroke-width: 3; pointer-events: none; transition: stroke-opacity .12s; }
 .will-ring.will { stroke-opacity: .5; }
 .legend .will-ring { stroke-opacity: .6; stroke-width: 8; }
+/* Algorithm step (guided mode): an inset honey ring on a dark casing, pulsing, with an arrow
+   from the light it chases. Distinct from the faint thin "will flip" outline at the tile edge
+   and the solid light focus stroke. */
+.guide-layer { pointer-events: none; }
+.guide { animation: guide-pulse 1.2s ease-in-out infinite; }
+.guide.still { animation: none; }
+.guide-case { fill: none; stroke: var(--board-bg); stroke-width: 10; stroke-linecap: round; }
+.guide-ring { fill: none; stroke: var(--honey); stroke-width: 5; }
+.guide-arrow { stroke: var(--honey); stroke-width: 5; stroke-linecap: round; }
+.guide-head { fill: var(--honey); stroke: var(--board-bg); stroke-width: 2.5; stroke-linejoin: round; }
+@keyframes guide-pulse { 50% { opacity: .45; } }
 /* Keyboard focus: a solid light ring on the focused tile */
 .cell:focus-visible .tile { stroke: var(--bg); stroke-width: 6; }
 
@@ -125,12 +136,33 @@ body.glow-blue {
 .legend span { display: inline-flex; align-items: center; gap: 8px; }
 .legend svg { width: 32px; height: 32px; border-radius: 6px; background: var(--board-bg); }
 
+/* "Algorithm step" appears in the legend only while guiding (space kept so nothing shifts) */
+.legend-guide { visibility: hidden; }
+.legend-guide.show { visibility: visible; }
+
 /* ---------- Side panel ---------- */
+.guide-row { margin-top: 8px; }
+.algo-pick { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; max-width: 100%; font-weight: 700; color: var(--heading); }
+.algo-pick select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--heading);
+  font: 400 1rem var(--font-body);
+}
+.guide-card { margin-bottom: 16px; border-left: 6px solid var(--honey); }
+.guide-card > :first-child { margin-top: 0; }
+.guide-card h2 { font-size: 1.1rem; }
+.guide-note { color: var(--heading); font-weight: 700; }
 #panelTimed .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .stat strong.word { font-size: 1.15rem; line-height: 1.66; }
 .side .seg-group { margin-bottom: 0; }
 .msg { margin-bottom: 16px; border-left: 6px solid var(--sage); }
 .msg.warn { border-left-color: var(--error); }
+.msg.stuck { border-left-color: var(--honey); }
 .msg > :first-child { margin-top: 0; }
 .msg > :last-child { margin-bottom: 0; }
 .msg h2 { font-size: 1.1rem; }
@@ -181,4 +213,5 @@ body.glow-blue {
 
 @media (prefers-reduced-motion: reduce) {
   .tile, .halo, .will-ring, .strategy summary::before { transition: none; }
+  .guide { animation: none; }
 }

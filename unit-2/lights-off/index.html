@@ -51,6 +51,7 @@
         <span><svg viewBox="0 0 100 100" aria-hidden="true"><g class="on"><rect x="2" y="2" width="96" height="96" rx="16" class="tile lit"/><circle cx="50" cy="50" r="46" class="halo"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light on</span>
         <span><svg viewBox="0 0 100 100" aria-hidden="true"><g><rect x="2" y="2" width="96" height="96" rx="16" class="tile"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light off</span>
         <span><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="2" y="2" width="96" height="96" rx="16" class="tile"/><rect x="2" y="2" width="96" height="96" rx="16" class="will-ring"/></svg>Will flip</span>
+        <span class="legend-guide" id="legendGuide"><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="2" y="2" width="96" height="96" rx="16" class="tile"/><g class="guide still"><rect x="14" y="14" width="72" height="72" rx="10" class="guide-case"/><rect x="14" y="14" width="72" height="72" rx="10" class="guide-ring"/></g></svg>Algorithm step</span>
       </div>
     </div>
 
@@ -70,6 +71,29 @@
         <div class="row">
           <button class="btn" type="button" id="newBtn">New puzzle</button>
           <button class="btn alt" type="button" id="restartBtn">Restart this puzzle</button>
+        </div>
+        <div class="row guide-row">
+          <button class="btn alt" type="button" id="guideBtn">Guide me (algorithm)</button>
+          <label class="algo-pick" for="algoSel">Algorithm
+            <select id="algoSel">
+              <option value="shortcut">1: Chase + shortcut (Recommended)</option>
+              <option value="lookup">2: Chase + full lookup</option>
+            </select>
+          </label>
+        </div>
+        <div class="card guide-card" id="guideCard" hidden>
+          <h2>Following the algorithm</h2>
+          <p class="guide-note" id="guideNote" hidden>That wasn't one of the algorithm's steps. No problem: the algorithm works from any board.</p>
+          <p id="guideText"></p>
+          <p class="hint">Ringed cells are the algorithm's next presses. The arrow shows which light each one turns off.</p>
+          <button class="btn ghost" type="button" id="stopGuide">Stop guiding</button>
+        </div>
+        <div class="card msg stuck" id="stuckMsg" role="status" hidden>
+          <p><strong>Stuck?</strong> Hunches are fast but don't always work. An algorithm always does.</p>
+          <div class="row">
+            <button class="btn alt" type="button" id="stuckGuide">Guide me (algorithm)</button>
+            <button class="btn ghost" type="button" id="stuckKeep">Keep trying</button>
+          </div>
         </div>
         <div class="card msg" id="pMsg" role="status" hidden></div>
 
@@ -121,6 +145,10 @@
         <button class="btn ghost" type="button" id="devSolve">Turn all off (dev)</button>
         <button class="btn ghost" type="button" id="devTime">Time left 10 s (dev)</button>
         <button class="btn ghost" type="button" id="devShowSol" aria-pressed="false">Show fewest-moves solution (dev)</button>
+        <button class="btn ghost" type="button" id="devSteps" aria-pressed="false">Show algorithm steps (dev)</button>
+        <button class="btn ghost" type="button" id="devStep">Solve one step (dev)</button>
+        <button class="btn ghost" type="button" id="devAll">Solve all, algorithm (dev)</button>
+        <button class="btn ghost" type="button" id="devMental">Load mental set board (dev)</button>
       </div>
       <p class="hint dev-info" id="devInfo" hidden></p>
     </aside>
