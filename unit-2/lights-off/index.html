@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lights Off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<main class="wide">
+  <h1>Lights Off</h1>
+  <p class="hint">Press a light to flip it and its up, down, left and right neighbors. Turn every light off to win.</p>
+
+  <div class="row toolbar">
+    <div class="row seg-group" role="group" aria-label="Game mode">
+      <button class="btn ghost seg" type="button" id="modePractice" aria-pressed="true">Practice</button>
+      <button class="btn ghost seg" type="button" id="modeTimed" aria-pressed="false">Timed (90 s)</button>
+    </div>
+    <button class="btn alt" type="button" id="soundBtn" aria-pressed="true">Sound: On</button>
+  </div>
+
+  <div class="split">
+    <div class="play">
+      <svg class="board locked" id="board" viewBox="0 0 500 500" role="group" aria-label="Lights Off board, 5 by 5">
+        <defs>
+          <radialGradient id="gOn" cx="45%" cy="42%" r="60%">
+            <stop offset="0" class="s-on-core"/><stop offset=".38" class="s-on-mid"/><stop offset="1" class="s-on-edge"/>
+          </radialGradient>
+          <radialGradient id="gOff" cx="40%" cy="36%" r="70%">
+            <stop offset="0" class="s-off-hi"/><stop offset="1" class="s-off-lo"/>
+          </radialGradient>
+          <radialGradient id="gHalo" cx="50%" cy="50%" r="50%">
+            <stop offset="0" class="s-halo-in"/><stop offset=".6" class="s-halo-mid"/><stop offset="1" class="s-halo-out"/>
+          </radialGradient>
+        </defs>
+        <rect class="board-bg" x="0" y="0" width="500" height="500" rx="16"/>
+      </svg>
+      <p class="hint board-hint">Tap a light, or use the arrow keys to move and Space or Enter to press. Hovering or focusing a light outlines what will flip.</p>
+      <div class="legend" aria-label="Legend">
+        <span><svg viewBox="0 0 100 100" aria-hidden="true"><g class="on"><rect x="2" y="2" width="96" height="96" rx="16" class="tile lit"/><circle cx="50" cy="50" r="46" class="halo"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light on</span>
+        <span><svg viewBox="0 0 100 100" aria-hidden="true"><g><rect x="2" y="2" width="96" height="96" rx="16" class="tile"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light off</span>
+        <span><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="2" y="2" width="96" height="96" rx="16" class="tile"/><rect x="2" y="2" width="96" height="96" rx="16" class="will-ring"/></svg>Will flip</span>
+      </div>
+    </div>
+
+    <aside class="side" aria-label="Game panel">
+      <!-- Practice -->
+      <section id="panelPractice">
+        <div class="stats">
+          <div class="stat"><span>Moves</span><strong id="pMoves">0</strong></div>
+        </div>
+        <div class="row seg-group" id="diffSeg" role="group" aria-label="Difficulty">
+          <button class="btn ghost seg" type="button" data-level="easy" aria-pressed="true">Easy</button>
+          <button class="btn ghost seg" type="button" data-level="medium" aria-pressed="false">Medium</button>
+          <button class="btn ghost seg" type="button" data-level="hard" aria-pressed="false">Hard</button>
+        </div>
+        <p class="hint">Easy puzzles are scrambled with 3 to 4 presses, medium with 6 to 8, hard with 11 to 15. Changing the difficulty starts a new puzzle.</p>
+        <div class="row">
+          <button class="btn" type="button" id="newBtn">New puzzle</button>
+          <button class="btn alt" type="button" id="restartBtn">Restart this puzzle</button>
+        </div>
+        <div class="card msg" id="pMsg" role="status" hidden></div>
+
+        <details class="card strategy">
+          <summary>Strategy: two algorithms</summary>
+          <p>An <strong>algorithm</strong> is a step-by-step procedure that always reaches a solution if you follow it exactly. Both of these work on every puzzle.</p>
+          <h3>Step 1: Chase the lights down</h3>
+          <p>Find the highest row (rows 1 to 4) that still has lights on. Press the cell directly below each of those lights, in any order. Repeat, row by row, until rows 1 to 4 are dark.</p>
+          <h3>Step 2: Fix the bottom row</h3>
+          <p>If lights remain in row 5, press the top-row cells listed by one of the two algorithms below. Then chase the lights down again, and the board is solved.</p>
+          <h3>Algorithm 1: Chase + shortcut <span class="tag">Recommended</span></h3>
+          <p>Look only at columns 1, 2 and 3 of the bottom row. For each one that's on, press the matching top-row cells.</p>
+          <table>
+            <thead><tr><th>Bottom-row light on</th><th>Press in top row (columns)</th></tr></thead>
+            <tbody>
+              <tr><td>Column 1</td><td>4, 5</td></tr>
+              <tr><td>Column 2</td><td>2, 5</td></tr>
+              <tr><td>Column 3</td><td>4</td></tr>
+            </tbody>
+          </table>
+          <p class="hint">If a top-row cell comes up twice, skip it: two presses cancel out. Easier to remember, but often takes more presses.</p>
+          <h3>Algorithm 2: Chase + full lookup</h3>
+          <p>Find the exact bottom-row pattern and press the listed top-row cells.</p>
+          <table id="lookup">
+            <thead><tr><th>Bottom-row lights on (columns)</th><th>Press in top row (columns)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <p class="hint">More to remember, but fewer presses. Columns are numbered 1 to 5 from the left; top-row presses can be made in any order.</p>
+        </details>
+      </section>
+
+      <!-- Timed -->
+      <section id="panelTimed" hidden>
+        <div class="stats">
+          <div class="stat"><span>Time left</span><strong id="tTime">90</strong></div>
+          <div class="stat"><span>Difficulty</span><strong class="word" id="tLevel">Easy</strong></div>
+          <div class="stat"><span>Solved</span><strong id="tSolved">0</strong></div>
+          <div class="stat"><span>Moves</span><strong id="tMoves">0</strong></div>
+          <div class="stat"><span>Total moves</span><strong id="tTotal">0</strong></div>
+        </div>
+        <div class="row">
+          <button class="btn" type="button" id="startBtn">Start timed round</button>
+        </div>
+        <div class="card msg" id="tMsg" role="status" hidden></div>
+      </section>
+
+      <div class="row dev-bar" id="devBar" hidden>
+        <button class="btn ghost" type="button" id="devSolve">Turn all off (dev)</button>
+        <button class="btn ghost" type="button" id="devTime">Time left 10 s (dev)</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</main>
+</body>
+</html>
