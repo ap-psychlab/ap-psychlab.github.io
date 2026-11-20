@@ -367,6 +367,65 @@
     if (soundOn) clickSound();
   });
 
+  /* ---------- Light color ---------- */
+  // Presets use the hand-tuned colors in style.css (body.glow-blue swaps them in).
+  // A custom color sets the five glow variables inline on <body>, all derived from one color.
+  var GLOW_VARS = ['--glow-core', '--glow-mid', '--glow-edge', '--glow-halo', '--tile-lit'];
+  var L_MIN = 55, L_MAX = 78; // lit bulbs stay this bright (HSL lightness, %) to stand out from the dark board
+  function hexToRgb(hex) {
+    var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex.trim());
+    return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [0, 0, 0];
+  }
+  function rgbToHsl(rgb) {
+    var r = rgb[0] / 255, g = rgb[1] / 255, b = rgb[2] / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, h = 0, s = 0, d = max - min;
+    if (d) {
+      s = d / (1 - Math.abs(2 * l - 1));
+      h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h = (h * 60 + 360) % 360;
+    }
+    return [h, s * 100, l * 100];
+  }
+  function hslToRgb(h, s, l) {
+    s /= 100; l /= 100;
+    var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, rgb;
+    if (h < 60) rgb = [c, x, 0]; else if (h < 120) rgb = [x, c, 0]; else if (h < 180) rgb = [0, c, x];
+    else if (h < 240) rgb = [0, x, c]; else if (h < 300) rgb = [x, 0, c]; else rgb = [c, 0, x];
+    return rgb.map(function (v) { return Math.round((v + m) * 255); });
+  }
+  function mix(a, b, t) { return a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }); }
+  function css(rgb) { return 'rgb(' + rgb.join(', ') + ')'; }
+  function deriveGlow(hex) {
+    var hsl = rgbToHsl(hexToRgb(hex));
+    var l = Math.min(L_MAX, Math.max(L_MIN, hsl[2]));
+    var mid = hslToRgb(hsl[0], hsl[1], l);
+    var tileArt = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--tile-art'));
+    return {
+      '--glow-core': css(mix(mid, [255, 255, 255], 0.85)),
+      '--glow-mid': css(mid),
+      '--glow-edge': css(hslToRgb(hsl[0], hsl[1], l - 18)),
+      '--glow-halo': css(mid),
+      '--tile-lit': css(mix(tileArt, mid, 0.25))
+    };
+  }
+  function setLightColor(which, hex) {
+    var body = document.body;
+    GLOW_VARS.forEach(function (v) { body.style.removeProperty(v); });
+    body.classList.toggle('glow-blue', which === 'blue');
+    if (which === 'custom') {
+      var vars = deriveGlow(hex);
+      GLOW_VARS.forEach(function (v) { body.style.setProperty(v, vars[v]); });
+    }
+    $('colorYellow').setAttribute('aria-pressed', which === 'yellow' ? 'true' : 'false');
+    $('colorBlue').setAttribute('aria-pressed', which === 'blue' ? 'true' : 'false');
+    $('customLabel').classList.toggle('active', which === 'custom');
+  }
+  $('colorYellow').addEventListener('click', function () { setLightColor('yellow'); say('Light color: yellow.'); });
+  $('colorBlue').addEventListener('click', function () { setLightColor('blue'); say('Light color: blue.'); });
+  $('colorPick').addEventListener('input', function () { setLightColor('custom', this.value); });
+  $('colorPick').addEventListener('change', function () { say('Light color: custom.'); });
+  $('colorPick').value = getComputedStyle(document.documentElement).getPropertyValue('--preset-yellow-mid').trim().toLowerCase();
+
   /* ---------- Debug tools (?dev) ---------- */
   var devMarks = [], devShow = false;
   function devRender() {

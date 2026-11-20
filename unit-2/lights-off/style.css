@@ -46,6 +46,31 @@ body.glow-blue {
 .seg[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
 .seg[aria-pressed="true"]:hover { background: var(--btn-hover); }
 
+/* Light color: Yellow / Blue presets and a custom color picker */
+.group-label { font-weight: 700; color: var(--heading); }
+.swatch { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; }
+.swatch svg { width: 20px; height: 20px; }
+.dot { stroke: var(--heading); stroke-width: 1.5; }
+.dot-yellow { fill: var(--preset-yellow-mid); }
+.dot-blue { fill: var(--preset-blue-mid); }
+.custom { cursor: pointer; }
+.custom.active { background: var(--btn); color: var(--bg); }
+.custom.active:hover { background: var(--btn-hover); }
+.custom:focus-within { outline: 3px solid var(--heading); outline-offset: 3px; }
+.custom input {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1.5px solid var(--heading);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.custom input:focus-visible { outline: none; }
+.custom input::-webkit-color-swatch-wrapper { padding: 0; }
+.custom input::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.custom input::-moz-color-swatch { border: 0; border-radius: 50%; }
+
 /* ---------- Board ---------- */
 .play { text-align: center; }
 .board {
@@ -147,6 +172,11 @@ body.glow-blue {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .color-group .group-label { flex-basis: 100%; text-align: center; }
+  .swatch { padding: 0 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
