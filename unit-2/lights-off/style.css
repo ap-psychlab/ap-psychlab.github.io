@@ -85,6 +85,19 @@ body.glow-blue {
 .board.locked { filter: grayscale(.5) brightness(.7); }
 .board.locked .cell { cursor: not-allowed; }
 .board-hint { max-width: 480px; margin-left: auto; margin-right: auto; }
+/* Copy of the current step's text under the board, for narrow screens only (the panel is
+   below the board there). From 1000px the side panel is in view, so it's hidden. */
+.board-note {
+  max-width: 480px;
+  margin: 8px auto 0;
+  padding: 8px 12px;
+  border-left: 4px solid var(--honey);
+  border-radius: 8px;
+  background: var(--bg-alt);
+  color: var(--heading);
+  text-align: left;
+}
+@media (min-width: 1000px) { .board-note { display: none; } }
 
 .s-on-core { stop-color: var(--glow-core); }
 .s-on-mid { stop-color: var(--glow-mid); }
@@ -141,6 +154,46 @@ body.glow-blue {
 .legend-guide.show { visibility: visible; }
 
 /* ---------- Side panel ---------- */
+.tut-prompt { margin-top: 0; }
+.linkish {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.linkish:hover { color: var(--btn-hover); }
+
+/* Tutorial */
+.tut-count { margin: 0; font-size: .85rem; font-weight: 700; color: var(--muted); }
+#tutTitle { margin-top: 4px; }
+#tutTitle:focus { outline: none; }
+.tut-sub { font-weight: 700; color: var(--heading); }
+.tut-nav { margin-top: 8px; }
+.algo-row { margin-bottom: 16px; }
+.choose-card, .ref-card { margin-bottom: 16px; border-left: 6px solid var(--honey); }
+.choose-card > :first-child, .ref-card > :first-child { margin-top: 0; }
+.choose-card > :last-child, .ref-card > :last-child { margin-bottom: 0; }
+.choice {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 8px;
+  padding: 12px 16px;
+  text-align: left;
+  line-height: 1.4;
+}
+.choice-name { display: block; font-weight: 700; }
+.choice-sub { display: block; margin-top: 4px; font-weight: 400; font-size: .9rem; }
+.ref { margin-top: 16px; }
+.table-wrap { overflow-x: auto; margin: 8px 0 16px; }
+.tut-table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: lining-nums tabular-nums; }
+.tut-table th, .tut-table td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.tut-table th { color: var(--heading); }
+.compare-table tbody th { white-space: nowrap; }
 .guide-row { margin-top: 8px; }
 .algo-pick { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; max-width: 100%; font-weight: 700; color: var(--heading); }
 .algo-pick select {

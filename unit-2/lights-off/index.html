@@ -18,6 +18,7 @@
 
   <div class="row toolbar">
     <div class="row seg-group" role="group" aria-label="Game mode">
+      <button class="btn ghost seg" type="button" id="modeTutorial" aria-pressed="false">Tutorial</button>
       <button class="btn ghost seg" type="button" id="modePractice" aria-pressed="true">Practice</button>
       <button class="btn ghost seg" type="button" id="modeTimed" aria-pressed="false">Timed (90 s)</button>
     </div>
@@ -46,6 +47,7 @@
         </defs>
         <rect class="board-bg" x="0" y="0" width="500" height="500" rx="16"/>
       </svg>
+      <p class="board-note" id="boardNote" aria-hidden="true" hidden></p>
       <p class="hint board-hint">Tap a light, or use the arrow keys to move and Space or Enter to press. Hovering or focusing a light outlines what will flip.</p>
       <div class="legend" aria-label="Legend">
         <span><svg viewBox="0 0 100 100" aria-hidden="true"><g class="on"><rect x="2" y="2" width="96" height="96" rx="16" class="tile lit"/><circle cx="50" cy="50" r="46" class="halo"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light on</span>
@@ -58,6 +60,7 @@
     <aside class="side" aria-label="Game panel">
       <!-- Practice -->
       <section id="panelPractice">
+        <p class="hint tut-prompt">New here? Solve a few puzzles on your own first. Then open the <button class="linkish" type="button" id="tutLink">Tutorial</button> to learn an algorithm that always works.</p>
         <div class="stats">
           <div class="stat"><span>Moves</span><strong id="pMoves">0</strong></div>
           <div class="stat"><span>Fewest possible</span><strong id="pFewest">0</strong></div>
@@ -125,6 +128,36 @@
         </details>
       </section>
 
+      <!-- Tutorial (content is filled by script.js) -->
+      <section id="panelTutorial" hidden>
+        <p class="tut-count" id="tutCount">Step 1 of 7</p>
+        <h2 id="tutTitle" tabindex="-1">Two ways to solve a problem</h2>
+        <div class="stats" id="tutStats">
+          <div class="stat"><span>Moves</span><strong id="uMoves">0</strong></div>
+          <div class="stat"><span>Fewest possible</span><strong id="uFewest">0</strong></div>
+        </div>
+        <div class="tut-body" id="tutBody"></div>
+        <div class="row algo-row" id="tutAlgoRow" hidden>
+          <label class="algo-pick" for="tutAlgo">Algorithm
+            <select id="tutAlgo">
+              <option value="shortcut">1: Chase + shortcut (Recommended)</option>
+              <option value="lookup">2: Chase + full lookup</option>
+            </select>
+          </label>
+        </div>
+        <div class="card guide-card" id="tutGuide" hidden>
+          <p class="guide-note" id="tutNote" hidden></p>
+          <p id="tutGuideText"></p>
+        </div>
+        <div class="tut-extra" id="tutExtra"></div>
+        <div class="card msg" id="uMsg" role="status" hidden></div>
+        <div class="row tut-nav">
+          <button class="btn ghost" type="button" id="tutBack">Back</button>
+          <button class="btn alt" type="button" id="tutRestart">Restart this board</button>
+          <button class="btn" type="button" id="tutNext">Next</button>
+        </div>
+      </section>
+
       <!-- Timed -->
       <section id="panelTimed" hidden>
         <div class="stats">
@@ -149,6 +182,13 @@
         <button class="btn ghost" type="button" id="devStep">Solve one step (dev)</button>
         <button class="btn ghost" type="button" id="devAll">Solve all, algorithm (dev)</button>
         <button class="btn ghost" type="button" id="devMental">Load mental set board (dev)</button>
+        <label class="algo-pick" for="devJump">Jump to tutorial step (dev)
+          <select id="devJump"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select>
+        </label>
+        <button class="btn ghost" type="button" id="devPlayH">Auto-play: heuristic (dev)</button>
+        <button class="btn ghost" type="button" id="devPlayA">Auto-play: algorithm (dev)</button>
+        <button class="btn ghost" type="button" id="devPlayHA">Auto-play: heuristic then algorithm (dev)</button>
+        <button class="btn ghost" type="button" id="devFill">Fill results (dev)</button>
       </div>
       <p class="hint dev-info" id="devInfo" hidden></p>
     </aside>
