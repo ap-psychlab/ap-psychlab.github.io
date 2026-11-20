@@ -211,14 +211,12 @@ h2{font-size:1.4rem;margin-top:0}h3{font-size:1.1rem}
 .tool.pun{border-color:var(--error)}
 .tool .ic{width:var(--ic);height:var(--ic);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;border-radius:0}
 .tool .tl{font-size:.8rem;line-height:1}
-.tool .cnt{position:absolute;top:3px;right:4px;font-size:.75rem;font-weight:700;line-height:1.3;padding:0 5px;border-radius:8px;background:var(--honey);color:var(--heading)}
 .tool .cd{display:none;position:absolute;left:0;top:0;width:100%;height:100%;border-radius:0;pointer-events:none}
 .tool.cool .cd{display:block}
 .tool .cd path{fill:var(--heading);fill-opacity:.7}
 .tool .cd text{fill:var(--bg);font:700 22px 'Lato',system-ui,sans-serif;text-anchor:middle}
 .tool[aria-disabled="true"]{cursor:not-allowed}
 .tool[aria-disabled="true"]:hover{background:var(--card)}
-.tool.out{opacity:.6}
 .statsbox{margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px}
 .statsbox h3{margin:0 0 8px}
 .mt{display:grid;grid-template-columns:minmax(120px,170px) 1fr 44px;align-items:center;gap:8px;margin:4px 0;font-size:.9rem}
@@ -228,6 +226,8 @@ h2{font-size:1.4rem;margin-top:0}h3{font-size:1.1rem}
 .mt .fl.str{background:var(--plum)}.mt .fl.ful{background:var(--honey)}
 .mt .v{text-align:right;font-weight:700;color:var(--heading)}
 .mt .tag{font-size:.8rem;color:var(--muted)}
+.mt .bw{display:block;font-size:.8rem;color:var(--text)}
+#coach{margin:4px 0 0;color:var(--text);min-height:1.5em}
 .statsbox .cr{margin:8px 0 0;color:var(--heading);font-weight:700}
 /* step 6: cat variants (Mocha is the default art; Latte and Cappuccino only change colours and add a pattern) */
 .cat[data-variant="latte"]{--cb:var(--accent);--cl:var(--link);--cs:var(--bg);--ei:var(--btn2);--ey:var(--honey);--cw:var(--btn);filter:url(#catOutline)}
@@ -273,8 +273,6 @@ button.small{font-size:.9rem;padding:6px 14px}
 .tbub::after{width:12px;height:12px;left:calc(var(--tx,50%) - 6px);bottom:-18px}
 .tbub::before{width:7px;height:7px;left:calc(var(--tx,50%) + 8px);bottom:-30px}
 .tbub p{margin:4px 0 8px;font-size:.95rem}
-.dif{display:inline-block;font-size:.8rem;font-weight:700;line-height:1.5;color:var(--heading);background:var(--bg-alt);border:2px solid var(--border);border-radius:8px;padding:0 8px}
-.dif-easy{border-color:var(--sage)}.dif-medium{border-color:var(--honey)}.dif-hard{border-color:var(--error)}
 .cbtn{width:100%}
 .score{font-size:1.2rem;font-weight:700;color:var(--heading);margin:8px 0 0}
 /* step 7: in-game thought bubbles (reuse .tbub; positioned from JS inside .scene) and the quiz */
@@ -301,7 +299,7 @@ button.small{font-size:.9rem;padding:6px 14px}
 .qfb .qc{margin-top:4px;font-size:.85rem;color:var(--muted)}
 /* Step 11 change: the tool bar is always one row of four. 600 px and under: 44 px buttons, no captions; 440 px and under: 40 px buttons. It may cover part of the walls and ramps at the top right. */
 @media (max-width:600px){.toolbar{--ts:44px;--ic:20px;top:4px;right:4px;flex-direction:row;flex-wrap:nowrap;align-items:flex-start;gap:4px;max-width:none}.tgrp{flex-direction:row;gap:4px}.tgrp>span{display:none}.tool{border-radius:10px}.tool .tl{font-size:.72rem}.tool .cnt{top:1px;right:2px;font-size:.7rem;padding:0 4px}}
-@media (max-width:440px){.toolbar{--ts:40px;--ic:18px}.tool .tl{font-size:.68rem}.tool .cnt{padding:0 3px}}
+@media (max-width:440px){.toolbar{--ts:40px;--ic:18px}.tool .tl{font-size:.68rem}}
 @media (max-width:520px){.ov{padding:8px}.dlg{padding:16px}.zone{height:230px}.ntag{font-size:.78rem;padding:2px 4px}.tbub{padding:8px 10px}.gbub{padding:6px 10px}}
 @media (prefers-reduced-motion:reduce){.pick,.tbub,.winb span{transition:none!important;animation:none!important}.tbub{transform:none}}
 /* step 11: the cuckoo clock's idle pendulum (swings from its pivot at 716,276 in scene units; still under reduced motion) */
@@ -668,10 +666,11 @@ button.small{font-size:.9rem;padding:6px 14px}
     <div class="winb" id="winb" hidden aria-hidden="true"><span>Escaped!</span></div>
     </div>
     <p id="say" aria-live="polite">Ready.</p>
+    <p id="coach" aria-live="polite"></p>
     <div class="row" style="margin-top:8px"><button id="laserBtn" aria-pressed="true">Laser: on</button><button id="infoBtn" aria-pressed="false" aria-controls="stats">Show debug info</button><button id="howBtn" type="button">How to play</button><button id="swapBtn" type="button" class="small">Choose another cat</button></div>
     <div id="stats" class="statsbox" hidden></div>
-    <p class="hint">Tool bar (top right): Treat and Pet reward, Spray and Buzzer punish. A tool counts toward what the cat is doing, or did within the last 5 seconds. Each tool needs time to recharge, and treats run out.</p>
-    <p class="hint">Laser: press and hold the left mouse button on the scene and drag (or touch and drag); the dot disappears when you let go. Keyboard: Tab to the scene, arrow keys move the dot (Shift = faster), Space toggles it, Esc turns it off. The cat only follows when the dot is on the floor and within about 60 px of it; it loses interest if the dot leaves the floor or gets too far away.</p>
+    <p class="hint">Tool bar (top right): Treat and Pet reward, Spray and Buzzer punish. A tool counts toward what the cat is doing, or did within the last 5 seconds. Each tool needs 9 seconds to recharge, and they recharge separately, so you can use both rewards (or both punishments) on one action. Treat and Pet work the same, and so do Spray and Buzzer.</p>
+    <p class="hint">Laser: press and hold the left mouse button on the scene and drag (or touch and drag); the dot disappears when you let go. Keyboard: Tab to the scene, arrow keys move the dot (Shift = faster), Space toggles it, Esc turns it off. The cat only follows when the dot is on the floor and within about 120 px of it; it loses interest if the dot leaves the floor or gets too far away.</p>
   </div>
 
   <section class="card" id="dbg" hidden>
@@ -682,7 +681,7 @@ button.small{font-size:.9rem;padding:6px 14px}
     <div class="row" style="margin-top:8px"><button class="primary drill" id="go" data-n="1">Start at step 1</button><button class="drill" data-n="2">Start at step 2</button><button class="drill" data-n="3">Start at step 3</button><button class="drill" data-n="4">Start at step 4</button><button id="rs">Reset</button></div>
     <label class="r" style="margin-top:8px"><input type="checkbox" id="dbgBrain" checked><span class="nm" id="dbgBrainTxt">Engine brain: the cat rolls at stations it has been near for 1 s, the plant and box after 0.4 s (unticked: it never triggers on its own; rewards and punishments still work)</span></label>
     <h3>Conditioning (hidden from players)</h3>
-    <p class="hint">Levels L are the chance each behavior triggers on a roll. Reward and punish with the tool bar at the top right (cooldowns apply); these buttons only help testing.</p>
+    <p class="hint">Levels L are the chance each behavior triggers on a roll; each is the value of its rung on the ladder (<code>config.LADDER</code>). Every tool use moves one rung. During a run the pad, crank and see-saw roll once each ("this run"). Reward and punish with the tool bar at the top right (cooldowns apply); these buttons only help testing.</p>
     <div class="dbgrow" id="dbgTrain"></div>
     <pre id="dbgModel"></pre>
     <h3>Make the cat do it</h3>
@@ -717,7 +716,8 @@ button.small{font-size:.9rem;padding:6px 14px}
       <li>The cat follows the laser. Hold the mouse or a finger on the floor to move the dot (or use the arrow keys).</li>
       <li>Flip the wall switch (lead the cat to it) before the machine does anything.</li>
       <li>Reward what you want and punish what you don't.</li>
-      <li>The cat remembers what you reinforce, and treats run out.</li>
+      <li>Each tool recharges for a few seconds, so you can use each one once per action. Training never wears off.</li>
+      <li>Once the ball is rolling, the cat gets one chance at each step. Train it well first.</li>
       <li>Win by conditioning the cat to escape.</li>
     </ul>
     <div class="cagewrap" id="cageWrap">
@@ -732,9 +732,9 @@ button.small{font-size:.9rem;padding:6px 14px}
 
   <section class="dlg" id="ovStats" role="dialog" aria-modal="true" aria-labelledby="stH" tabindex="-1" hidden>
     <h2 id="stH">Escaped!</h2>
-    <p>A clean run: the cat did all four steps and ignored the plant and box. Here is what your training did to it.</p>
+    <p>The cat did all four steps without stopping for the plant or the box. Here is what your training did to it.</p>
     <div class="statsbox" id="endStats"></div>
-    <p class="hint">Behavior levels are the chance each behavior triggers when the cat gets the chance. Reinforced tasks climb; distractions you punished or ignored fall.</p>
+    <p class="hint">Behavior levels are the chance each behavior triggers when the cat gets the chance. Rewarded tasks climb and punished distractions fall. Nothing fades on its own in this game.</p>
     <div class="row"><button class="primary" id="stNext" type="button">Continue</button></div>
   </section>
 
@@ -763,6 +763,14 @@ var $=function(s){return document.querySelector(s)},NS='http://www.w3.org/2000/s
 var lerp=function(a,b,t){return a+(b-a)*t},clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
 
 /* ================= config (all tunables live here) ================= */
+/* Design decisions (Steps 12 and 12b):
+   - Win = one successful run. A distraction during a run holds the cat 12 s, so the run fails on its own (no separate "doesn't count" check).
+   - A run lasts from the switch press to the run's end. During it the pad, crank and see-saw roll once each, and every action has its full length;
+     outside a run actions are capped at ENGINE.SHORT_ACTION. A failed step says why (coach + HINTS.WHY).
+   - Learning = ladders (LADDER). Every tool moves one rung; Treat = Pet, Spray = Buzzer. Nothing fades, and a tool with no target changes nothing.
+   - Cooldowns: 9 s per tool, independent, no shared lock, no treat limit.
+   - Stress and fullness are measured only (bubbles, stats, hiding at STRESS_HIDE); they don't change learning or the laser.
+   - Every cat follows the laser like Latte; the cats differ only in taskOffset (and personality text). */
 var config={
   FORCE_DEBUG:false,           /* true shows the debug tools without ?dev (local testing only) */
   ROLL_DELAY:1, ROLL_DELAY_DISTRACT:.4, ROLL_INTERVAL:[10,15],   /* first roll after this long near a station; distractions (plant, box) roll sooner so the cat cannot just run past them (.4 leaves a frame of margin under the 0.5 s limit) */
@@ -787,7 +795,7 @@ var config={
   },
   /* interaction contract: model emits interactionStart(item) / interactionEnd(item,reason);
      machine emits stepComplete(step); tools emit reward(tool) / punish(tool) */
-  LASER:{STOP:18,KEYSTEP:20,NOTICE:60,LOSE:1.6,FLOOR_TOP:584,FORGIVE:24,STRESS_NOTICE:.5,STRESS_SPEED:.4},  /* full stress shrinks the notice distance by STRESS_NOTICE and slows laser-following by STRESS_SPEED */  /* NOTICE: px, same for every cat; the dot must be on the floor (FORGIVE px above it is allowed); the cat loses interest beyond NOTICE*LOSE */
+  LASER:{STOP:18,KEYSTEP:20,NOTICE:120,LOSE:1.6,FLOOR_TOP:584,FORGIVE:24,STRESS_NOTICE:0,STRESS_SPEED:0},  /* Step 12b: NOTICE 60 -> 120. Stress effects are off (0); set STRESS_NOTICE (e.g. .5) and STRESS_SPEED (e.g. .4) to bring back the shrinking range and slower following */  /* NOTICE: px, same for every cat; the dot must be on the floor (FORGIVE px above it is allowed); the cat loses interest beyond NOTICE*LOSE */
   POSES:{                      /* body = rig body shown; spot = where the cat stands/lies; hop = jumps there; dur = default seconds */
     walk:{body:'walk'},sit:{body:'sit'},lay:{body:'lay'},lick:{body:'sit'},
     pressButton:{body:'sit',spot:{x:64,y:596,dir:-1},dur:1},
@@ -799,23 +807,48 @@ var config={
     flinch:{body:'sit',dur:.7},eat:{body:'walk',dur:3},petted:{body:'sit',dur:3},
     hide:{body:'lay',spot:{x:850,y:640,dir:-1},dur:6}
   },
-  EVENTS:['interactionStart','interactionEnd','stepComplete','reward','punish'],
-  ENGINE:{                     /* Step 4 conditioning engine (all values are starting points for Step 8) */
-    STRESS_DECAY:.02, STRESS_LEARN:.7,   /* stress lost per second; how much full stress cuts reward learning (0.7 = -70%) */
+  EVENTS:['interactionStart','interactionEnd','stepComplete','reward','punish','level','rollMiss'],   /* level(id, dir): a tool moved a behavior's rung; rollMiss(id): a task missed its one roll in a run */
+  ENGINE:{                     /* conditioning engine (Step 12b: ladders) */
+    SHORT_ACTION:4,            /* Step 12: outside a run every interaction lasts min(maxDuration, SHORT_ACTION) s; during a run it lasts its full maxDuration */
+    STRESS_DECAY:.02,          /* stress lost per second. Step 12b: stress is measured only (bubbles, stats, hiding); it no longer changes learning or the laser */
     HIDE_RELIEF:.5,            /* stress left after the cat has hidden */
-    FULL_DECAY:.004,           /* treat fullness lost per second */
-    EXTINCTION:.04,            /* an interaction with no reward or punishment in its window: L -= EXTINCTION*(L-floor) */
-    PUNISH_RATE:.5,            /* L -= PUNISH_RATE*strength*catSensitivity*(L-floor) */
-    SENS_BASE:.5,              /* catSensitivity = SENS_BASE + (1-SENS_BASE)*cat[spray|buzz]: even a forgiving cat feels a punishment; the stress jump uses the raw cat value */
-    TOOLS:{                    /* reward: value comes from the cat (treat/pet). punish: strength scales L loss, stress scales the stress jump; the cat key is its sensitivity */
-      treat:{kind:'reward',key:'treat'}, pet:{kind:'reward',key:'pet'},
-      spray:{kind:'punish',key:'spray',strength:1,stress:.35}, buzzer:{kind:'punish',key:'buzz',strength:.45,stress:.15}
+    FULL_DECAY:.004,           /* treat fullness lost per second. Step 12b: fullness is measured only (bubbles, stats); a treat is always worth one rung */
+    TOOLS:{                    /* every tool moves one rung (Treat = Pet, Spray = Buzzer). stress = stress jump x the cat's raw sensitivity (key) */
+      treat:{kind:'reward'}, pet:{kind:'reward'},
+      spray:{kind:'punish',key:'spray',stress:.35}, buzzer:{kind:'punish',key:'buzz',stress:.15}
     }
   },
+  LADDER:{                     /* Step 12b: a behavior's trigger chance is the value of its rung. Rung 0 is the start; a reward or punishment moves one rung.
+                                  Tasks: rewards climb (rung +1), punishments drop (rung -1). Distractions: punishments move down the list (+1), rewards back up (-1).
+                                  A cat's taskOffset is subtracted from every task rung above 0 (Cappuccino .01, Mocha .02). Nothing fades on its own. */
+    task:[.30,.50,.70,.90,.99],
+    distraction:[.80,.65,.50,.30,.02]
+  },
+  HINTS:{                      /* Step 12b: player-facing training hints (no numbers) and Step 12 run messages. {cat} = the cat's name; the other {keys} come from B */
+    TASK_WORDS:['Not likely','Sometimes','Getting the hang of it','Likely, not guaranteed','Very likely'],   /* one per task rung (rung 2 avoids "likely": three tasks at 70% is only about a 1 in 3 clean run) */
+    DIS_WORDS:['Can\u2019t resist','Very tempted','Sometimes','Losing interest','Very unlikely'],
+    TASK:['{cat} isn\u2019t likely to {act} yet.','{cat} {acts} sometimes.','{cat} is getting the hang of {the}, but it\u2019s still hit or miss.','{cat} will probably {act}, but not every time.','{cat} will almost always {act}.'],
+    DIS:['{cat} can\u2019t resist {the}.','{cat} is still very tempted by {the}.','{cat} {acts} sometimes.','{cat} is losing interest in {the}.','{cat} is very unlikely to {act} again.'],
+    B:{button:{the:'the wall switch',act:'flip the wall switch',acts:'flips the wall switch',actIt:'flip it'},
+       pad:{the:'the switch pad',act:'lie on the switch pad',acts:'lies on the switch pad',actIt:'lie on it'},
+       crank:{the:'the crank',act:'turn the crank',acts:'turns the crank',actIt:'turn it'},
+       seesaw:{the:'the see-saw',act:'press the see-saw',acts:'presses the see-saw',actIt:'press it'},
+       plant:{the:'the plant',act:'paw at the plant',acts:'paws at the plant',busy:'pawing at the plant'},
+       box:{the:'the box',act:'jump in the box',acts:'jumps in the box',busy:'playing in the box'}},
+    MISS:'{cat} sniffs at {the} and wanders off. This run won\u2019t make it.',   /* shown the moment a task misses its one roll in a run */
+    WHY:{                      /* added to a failed step's message; {when} from WHEN, {busy} and {dthe} from the distraction that is running */
+      never:'{cat} never went near {the} after the ball started rolling. Lead {cat} there with the laser.',
+      left:'{cat} passed {the} but didn\u2019t stay long enough to notice it. Hold the laser on {the}.',
+      late:'{cat} got to {the} too late.',
+      missed:'{cat} was at {the} but isn\u2019t trained enough to {actIt} yet. Keep rewarding it when it does.',
+      busy:'{cat} was still {busy} {when}. Punish {dthe} between runs.',
+      distracted:'{cat} spent too long {busy} and didn\u2019t get to {the} in time. Punish {dthe} between runs.',
+      hiding:'{cat} was hiding {when}, too stressed to help. Go easy on the punishments.'
+    },
+    WHEN:{pad:'when the ball reached the gate',crank:'when the balloon floated away',seesaw:'when the fuse burned out'}
+  },
   TOOLBAR:{                    /* Step 5 tool bar */
-    COOLDOWN:{treat:5,pet:3,spray:12,buzzer:5},   /* seconds before the same tool can be used again */
-    GLOBAL:2,                                     /* seconds before ANY other tool can be used after one is used */
-    TREATS:{max:8,refill:12},                     /* treat supply: starts full, one comes back every REFILL seconds */
+    COOLDOWN:{treat:9,pet:9,spray:9,buzzer:9},    /* Step 12: seconds before the same tool can be used again. Each tool is independent (no shared lock, no treat limit), so every tool can be used once per interaction */
     REACT:{treat:'eat',pet:'petted',spray:'flinch',buzzer:'flinch'},   /* cat reaction pose per tool (skipped while the cat is in a committed action) */
     FX:{treat:1.2,pet:2.2,spray:1.1,buzzer:.9}    /* seconds each visible tool effect lasts */
   },
@@ -830,18 +863,20 @@ var config={
     {id:'pad',type:'task',anchor:'pad',animation:'lieOnPad',maxDuration:11},
     {id:'crank',type:'task',anchor:'crank',animation:'pawCrank',maxDuration:12}   /* 8 s + MACHINE.WEB.HOLD + 1 s for the longer drift to the cuckoo (Step 11b) */,
     {id:'seesaw',type:'task',anchor:'seesaw',animation:'pressSeesaw',maxDuration:11},
-    {id:'plant',type:'distraction',anchor:'plant',animation:'pawPlant',maxDuration:3},
-    {id:'box',type:'distraction',anchor:'box',animation:'jumpBox',maxDuration:5}
+    {id:'plant',type:'distraction',anchor:'plant',animation:'pawPlant',maxDuration:12},   /* Step 12: 12 s during a run (outside a run the short cap makes it 4 s). The see-saw needs the cat pressing at fuse-out, 12.6 s after the pop; */
+    {id:'box',type:'distraction',anchor:'box',animation:'jumpBox',maxDuration:12}         /* a cat held more than about 10.2 s on the way can't get there, so a distraction during a run always costs the run */
   ],
   CATS:{                       /* starting values, tuned in Step 8 */
-    latte:{name:'Latte',cap:.99,floor:.01,start:.15,plant:.4,box:.4,learn:.6,treat:.9,pet:.6,fillRate:.2,spray:.15,buzz:.1,nothing:.02,laser:1,lag:0},
-    cappuccino:{name:'Cappuccino',cap:.96,floor:.04,start:.12,plant:.5,box:.6,learn:.4,treat:.6,pet:.9,fillRate:.12,spray:.5,buzz:.35,nothing:.04,laser:.7,lag:.1},
-    mocha:{name:'Mocha',cap:.9,floor:.1,start:.1,plant:.5,box:.5,learn:.22,treat:.3,pet:.3,fillRate:.06,spray:1,buzz:.7,nothing:.08,laser:.5,lag:.35}
+    /* taskOffset: subtracted from task rungs above 0 (the only learning difference). fillRate: fullness per treat (measured only). spray/buzz: stress sensitivity.
+       laser/lag: laser following; Step 12b: every cat follows like Latte (1, 0) */
+    latte:{name:'Latte',taskOffset:0,fillRate:.2,spray:.15,buzz:.1,laser:1,lag:0},
+    cappuccino:{name:'Cappuccino',taskOffset:.01,fillRate:.12,spray:.5,buzz:.35,laser:1,lag:0},
+    mocha:{name:'Mocha',taskOffset:.02,fillRate:.06,spray:1,buzz:.7,laser:1,lag:0}
   },
   INTRO:{                      /* Step 6 title screen: badge, pose and facing of each cat in the cage, thought-bubble text */
-    latte:{level:'Easy',pose:'sit',dir:1,blurb:"I'm Latte. I'll do almost anything for a snack, and I forgive a squirt of water in about five seconds."},
-    cappuccino:{level:'Medium',pose:'lick',dir:-1,blurb:"Cappuccino, darling. A good pet beats a treat, and I simply adore boxes. Do try to keep up."},
-    mocha:{level:'Hard',pose:'lay',dir:-1,blurb:"Mocha. I do things my way, I get bored fast, and I really, truly hate that spray. Good luck."}
+    latte:{pose:'sit',dir:1,blurb:"I'm Latte. I'll chase that red dot anywhere, I love a snack or a scratch, and I forgive a squirt of water in about five seconds."},
+    cappuccino:{pose:'lick',dir:-1,blurb:"Cappuccino, darling. I take a little more convincing than most, and I simply adore boxes. Do try to keep up."},
+    mocha:{pose:'lay',dir:-1,blurb:"Mocha. I do things my way, I take the longest to train, and I really, truly hate that spray. Good luck."}
   },
   FLOW:{SELECT_FADE:.7,WIN_HOLD:1,WIN_HOLD_FAST:1.8,WIN_WAIT:2.5,WIN_WALK:5,START:{x:300,y:625}}   /* seconds: fade after choosing a cat; pause after the cat leaves; pause for a win that waited for an overlay; longest wait for the cat to be free; longest walk out */,
   BUBBLES:{                    /* Step 7 thought bubbles. Times in seconds of unlocked play (the clock pauses on overlays, the win moment and while the cat hides) */
@@ -895,7 +930,7 @@ var config={
       ],
       cappuccino:[
         "The box is not a hobby, darling. It is a lifestyle.",
-        "A good chin scratch is worth ten treats. Do take notes.",
+        "A good chin scratch is a treat in itself. Do take notes.",
         "Cardboard is the finest material known to cats.",
         "Technically, I could escape. I simply haven\u2019t gotten around to it.",
         "The dot is beneath me. I will, however, supervise it.",
@@ -942,7 +977,7 @@ var config={
      why:"The spray adds an unpleasant stimulus, so it is positive punishment (\u201Cpositive\u201D means added, not \u201Cgood\u201D). By the Law of Effect, behaviors followed by punishing consequences are less likely to be repeated.",code:"3.8.A.1 and 3.8.A.2"},
     {q:"The cat flips the wall switch several times, but you give no treat, pet, spray, or buzzer afterward. What does the Law of Effect predict, and what is it called?",
      o:["The behavior fades because it no longer earns a reinforcing consequence (extinction)","The behavior fades because it is being punished (positive punishment)","The behavior stays just as strong (habituation)","The behavior gets stronger (spontaneous recovery)"],
-     why:"Behaviors that stop producing reinforcing consequences are less likely to be repeated. Ending reinforcement altogether is extinction. In the game, a behavior with no reward or punishment in its window slowly loses strength.",code:"3.8.A.1"},
+     why:"Behaviors that stop producing reinforcing consequences are less likely to be repeated. Ending reinforcement altogether is extinction. This game leaves extinction out, so your training never wears off, but a real cat\u2019s unrewarded behavior would slowly fade.",code:"3.8.A.1"},
     {q:"Pawing the crank earns treats, and pawing the plant never does. Soon the cat paws only at the crank. Which term fits best?",
      o:["Discrimination","Generalization","Shaping","Negative reinforcement"],
      why:"Discrimination means responding only in the situation where the behavior has been reinforced, like acting at the right station. Generalization would be responding in similar situations too, such as pawing the plant as well.",code:"3.8.A.2"},
@@ -974,91 +1009,109 @@ var bus=(function(){
 
 /* ================= model (pure logic, no DOM, seeded RNG, fixed step) ================= */
 var model=(function(){
-  var E=CFG.ENGINE;
+  var E=CFG.ENGINE,LD=CFG.LADDER,RUN_TASKS=['pad','crank','seesaw'];   /* the switch starts a run, so it is not limited to one roll */
   function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
   function delay(b){return b.type==='distraction'?CFG.ROLL_DELAY_DISTRACT:CFG.ROLL_DELAY}
+  /* Step 12b: a behavior's chance is the value of its rung on its ladder */
+  function ladder(b){return b.type==='task'?LD.task:LD.distraction}
+  function level(b,c){var v=ladder(b)[b.rung];return b.type==='task'&&b.rung>0?v-c.taskOffset:v}
+  function setRung(b,c,r){b.rung=clamp(r,0,ladder(b).length-1);b.L=level(b,c)}
   function create(catId,seed){
     var c=CFG.CATS[catId],m={
       id:catId,cat:c,rand:rng(seed===undefined?CFG.SEED:seed),t:0,stress:0,fullness:0,brain:true,
-      cur:null,last:null,pend:[],items:{},log:[],
-      stats:{treats:0,pets:0,sprays:0,buzzes:0,hides:0,nothing:0,interactions:0,extinct:0},
+      cur:null,last:null,items:{},log:[],run:{no:0,tasks:{}},
+      stats:{treats:0,pets:0,sprays:0,buzzes:0,hides:0,nothing:0,interactions:0},
       behaviors:CFG.BEHAVIORS.map(function(b){
-        var task=b.type==='task',o={};for(var k in b)o[k]=b[k];
-        o.L=task?c.start:c[b.id];o.cap=task?c.cap:1;o.floor=task?0:c.floor;return o;
+        var o={};for(var k in b)o[k]=b[k];
+        o.top=ladder(o).length-1;setRung(o,c,0);
+        o.cap=level({type:o.type,rung:o.top},c);o.floor=o.type==='task'?ladder(o)[0]:ladder(o)[o.top];   /* for display */
+        return o;
       })
     };
     m.behaviors.forEach(function(b){m.items[b.id]={armed:true,rollAt:delay(b),rolls:0}});
     return m;
   }
-  /* The engine owns no DOM and no per-behavior code. host = {nearTime(anchorId), play(animation,{dur,done})->bool, busy()->bool};
-     emit(name,a,b) carries interactionStart / interactionEnd. Rewards and punishments arrive through reward(tool) / punish(tool). */
+  /* The engine owns no DOM and no per-behavior code. host = {nearTime(anchorId), play(animation,{dur,done})->bool, busy()->bool,
+     inRun()->run number or 0 (optional), extend(dur) (optional: lengthen the running action to dur s from its start)};
+     emit(name,a,b) carries interactionStart / interactionEnd / level / rollMiss. Rewards and punishments arrive through reward(tool) / punish(tool). */
   function engine(host,emit){
     var m=null;
     function beh(id){for(var i=0;i<m.behaviors.length;i++)if(m.behaviors[i].id===id)return m.behaviors[i]}
     function note(s){m.log.push(m.t.toFixed(1)+'s  '+s);if(m.log.length>8)m.log.shift()}
     function lerp2(a,b,t){return a+(b-a)*t}
     function setCat(id,seed){m=create(id,seed);return m}
+    function inRun(){return host.inRun?host.inRun():0}
+    function runTask(b){return m.run.no&&RUN_TASKS.indexOf(b.id)>=0}
+    /* Step 12: full length during a run, short outside it */
+    function dur(b){return m.run.no?b.maxDuration:Math.min(b.maxDuration,E.SHORT_ACTION)}
     /* the interaction a reward or punishment counts toward: the one running, or one that ended within REWARD_WINDOW */
     function target(){
       if(m.cur)return m.cur;
       var l=m.last;return l&&l.end!==null&&m.t-l.end<=CFG.REWARD_WINDOW?l:null;
     }
     function start(b){
-      var it={id:b.id,start:m.t,end:null,credited:false,roll:m.items[b.id].rolls};
-      var ok=host.play(b.animation,{dur:b.maxDuration,done:function(n,why){
+      var d=dur(b),it={id:b.id,start:m.t,end:null,credited:false,roll:m.items[b.id].rolls,short:d<b.maxDuration};
+      var ok=host.play(b.animation,{dur:d,done:function(n,why){
         it.end=m.t;if(m.cur===it)m.cur=null;
-        m.pend.push({it:it,due:m.t+CFG.REWARD_WINDOW});
         emit('interactionEnd',b.id,why);
       }});
       if(!ok)return false;
       m.cur=it;m.last=it;m.stats.interactions++;
+      if(m.run.no&&b.type==='distraction')m.run.dis=b.id;   /* the run messages say when a distraction cost the run */
       emit('interactionStart',b.id);
       return true;
     }
+    /* Step 12b: every tool moves the credited behavior one rung (up for a rewarded task or a punished distraction's list position) */
+    function move(t,dir,tool){
+      var b=beh(t.id),r0=b.rung;t.credited=true;
+      setRung(b,m.cat,b.rung+(b.type==='task'?dir:-dir));
+      note(tool+' -> '+b.id+'  rung '+b.rung+'  L '+b.L.toFixed(2));
+      emit('level',b.id,b.rung===r0?0:dir);
+    }
     function reward(tool){
-      var d=E.TOOLS[tool],c=m.cat,v,t,b;
+      var d=E.TOOLS[tool],t;
       if(!d||d.kind!=='reward')return;
-      v=c[d.key];
-      if(tool==='treat'){v*=1-m.fullness;m.fullness=Math.min(1,m.fullness+c.fillRate);m.stats.treats++}else m.stats.pets++;
-      v*=1-E.STRESS_LEARN*m.stress;                       /* stress slows learning */
+      if(tool==='treat'){m.fullness=Math.min(1,m.fullness+m.cat.fillRate);m.stats.treats++}else m.stats.pets++;   /* fullness is measured only */
       t=target();
-      if(t){
-        b=beh(t.id);t.credited=true;
-        b.L=clamp(b.L+c.learn*v*(b.cap-b.L),b.floor,b.cap);
-        note(tool+' -> '+b.id+'  L '+b.L.toFixed(2));
-      }else{                                              /* reward for nothing: the cat learns to do nothing */
-        m.stats.nothing++;
-        m.behaviors.forEach(function(x){x.L=clamp(x.L-c.nothing*(x.L-x.floor),x.floor,x.cap)});
-        note(tool+' for nothing: every L down');
-      }
+      if(t)move(t,1,tool);
+      else{m.stats.nothing++;note(tool+' for nothing: no change')}
     }
     function punish(tool){
-      var d=E.TOOLS[tool],c=m.cat,s,sens,t,b;
+      var d=E.TOOLS[tool],t;
       if(!d||d.kind!=='punish')return;
-      s=c[d.key];sens=E.SENS_BASE+(1-E.SENS_BASE)*s;if(tool==='spray')m.stats.sprays++;else m.stats.buzzes++;
+      if(tool==='spray')m.stats.sprays++;else m.stats.buzzes++;
       t=target();
-      if(t){
-        b=beh(t.id);t.credited=true;
-        b.L=clamp(b.L-E.PUNISH_RATE*d.strength*sens*(b.L-b.floor),b.floor,b.cap);
-        note(tool+' -> '+b.id+'  L '+b.L.toFixed(2));
-      }else note(tool+' with nothing to punish: stress only');
-      m.stress=Math.min(1,m.stress+d.stress*s);
+      if(t)move(t,-1,tool);else note(tool+' with nothing to punish: stress only');
+      m.stress=Math.min(1,m.stress+d.stress*m.cat[d.key]);   /* stress is measured only (and can make the cat hide) */
+    }
+    /* Step 12: track the run. One roll per task per run; what each task did is kept for the run messages */
+    function syncRun(){
+      var rn=inRun(),i,b,it,n;
+      if(rn===m.run.no)return;
+      for(i=0;i<m.behaviors.length;i++){   /* a task that missed its run roll and is still near rolls again soon */
+        b=m.behaviors[i];it=m.items[b.id];n=host.nearTime(b.anchor);
+        if(it.armed&&it.rollAt===Infinity)it.rollAt=n+CFG.ROLL_DELAY;
+      }
+      if(rn){
+        m.run={no:rn,tasks:{}};
+        RUN_TASKS.forEach(function(id){m.run.tasks[id]={seen:false,rolled:false,hit:false,missed:false}});
+        if(m.cur&&m.cur.short){m.cur.short=false;if(host.extend)host.extend(beh(m.cur.id).maxDuration)}   /* a run started mid-action: full length from its start */
+        note('run '+rn+' started');
+      }else{
+        m.run={no:0,tasks:{}};
+        note('run ended');
+      }
     }
     function step(dt){
-      var i,b,it,n,due,j,k,p,ok;
+      var i,b,it,n,due,j,k,ok,rt;
       m.t+=dt;
       m.stress=Math.max(0,m.stress-E.STRESS_DECAY*dt);
       m.fullness=Math.max(0,m.fullness-E.FULL_DECAY*dt);
-      for(i=m.pend.length-1;i>=0;i--){                    /* extinction: a closed window with no reward or punishment */
-        p=m.pend[i];
-        if(m.t>=p.due){
-          m.pend.splice(i,1);
-          if(!p.it.credited){b=beh(p.it.id);b.L=clamp(b.L-E.EXTINCTION*(b.L-b.floor),b.floor,b.cap);m.stats.extinct++}
-        }
-      }
-      for(i=0;i<m.behaviors.length;i++){                  /* leaving a zone re-arms the item and resets its roll clock */
-        b=m.behaviors[i];it=m.items[b.id];
-        if(host.nearTime(b.anchor)===0){it.armed=true;it.rollAt=delay(b);it.rolls=0}
+      syncRun();
+      for(i=0;i<m.behaviors.length;i++){                  /* leaving a zone re-arms the item and resets its roll clock (not for a task that rolled this run) */
+        b=m.behaviors[i];it=m.items[b.id];n=host.nearTime(b.anchor);rt=runTask(b)&&m.run.tasks[b.id];
+        if(rt&&n>0)rt.seen=true;
+        if(n===0&&!(rt&&rt.rolled)){it.armed=true;it.rollAt=delay(b);it.rolls=0}
       }
       if(!m.brain||host.busy())return;
       if(m.stress>=CFG.STRESS_HIDE){                      /* too stressed: the cat hides for a while */
@@ -1072,29 +1125,38 @@ var model=(function(){
       }
       for(j=due.length-1;j>0;j--){k=Math.floor(m.rand()*(j+1));b=due[j];due[j]=due[k];due[k]=b}   /* random order among rivals */
       for(i=0;i<due.length;i++){
-        b=due[i];it=m.items[b.id];n=host.nearTime(b.anchor);
+        b=due[i];it=m.items[b.id];n=host.nearTime(b.anchor);rt=runTask(b)&&m.run.tasks[b.id];
         it.rolls++;ok=m.rand()<b.L;
-        note('roll '+b.id+' #'+it.rolls+'  p '+b.L.toFixed(2)+(ok?'  HIT':'  miss'));
-        if(ok){if(start(b)){it.armed=false;return}}       /* the first success triggers; later rivals do not roll */
+        note('roll '+b.id+' #'+it.rolls+'  p '+b.L.toFixed(2)+(ok?'  HIT':'  miss')+(rt?'  (run roll)':''));
+        if(ok){if(start(b)){it.armed=false;if(rt){rt.rolled=true;rt.hit=true}return}}   /* the first success triggers; later rivals do not roll */
+        else if(rt){rt.rolled=true;rt.missed=true;it.rollAt=Infinity;emit('rollMiss',b.id)}   /* one roll per task per run */
         else it.rollAt=n+lerp2(CFG.ROLL_INTERVAL[0],CFG.ROLL_INTERVAL[1],m.rand());
       }
     }
     /* debug only: start a behavior's action without a roll (still disarms it and is credited like any interaction) */
     function force(id){
-      var b=beh(id);if(!b||host.busy())return false;
+      var b=beh(id),rt;if(!b||host.busy())return false;
+      syncRun();
       if(!start(b))return false;
-      m.items[id].armed=false;note('forced '+id);return true;
+      m.items[id].armed=false;rt=runTask(b)&&m.run.tasks[id];if(rt){rt.seen=rt.rolled=rt.hit=true}
+      note('forced '+id);return true;
     }
-    /* debug only: 'trained' = tasks at cap, distractions at floor; 'fresh' = the cat's starting values */
+    /* debug only: 'trained' = tasks and distractions on their last rung; 'fresh' = the cat's starting values */
     function preset(kind){
       if(kind==='fresh'){var id=m.id,br=m.brain;setCat(id,CFG.SEED);m.brain=br;return}
-      m.behaviors.forEach(function(b){b.L=b.type==='task'?b.cap:b.floor});
+      m.behaviors.forEach(function(b){setRung(b,m.cat,b.top)});
       m.stress=0;m.fullness=0;
     }
-    return{state:function(){return m},setCat:setCat,step:step,reward:reward,punish:punish,force:force,preset:preset,beh:beh,target:target,
+    /* Step 12: what a task did in the current run ('hit' | 'missed' | 'late' | 'left' | 'never'), or null outside a run */
+    function runInfo(id){
+      var rt=m.run.no&&m.run.tasks[id],b=beh(id);if(!rt)return null;
+      return rt.hit?'hit':rt.missed?'missed':rt.seen?(host.nearTime(b.anchor)>0?'late':'left'):'never';
+    }
+    return{state:function(){return m},setCat:setCat,step:step,reward:reward,punish:punish,force:force,preset:preset,beh:beh,target:target,runInfo:runInfo,
+      setRung:function(id,r){var b=beh(id);if(b)setRung(b,m.cat,r)},
       brain:function(v){m.brain=v},hasBrain:function(){return m.brain}};
   }
-  return{create:create,rng:rng,engine:engine};
+  return{create:create,rng:rng,engine:engine,level:level};
 })();
 
 /* ================= world (stations) ================= */
@@ -1191,7 +1253,8 @@ function say(t){$('#say').textContent=t}
 function now(){return performance.now()/1000}
 
 /* ---- runtime state (everything the cat can change) ---- */
-var MC=CFG.MACHINE,PT=MC.PLANK.rest,phaseCbs=[],runCbs=[],lastRun=null,windOn=0;
+var MC=CFG.MACHINE,PT=MC.PLANK.rest,phaseCbs=[],runCbs=[],lastRun=null,windOn=0,
+    runSeq=0,whyFn=null;   /* Step 12: runSeq numbers each run (the engine's one-roll-per-run rule); whyFn(i) adds the reason to a failed step's message */
 function newState(){return{state:'idle',step:0,res:[null,null,null,null],t:{},btnOn:false,padOn:false,crankOn:false,seesawOn:false,
   gateP:0,gateLock:false,arrived:false,loaded:false,doneAt:0,outcome:null,failedAt:0,distractions:0}}
 var M=newState();
@@ -1277,7 +1340,7 @@ function finishRun(o){
     steps:M.res.map(function(r){return r?r.status:'not reached'}),times:M.res.map(function(r){return r?r.t:null})};
   runCbs.forEach(function(f){f(lastRun)});
 }
-function failAt(i,msg){setRes(i,'fail','\u2715 stopped here');M.failedAt=i+1;say(msg);finishRun('fail')}
+function failAt(i,msg){var w=whyFn?whyFn(i):'';setRes(i,'fail','\u2715 stopped here');M.failedAt=i+1;say(msg+(w?' '+w:''));finishRun('fail')}
 function updPT(){PT=M.seesawOn?MC.PLANK.pressed:(M.loaded?MC.PLANK.loaded:MC.PLANK.rest)}
 function applyFlags(){
   $('#swk').setAttribute('transform',M.btnOn?'translate(0 12)':'');
@@ -1626,7 +1689,7 @@ async function runFrom(n){
 /* ---- cat events: the only way the cat touches the machine ---- */
 function startRun(t){
   if(M.state==='done')reset(false);else rows.forEach(function(r){r.res.textContent=''});
-  M.state='running';M.step=1;M.t.start=t;
+  M.state='running';M.step=1;M.t.start=t;runSeq++;
   runFrom(1).catch(function(e){console.error(e)});
 }
 function catEvent(name,on,t){
@@ -1642,7 +1705,7 @@ function catEvent(name,on,t){
 function drill(n){
   reset(false);n=n||1;
   if(n<=1)return;
-  M.state='running';M.t.start=now();
+  M.state='running';M.t.start=now();runSeq++;
   runFrom(n).catch(function(e){console.error(e)});
 }
 bus.on('interactionStart',function(it){if(M.state==='running'&&(it==='plant'||it==='box'))M.distractions++});
@@ -1674,7 +1737,8 @@ return{run:drill,reset:function(){reset(false)},tick:tick,plank:function(a){PT=a
   plankY:function(x){var a=PL.th*Math.PI/180;return 555+(x-715)*Math.tan(a)-4/Math.cos(a)},
   catEvent:catEvent,abort:function(n,msg){if(M.state!=='done')failAt(n-1,msg)},toggle:ok,info:info,
   onPhase:function(f){phaseCbs.push(f)},onRunEnd:function(f){runCbs.push(f)},
-  results:function(){return M.res.slice()},lastRun:function(){return lastRun},state:function(){return M}};
+  results:function(){return M.res.slice()},lastRun:function(){return lastRun},state:function(){return M},
+  runNo:function(){return M.state==='running'?runSeq:0},setWhy:function(f){whyFn=f}};
 })();
 
 /* ================= cat (rig + animation) ================= */
@@ -1799,7 +1863,9 @@ var cat=(function(){
   (function blink(){el.classList.add('blink');setTimeout(function(){el.classList.remove('blink')},140);setTimeout(blink,rnd(2200,5200))})();
   setTimeout(function blep(){el.classList.add('blep');setTimeout(function(){el.classList.remove('blep')},1100);setTimeout(blep,rnd(5000,11000))},4000);
   setPose('sit',3);
-  return{update:update,play:play,end:function(r,name){if(S.act&&S.act.stage==='on'&&(!name||S.act.name===name))finish(r||'early')},onAction:function(f){actCbs.push(f)},release:function(){finish('released');if(!S.act&&S.lock&&!S.move)S.lock=false},
+  /* Step 12: a run started mid-action: lengthen the running action to d s, counted from when it started */
+  function extend(d){var a=S.act;if(!a||a.dur>=d)return;if(a.stage==='on'&&S.t!==Infinity)S.t+=d-a.dur;a.dur=d}
+  return{update:update,play:play,extend:extend,end:function(r,name){if(S.act&&S.act.stage==='on'&&(!name||S.act.name===name))finish(r||'early')},onAction:function(f){actCbs.push(f)},release:function(){finish('released');if(!S.act&&S.lock&&!S.move)S.lock=false},
     reset:reset,restart:restart,walkOut:walkOut,out:function(){return S.x>W.w+40},setVariant:setVariant,walkTo:function(x,y){if(!S.lock)walkTo(x,y)},wander:function(){if(!S.lock)wander()},
     setPose:function(p,d){reset();setPose(p,d)},auto:auto,laser:setLaser,setStress:function(v){S.stress=v},
     setTraits:function(t){S.tr=t},near:function(){return S.near.slice()},nearTime:function(id){return S.nearT[id]||0},
@@ -1808,7 +1874,7 @@ var cat=(function(){
 
 /* ================= tools / audio / ui (stubs filled in Step 5) ================= */
 var tools=(function(){
-  var TB=CFG.TOOLBAR,W=CFG.WORLD,order=['treat','pet','spray','buzzer'],S={},supply=TB.TREATS.max,refill=0,list=[],locked=false,bar=$('#toolbar'),
+  var TB=CFG.TOOLBAR,W=CFG.WORLD,order=['treat','pet','spray','buzzer'],S={},list=[],locked=false,bar=$('#toolbar'),
       RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),mo=RM?0:1,svg=$('#m'),g=document.createElementNS(NS,'g');
   g.setAttribute('id','toolfx');g.setAttribute('pointer-events','none');$('#laser').parentNode.insertBefore(g,$('#laser'));
   var INFO={
@@ -1825,29 +1891,25 @@ var tools=(function(){
   function mkBtn(id,par){
     var i=INFO[id],b=document.createElement('button');
     b.type='button';b.className='tool'+(i.pun?' pun':'');b.dataset.tool=id;b.setAttribute('aria-disabled','false');
-    b.innerHTML='<svg class="ic" viewBox="0 0 32 32" aria-hidden="true">'+i.icon+'</svg><span class="tl">'+i.label+'</span>'+(id==='treat'?'<span class="cnt"></span>':'')+
+    b.innerHTML='<svg class="ic" viewBox="0 0 32 32" aria-hidden="true">'+i.icon+'</svg><span class="tl">'+i.label+'</span>'+
       '<svg class="cd" viewBox="-36 -36 72 72" aria-hidden="true"><path d=""/><text x="0" y="8"></text></svg>';
     b.addEventListener('click',function(){use(id)});
     par.appendChild(b);
-    S[id]={rem:0,total:1,b:b,path:b.querySelector('.cd path'),txt:b.querySelector('.cd text'),cnt:b.querySelector('.cnt'),key:''};
+    S[id]={rem:0,total:1,b:b,path:b.querySelector('.cd path'),txt:b.querySelector('.cd text'),key:''};
   }
   grp('Reward',['treat','pet']);grp('Punish',['spray','buzzer']);
   function pieD(f){var a=clamp(f,0,.9995)*Math.PI*2,r=34;return 'M0 0 L0 '+(-r)+' A'+r+' '+r+' 0 '+(a>Math.PI?1:0)+' 1 '+(r*Math.sin(a)).toFixed(2)+' '+(-r*Math.cos(a)).toFixed(2)+' Z'}
   function paint(id){
-    var s=S[id],cool=s.rem>0,out=id==='treat'&&supply<1,key=(cool?Math.ceil(s.rem*10):'r')+'|'+supply+'|'+out;
+    var s=S[id],cool=s.rem>0,key=cool?Math.ceil(s.rem*10):'r';
     if(key===s.key)return;s.key=key;
-    s.b.classList.toggle('cool',cool);s.b.classList.toggle('out',out&&!cool);
-    s.b.setAttribute('aria-disabled',cool||out?'true':'false');
-    s.b.setAttribute('aria-label',INFO[id].label+(id==='treat'?', '+supply+' left':'')+(cool?', ready in '+Math.ceil(s.rem)+' seconds':out?', none left':''));
+    s.b.classList.toggle('cool',cool);
+    s.b.setAttribute('aria-disabled',cool?'true':'false');
+    s.b.setAttribute('aria-label',INFO[id].label+(cool?', ready in '+Math.ceil(s.rem)+' seconds':''));
     if(cool){s.path.setAttribute('d',pieD(s.rem/s.total));s.txt.textContent=Math.ceil(s.rem)}
-    if(s.cnt)s.cnt.textContent=supply;
   }
   function use(id){
     var s=S[id];if(locked||!s||s.rem>0)return false;
-    if(id==='treat'&&supply<1){ui.say('Out of treats. They come back slowly.');return false}
-    s.rem=s.total=TB.COOLDOWN[id];
-    order.forEach(function(o){if(o!==id&&S[o].rem<TB.GLOBAL){S[o].rem=S[o].total=TB.GLOBAL}});
-    if(id==='treat')supply--;
+    s.rem=s.total=TB.COOLDOWN[id];   /* Step 12: each tool's cooldown is independent */
     bus.emit(CFG.ENGINE.TOOLS[id].kind,id);     /* the engine does the conditioning */
     if(!cat.state().lock)cat.play(TB.REACT[id]);
     fxStart(id);
@@ -1898,14 +1960,12 @@ var tools=(function(){
   function update(dt){
     var i,s,f;
     for(i=0;i<order.length;i++){s=S[order[i]];if(s.rem>0)s.rem=Math.max(0,s.rem-dt);paint(order[i])}
-    if(supply<TB.TREATS.max){refill+=dt;if(refill>=TB.TREATS.refill){refill=0;supply++}}else refill=0;
     if(list.length){var h=head();for(i=list.length-1;i>=0;i--){f=list[i];f.t+=dt;if(f.t>=f.dur){f.root.remove();list.splice(i,1)}else fxStep(f,h)}}
   }
   order.forEach(paint);
   return{list:['laser'].concat(order),use:use,update:update,lock:function(v){locked=!!v},
-    reset:function(){supply=TB.TREATS.max;refill=0;order.forEach(function(k){S[k].rem=0;S[k].key=''});list.forEach(function(f){f.root.remove()});list.length=0;order.forEach(paint)},
-    supply:function(){return supply},
-    refill:function(){supply=TB.TREATS.max;order.forEach(paint)},clear:function(){order.forEach(function(k){S[k].rem=0;paint(k)})}};
+    reset:function(){order.forEach(function(k){S[k].rem=0;S[k].key=''});list.forEach(function(f){f.root.remove()});list.length=0;order.forEach(paint)},
+    clear:function(){order.forEach(function(k){S[k].rem=0;paint(k)})}};
 })();
 var audio={ctx:null,init:function(){if(!this.ctx&&window.AudioContext)this.ctx=new AudioContext()}};
 var ui=(function(){
@@ -1948,7 +2008,8 @@ var game=(function(){
   var eng=model.engine({
     nearTime:function(id){return cat.nearTime(id)},
     play:function(a,o){return cat.play(a,o)},
-    busy:function(){return cat.state().lock}
+    busy:function(){return cat.state().lock},
+    inRun:function(){return machine.runNo()},extend:function(d){cat.extend(d)}
   },function(e,a,b){bus.emit(e,a,b)});
   /* the engine brain stays off whenever the gate says so (title screen, overlays, win moment) or the debug box is unticked */
   var gate=function(){return true};
@@ -1963,7 +2024,7 @@ var game=(function(){
   return{onTick:function(f){vs.push(f)},onFixed:function(f){fs.push(f)},start:function(){requestAnimationFrame(frame)},perform:perform,engine:eng,selectCat:selectCat,applyBrain:applyBrain,setGate:function(f){gate=f;applyBrain()}};
 })();
 game.onTick(cat.update);
-game.onTick(function(){cat.setStress(game.engine.state().stress)});   /* stress makes the cat less responsive to the laser */
+game.onTick(function(){cat.setStress(game.engine.state().stress)});   /* stress can make the cat less responsive to the laser (off in Step 12b: LASER.STRESS_* = 0) */
 game.onTick(tools.update);
 game.onTick(machine.tick);
 
@@ -1975,8 +2036,9 @@ function buildStats(box,title,withCredit){
   function row(label,tag,cls){
     var d=document.createElement('div'),l=document.createElement('span'),t=document.createElement('span'),f=document.createElement('div'),fl=document.createElement('div'),v=document.createElement('span');
     d.className='mt';l.textContent=label;if(tag){t.className='tag';t.textContent=' ('+tag+')';l.appendChild(t)}
+    var w=document.createElement('span');w.className='bw';l.appendChild(w);   /* Step 12b: the rung's hint word */
     f.className='tr';fl.className='fl '+cls;f.appendChild(fl);v.className='v';d.appendChild(l);d.appendChild(f);d.appendChild(v);box.appendChild(d);
-    return{fl:fl,v:v,f:f};
+    return{fl:fl,v:v,f:f,w:w};
   }
   var h=document.createElement('h3');h.textContent=title;box.appendChild(h);
   rows.stress=row('Stress','','str');rows.full=row('Fullness','','ful');
@@ -1986,7 +2048,7 @@ function buildStats(box,title,withCredit){
   function set(r,v){var p=Math.round(clamp(v,0,1)*100);r.fl.style.width=p+'%';r.v.textContent=p+'%';r.f.setAttribute('role','img');r.f.setAttribute('aria-label',p+' percent')}
   return{refresh:function(m,tg){
     set(rows.stress,m.stress);set(rows.full,m.fullness);
-    m.behaviors.forEach(function(b){set(rows[b.id],b.L)});
+    m.behaviors.forEach(function(b){set(rows[b.id],b.L);rows[b.id].w.textContent=(b.type==='task'?CFG.HINTS.TASK_WORDS:CFG.HINTS.DIS_WORDS)[b.rung]||''});
     if(cr)cr.textContent='Credit goes to: '+(tg?NMS[tg.id]+(tg.end===null?' (happening now)':' (ended '+(m.t-tg.end).toFixed(1)+' s ago)'):'nothing');
   }};
 }
@@ -2008,6 +2070,27 @@ var stats=(function(){
   cat.onAction(function(name,stage){var e=CAT_EVT[name];if(e)machine.catEvent(e,stage==='start',performance.now()/1000)});
   bus.on('stepComplete',function(n){cat.end('step '+n,STEP_ACT[n])});
 })();
+/* ================= coach (Steps 12 and 12b): training hints, the miss line, and why a run step failed ================= */
+var coach=(function(){
+  var H=CFG.HINTS,el=$('#coach'),E=game.engine,TASK_OF={1:'pad',2:'crank',3:'seesaw'};   /* machine step index (failAt i) -> task */
+  function fill(t,o){return t.replace(/\{(\w+)\}/g,function(x,k){return o[k]!==undefined?o[k]:x})}
+  function words(id,extra){var o={cat:E.state().cat.name},b=H.B[id],k;for(k in b)o[k]=b[k];for(k in extra)o[k]=extra[k];return o}
+  function show(t){el.textContent=t}
+  /* every tool use that reaches a behavior: the line for its (new) rung */
+  bus.on('level',function(id){var b=E.beh(id);if(b&&!flow.locked())show(fill((b.type==='task'?H.TASK:H.DIS)[b.rung],words(id)))});
+  bus.on('rollMiss',function(id){show(fill(H.MISS,words(id)))});
+  machine.setWhy(function(i){
+    var id=TASK_OF[i],info=id&&E.runInfo(id),a=cat.state().act,k,o;
+    if(!info||info==='hit')return '';      /* the task did trigger: the machine's own timing message says what went wrong */
+    o=words(id,{when:H.WHEN[id]});
+    if(a&&(a.name==='pawPlant'||a.name==='jumpBox')){k=a.name==='pawPlant'?'plant':'box';o.busy=H.B[k].busy;o.dthe=H.B[k].the;return fill(H.WHY.busy,o)}
+    if(a&&a.name==='hide')return fill(H.WHY.hiding,o);
+    k=E.state().run.dis;
+    if(k&&info!=='missed'){o.busy=H.B[k].busy;o.dthe=H.B[k].the;return fill(H.WHY.distracted,o)}   /* a distraction earlier in this run used up the time */
+    return fill(H.WHY[info],o);
+  });
+  return{show:show,clear:function(){show('')}};
+})();
 /* ================= flow (Step 6): title screen, cat selection, win moment, stats window, end screen ================= */
 var flow=(function(){
   var F=CFG.FLOW,W=CFG.WORLD,ov=$('#ov'),main=$('main'),svg=$('#m'),catPos=$('#catPos'),
@@ -2020,7 +2103,7 @@ var flow=(function(){
   /* anything that stops the game from taking input: an overlay, the win moment, or the title screen */
   function locked(){return !!openId||winning||mode==='title'}
   function lockAll(){var v=locked();ui.lock(v);tools.lock(v);game.applyBrain()}
-  function snapshot(){var m=game.engine.state();return{stress:m.stress,fullness:m.fullness,t:m.t,behaviors:m.behaviors.map(function(b){return{id:b.id,L:b.L}})}}
+  function snapshot(){var m=game.engine.state();return{stress:m.stress,fullness:m.fullness,t:m.t,behaviors:m.behaviors.map(function(b){return{id:b.id,L:b.L,rung:b.rung,type:b.type}})}}
 
   /* ---- overlay: one container, several panels, focus trapped inside, page behind made inert ---- */
   function openOv(id,m,opener){
@@ -2081,7 +2164,7 @@ var flow=(function(){
     var row=$('#row3'),zone=$('#zone'),src=$('#cat'),clones=[];
     IDS.forEach(function(id,i){
       var I=CFG.INTRO[id],name=CFG.CATS[id].name,pick=document.createElement('div'),cf=document.createElement('div'),tag=document.createElement('span'),
-          b=document.createElement('div'),lv=document.createElement('span'),tx=document.createElement('p'),btn=document.createElement('button'),
+          b=document.createElement('div'),tx=document.createElement('p'),btn=document.createElement('button'),
           sv=document.createElementNS(NS,'svg'),g=document.createElementNS(NS,'g'),sh=document.createElementNS(NS,'ellipse'),c=src.cloneNode(true);
       /* the cat: a clone of the in-game rig, recoloured by data-variant */
       [].forEach.call(c.querySelectorAll('[id]'),function(n){n.removeAttribute('id')});
@@ -2094,10 +2177,9 @@ var flow=(function(){
       pick.className='pick';pick.dataset.cat=id;pick.appendChild(cf);pick.appendChild(tag);row.appendChild(pick);picks[id]=pick;
       /* the thought bubble, with the real Choose button inside (keyboard and touch use it; the mouse can also just click the cat) */
       b.className='tbub';b.id='tb-'+id;b.style.setProperty('--tx',((i+.5)/3*100).toFixed(1)+'%');
-      lv.className='dif dif-'+I.level.toLowerCase();lv.textContent='Difficulty: '+I.level;
       tx.id='tbt-'+id;tx.textContent=I.blurb;
       btn.type='button';btn.className='primary cbtn';btn.textContent='Choose '+name;btn.setAttribute('aria-describedby',tx.id);
-      b.appendChild(lv);b.appendChild(tx);b.appendChild(btn);zone.appendChild(b);bubs[id]=b;
+      b.appendChild(tx);b.appendChild(btn);zone.appendChild(b);bubs[id]=b;
       cf.addEventListener('pointerdown',function(e){lastPT=e.pointerType});
       cf.addEventListener('click',function(){if(choosing)return;if(lastPT==='mouse')choose(id);else show(id)});
       pick.addEventListener('pointerenter',function(e){if(e.pointerType==='mouse'&&!choosing)show(id)});
@@ -2121,8 +2203,9 @@ var flow=(function(){
     winning=false;pending=false;snap=null;$('#winb').hidden=true;
     game.selectCat(id,seed());          /* fresh conditioning model */
     cat.restart(F.START.x,F.START.y);   /* before machine.reset: the machine reads the cat's state */
-    machine.reset();tools.reset();      /* machine, treat supply, cooldowns, tool effects */
+    machine.reset();tools.reset();      /* machine, cooldowns, tool effects */
     if(bubbles)bubbles.reset();         /* thought-bubble clock and history */
+    coach.clear();ui.say('Ready.');
     var s=document.querySelector('#dbgCat select');if(s)s.value=id;
   }
   function newGame(id){
@@ -2170,8 +2253,7 @@ var flow=(function(){
     game.setGate(function(){return !locked()});
     machine.onRunEnd(function(r){
       if(mode!=='play'||winning||r.outcome!=='success')return;
-      if(r.distractions>0){ui.say('The door is open, but the cat got distracted by the plant or the box on the way, so this run does not count. Train the distractions away and try again.');return}
-      ui.say('Clean run! The padlock shatters, the cage door swings open, and the cat walks free.');
+      ui.say('The padlock shatters, the cage door swings open, and '+CFG.CATS[cur].name+' walks free!');
       snap=snapshot();
       if(openId)pending=true;else win(false);
     });
@@ -2318,7 +2400,7 @@ var debug=(function(){
     btn(rowC,p[0],function(){noRoam();cat.reset();if(p[1])cat.setPose(p[1]);else cat.wander()});
   });
   var sel=document.createElement('select');sel.setAttribute('aria-label','Cat (laser response and conditioning parameters)');
-  Object.keys(CFG.CATS).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=CFG.CATS[k].name+' (laser '+CFG.CATS[k].laser+', lag '+CFG.CATS[k].lag+'s)';sel.appendChild(o)});
+  Object.keys(CFG.CATS).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=CFG.CATS[k].name+' (task offset '+CFG.CATS[k].taskOffset+')';sel.appendChild(o)});
   sel.addEventListener('change',function(){game.selectCat(sel.value)});rowC.appendChild(sel);
   [['Press button','pressButton'],['Lie on pad','lieOnPad'],['Paw crank','pawCrank'],['Press see-saw','pressSeesaw'],['Paw plant','pawPlant'],
    ['Jump in box','jumpBox'],['Flinch','flinch'],['Eat','eat'],['Petted','petted'],['Hide','hide']].forEach(function(p){
@@ -2364,24 +2446,25 @@ var debug=(function(){
   $('#dbgScript').addEventListener('change',function(e){script.on=e.target.checked;if(script.on){$('#dbgBrain').checked=false;game.applyBrain()}});
   /* ---- Step 4: conditioning readout and test controls ---- */
   var rowT=$('#dbgTrain'),E4=game.engine;
-  btn(rowT,'Refill treats',function(){tools.refill()});btn(rowT,'Clear cooldowns',function(){tools.clear()});
-  btn(rowT,'Set trained (L at cap)',function(){E4.preset('trained')});
+  btn(rowT,'Clear cooldowns',function(){tools.clear()});
+  btn(rowT,'Set trained (last rung)',function(){E4.preset('trained')});
   btn(rowT,'Reset levels',function(){E4.preset('fresh')});
   function bar(v,n){var k=Math.round(clamp(v,0,1)*n),o='';while(o.length<k)o+='\u2588';while(o.length<n)o+='\u2591';return o}
   function pad(x,n){x=String(x);while(x.length<n)x+=' ';return x}
   function modelText(){
     var m=E4.state(),st=m.stats,tg=E4.target(),h,L=[];
     L.push(m.cat.name+'   t '+m.t.toFixed(0)+' s   brain '+(m.brain?'on':'off'));
-    L.push('stress   '+bar(m.stress,16)+' '+m.stress.toFixed(2)+'   (hides at '+CFG.STRESS_HIDE+')');
-    L.push('fullness '+bar(m.fullness,16)+' '+m.fullness.toFixed(2));
-    L.push('');L.push(pad('behavior',9)+pad('level',20)+pad('cap/floor',11)+pad('armed',7)+pad('near',7)+'next roll');
+    L.push('stress   '+bar(m.stress,16)+' '+m.stress.toFixed(2)+'   (measured only; hides at '+CFG.STRESS_HIDE+')');
+    L.push('fullness '+bar(m.fullness,16)+' '+m.fullness.toFixed(2)+'   (measured only)');
+    L.push('');L.push(pad('behavior',9)+pad('level',20)+pad('rung',8)+pad('armed',7)+pad('near',7)+pad('next roll',11)+(m.run.no?'this run':''));
     m.behaviors.forEach(function(b){
-      var it=m.items[b.id],n=cat.nearTime(b.anchor),nx=n>0&&it.armed?(it.rollAt-n>0?'in '+(it.rollAt-n).toFixed(1)+' s':'due'):'-';
-      L.push(pad(b.id,9)+pad(bar(b.L,10)+' '+b.L.toFixed(2),20)+pad(b.cap.toFixed(2)+'/'+b.floor.toFixed(2),11)+pad(it.armed?'yes':'no',7)+pad(n>0?n.toFixed(1)+'s':'-',7)+nx);
+      var it=m.items[b.id],n=cat.nearTime(b.anchor),nx=n>0&&it.armed?(it.rollAt===Infinity?'used':it.rollAt-n>0?'in '+(it.rollAt-n).toFixed(1)+' s':'due'):'-',ri=E4.runInfo(b.id);
+      L.push(pad(b.id,9)+pad(bar(b.L,10)+' '+b.L.toFixed(2),20)+pad(b.rung+'/'+b.top,8)+pad(it.armed?'yes':'no',7)+pad(n>0?n.toFixed(1)+'s':'-',7)+pad(nx,11)+(ri?(ri==='hit'||ri==='missed'?'rolled ('+ri+')':'not rolled ('+ri+')'):''));
     });
     L.push('');
-    L.push('credit goes to: '+(tg?tg.id+(tg.end===null?' (running)':' (ended '+(m.t-tg.end).toFixed(1)+' s ago)'):'nothing (a reward now is for nothing)'));
-    L.push('treats '+st.treats+'  pets '+st.pets+'  sprays '+st.sprays+'  buzzes '+st.buzzes+'  rewards-for-nothing '+st.nothing+'  extinctions '+st.extinct+'  hides '+st.hides+'  interactions '+st.interactions);
+    L.push('credit goes to: '+(tg?tg.id+(tg.end===null?' (running)':' (ended '+(m.t-tg.end).toFixed(1)+' s ago)'):'nothing (a reward now changes nothing)')+
+      '   action length: '+(m.run.no?'full (run '+m.run.no+' active)':'short ('+CFG.ENGINE.SHORT_ACTION+' s cap)'));
+    L.push('treats '+st.treats+'  pets '+st.pets+'  sprays '+st.sprays+'  buzzes '+st.buzzes+'  tools-for-nothing '+st.nothing+'  hides '+st.hides+'  interactions '+st.interactions);
     L.push('');L.push(m.log.length?m.log.join('\n'):'(no rolls yet)');
     return L.join('\n');
   }
@@ -2406,10 +2489,10 @@ var sim=(function(){
   var TRAINERS={
     careful:{react:function(e,kind){
       var m=e.state(),c=m.cat;
-      if(kind==='task')e.reward(c.pet>c.treat||m.fullness>.7?'pet':'treat');
-      else if(m.stress<.5)e.punish(c.spray<.6?'spray':'buzzer');
+      if(kind==='task'){e.reward('treat');e.reward('pet')}   /* Step 12b: both rewards, one rung each (Step 14 adds cooldowns and the run model) */
+      else if(m.stress<.5){e.punish('spray');e.punish('buzzer')}
     },idle:null},
-    rewardAll:{react:function(e){var m=e.state();e.reward(m.fullness<.9&&m.cat.treat>=m.cat.pet?'treat':'pet')},idle:function(e){var m=e.state();e.reward(m.fullness<.9?'treat':'pet')}},
+    rewardAll:{react:function(e){e.reward('treat')},idle:function(e){e.reward('treat')}},
     punishAll:{react:function(e){e.punish('spray')},idle:function(e){e.punish('spray')}}
   };
   function runOne(catId,trainerId,seed){
