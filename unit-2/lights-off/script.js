@@ -76,22 +76,67 @@
     }
     return out;
   }
-  // Bottom-row pattern (columns 1–5 that are on, e.g. "1,2") → fewest top-row presses.
+  // Bottom-row pattern (columns 1–5 that are on, e.g. "1,2") → the top-row presses that
+  // finish the puzzle in the fewest total presses (top-row presses + the second chase).
+  // Each pattern has 4 working top-row sets; ties go to fewer top-row presses.
   function lookupTable() {
-    var best = {};
+    var best = {}, cost = {};
     for (var s = 1; s < 32; s++) {
       var b = emptyBoard(), cols = [], c;
       for (c = 0; c < N; c++) if (s & (1 << c)) { applyPress(b, c); cols.push(c + 1); }
-      chase(b);
+      var total = cols.length + chase(b).length;
       var bottom = [];
       for (c = 0; c < N; c++) if (b[(N - 1) * N + c]) bottom.push(c + 1);
       var key = bottom.join(',');
-      if (key && (!best[key] || cols.length < best[key].length)) best[key] = cols;
+      if (key && (!best[key] || total < cost[key] || (total === cost[key] && cols.length < best[key].length))) {
+        best[key] = cols; cost[key] = total;
+      }
     }
     return best;
   }
+  var LOOKUP = null;
+  // The two ways to fix the bottom row; both return top-row cells (0–4) to press.
+  function bottomOf(b) { var out = []; for (var c = 0; c < N; c++) out.push(b[(N - 1) * N + c]); return out; }
+  function shortcutPresses(bottom) {
+    var rules = [[3, 4], [1, 4], [3]], count = {}, out = [];
+    for (var c = 0; c < 3; c++) if (bottom[c]) rules[c].forEach(function (t) { count[t] = (count[t] || 0) + 1; });
+    Object.keys(count).forEach(function (t) { if (count[t] % 2) out.push(+t); });
+    return out.sort();
+  }
+  function lookupPresses(bottom) {
+    var key = [];
+    bottom.forEach(function (on, c) { if (on) key.push(c + 1); });
+    return (LOOKUP[key.join(',')] || []).map(function (col) { return col - 1; });
+  }
+
+  /* ---------- Solver ---------- */
+  // Press order doesn't matter, and once the top-row presses are chosen the chase decides
+  // every other press. So try all 32 top-row press sets; exactly 4 solve a solvable board.
+  function allSolutions(b) {
+    var sols = [];
+    for (var s = 0; s < 32; s++) {
+      var x = b.slice(), tops = [];
+      for (var c = 0; c < N; c++) if (s & (1 << c)) { applyPress(x, c); tops.push(c); }
+      var rest = chase(x);
+      if (allOff(x)) sols.push(tops.concat(rest));
+    }
+    return sols.sort(function (p, q) { return p.length - q.length; });
+  }
+  function fewestSolution(b) { return allSolutions(b)[0] || []; }
+  function fewest(b) { return fewestSolution(b).length; }
+  // Presses the algorithm makes from board b: chase, fix the bottom row, chase again.
+  function algorithmMoves(b, method) {
+    var x = b.slice(), n = chase(x).length;
+    if (!allOff(x)) {
+      var tops = (method === 'lookup' ? lookupPresses : shortcutPresses)(bottomOf(x));
+      tops.forEach(function (t) { applyPress(x, t); });
+      n += tops.length + chase(x).length;
+    }
+    return n;
+  }
+
   function fillLookupTable() {
-    var best = lookupTable(), tb = document.querySelector('#lookup tbody');
+    var best = LOOKUP, tb = document.querySelector('#lookup tbody');
     Object.keys(best).sort(function (a, b) { return a.length - b.length || (a < b ? -1 : 1); })
       .forEach(function (key) {
         var tr = document.createElement('tr');
@@ -175,9 +220,9 @@
   function clearPreview() { rings.forEach(function (r) { r.classList.remove('will'); }); }
 
   /* ---------- Game state ---------- */
-  var board = emptyBoard(), startBoard = [], moves = 0, locked = true;
+  var board = emptyBoard(), startBoard = [], moves = 0, locked = true, puzzleFewest = 0;
   var mode = 'practice', practiceLevel = 'easy';
-  var running = false, endTime = 0, timer = null, solved = 0, totalMoves = 0;
+  var running = false, endTime = 0, timer = null, solved = 0, totalMoves = 0, totalFewest = 0;
 
   function render() {
     for (var i = 0; i < TOTAL; i++) {
@@ -192,6 +237,9 @@
     $('tMoves').textContent = moves;
     $('tSolved').textContent = solved;
     $('tTotal').textContent = totalMoves;
+    $('pFewest').textContent = puzzleFewest;
+    $('tFewest').textContent = puzzleFewest;
+    if (DEV) devRender();
   }
 
   function say(t) { var l = $('live'); l.textContent = ''; setTimeout(function () { l.textContent = t; }, 30); }
@@ -201,6 +249,7 @@
 
   function loadBoard(b) {
     board = b; startBoard = b.slice(); moves = 0; locked = false;
+    puzzleFewest = fewest(b);
     clearPreview(); render();
   }
   function loadPuzzle(level) {
@@ -220,11 +269,14 @@
     locked = true; render(); chime();
     if (mode === 'practice') {
       showMsg('<h2>Solved in ' + moves + ' move' + (moves === 1 ? '' : 's') + '!</h2>' +
+        '<p class="compare">You: <strong>' + moves + '</strong> · Fewest possible: <strong>' + puzzleFewest + '</strong>' +
+        (moves === puzzleFewest ? ' · You matched it!' : '') + '</p>' +
         '<p>Did you rely on hunches and trial and error (a heuristic) or follow a step-by-step procedure (an algorithm)? Press <strong>Restart this puzzle</strong> to try the other way on the same board.</p>');
-      say('Solved in ' + moves + ' moves. All lights are off.');
+      say('Solved in ' + moves + ' moves. The fewest possible was ' + puzzleFewest + '.');
     } else {
-      solved++; totalMoves += moves; render();
-      showMsg('<p><strong>Puzzle ' + solved + ' solved in ' + moves + ' move' + (moves === 1 ? '' : 's') + '.</strong> Next puzzle loading.</p>');
+      solved++; totalMoves += moves; totalFewest += puzzleFewest; render();
+      showMsg('<p><strong>Puzzle ' + solved + ' solved in ' + moves + ' move' + (moves === 1 ? '' : 's') +
+        '</strong> (fewest possible: ' + puzzleFewest + '). Next puzzle loading.</p>');
       say('Solved. Next puzzle.');
       setTimeout(function () {
         if (running) { var lv = timedLevel(); hideMsg(); loadPuzzle(lv); say('New ' + LEVELS[lv].label.toLowerCase() + ' puzzle.'); }
@@ -260,7 +312,7 @@
     if (Date.now() >= endTime) endRound();
   }
   $('startBtn').addEventListener('click', function () {
-    solved = 0; totalMoves = 0; running = true; hideMsg();
+    solved = 0; totalMoves = 0; totalFewest = 0; running = true; hideMsg();
     endTime = Date.now() + ROUND * 1000;
     $('startBtn').hidden = true;
     loadPuzzle(timedLevel()); tick();
@@ -275,6 +327,7 @@
     $('tTime').textContent = '0';
     showMsg('<h2>Time is up!</h2><p>Puzzles solved: <strong>' + solved + '</strong>. Moves on solved puzzles: <strong>' + totalMoves +
       '</strong>. Average moves per solved puzzle: <strong>' + avg + '</strong>.</p>' +
+      (solved ? '<p class="compare">Your moves: <strong>' + totalMoves + '</strong> · Fewest possible for those puzzles: <strong>' + totalFewest + '</strong></p>' : '') +
       '<p>Which approach did you use under time pressure, and did it change as the clock ran down?</p>');
     $('startBtn').textContent = 'Play again';
     $('startBtn').hidden = false;
@@ -293,8 +346,8 @@
     if (m === 'practice') {
       loadPuzzle(practiceLevel);
     } else {
-      solved = 0; totalMoves = 0; moves = 0;
-      board = scramble('easy'); startBoard = board.slice(); locked = true;
+      solved = 0; totalMoves = 0; totalFewest = 0; moves = 0;
+      board = scramble('easy'); startBoard = board.slice(); locked = true; puzzleFewest = fewest(board);
       $('tLevel').textContent = LEVELS.easy.label;
       $('tTime').textContent = ROUND;
       $('startBtn').textContent = 'Start timed round';
@@ -315,8 +368,28 @@
   });
 
   /* ---------- Debug tools (?dev) ---------- */
-  if (DEV) {
+  var devMarks = [], devShow = false;
+  function devRender() {
+    var sols = allSolutions(board), best = sols[0] || [];
+    devMarks.forEach(function (m, i) { m.classList.toggle('show', devShow && best.indexOf(i) >= 0); });
+    $('devInfo').textContent = allOff(board) ? 'Board is dark.' :
+      'From here: fewest ' + best.length + ' · Algorithm 1 (shortcut) ' + algorithmMoves(board, 'shortcut') +
+      ' · Algorithm 2 (lookup) ' + algorithmMoves(board, 'lookup') +
+      ' · all 4 solutions: ' + sols.map(function (p) { return p.length; }).join(', ') +
+      '. Puzzle fewest (from the start): ' + puzzleFewest + '.';
+  }
+  function initDev() {
     $('devBar').hidden = false;
+    $('devInfo').hidden = false;
+    cells.forEach(function (g, i) {
+      var x = (i % N) * 100, y = Math.floor(i / N) * 100;
+      devMarks.push(el('circle', { cx: x + 80, cy: y + 20, r: 8, 'class': 'dev-mark' }, g));
+    });
+    $('devShowSol').addEventListener('click', function () {
+      devShow = !devShow;
+      this.setAttribute('aria-pressed', devShow ? 'true' : 'false');
+      devRender();
+    });
     $('devSolve').addEventListener('click', function () {
       if (locked) return;
       board = emptyBoard(); moves++; render(); onSolved();
@@ -324,10 +397,13 @@
     $('devTime').addEventListener('click', function () {
       if (running) endTime = Date.now() + 10000;
     });
+    $('devSolve').textContent = 'Turn all off (dev)';
   }
 
   /* ---------- Start ---------- */
+  LOOKUP = lookupTable();
   buildBoard();
   fillLookupTable();
+  if (DEV) initDev();
   setMode(params.get('mode') === 'timed' ? 'timed' : 'practice');
 })();

@@ -109,6 +109,7 @@ body.glow-blue {
 .msg > :first-child { margin-top: 0; }
 .msg > :last-child { margin-bottom: 0; }
 .msg h2 { font-size: 1.1rem; }
+.compare { color: var(--heading); font-variant-numeric: lining-nums tabular-nums; }
 
 .strategy { margin-bottom: 16px; }
 .strategy summary {
@@ -136,6 +137,8 @@ body.glow-blue {
 }
 
 .dev-bar { justify-content: flex-start; }
+.dev-mark { fill: var(--sage); stroke: var(--bg); stroke-width: 2; display: none; pointer-events: none; }
+.dev-mark.show { display: inline; }
 
 .sr-only {
   position: absolute;

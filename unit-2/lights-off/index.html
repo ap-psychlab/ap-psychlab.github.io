@@ -53,6 +53,7 @@
       <section id="panelPractice">
         <div class="stats">
           <div class="stat"><span>Moves</span><strong id="pMoves">0</strong></div>
+          <div class="stat"><span>Fewest possible</span><strong id="pFewest">0</strong></div>
         </div>
         <div class="row seg-group" id="diffSeg" role="group" aria-label="Difficulty">
           <button class="btn ghost seg" type="button" data-level="easy" aria-pressed="true">Easy</button>
@@ -83,14 +84,14 @@
               <tr><td>Column 3</td><td>4</td></tr>
             </tbody>
           </table>
-          <p class="hint">If a top-row cell comes up twice, skip it: two presses cancel out. Easier to remember, but often takes more presses.</p>
+          <p class="hint">If a top-row cell comes up twice, skip it: two presses cancel out. Easier to remember, but sometimes takes more presses.</p>
           <h3>Algorithm 2: Chase + full lookup</h3>
           <p>Find the exact bottom-row pattern and press the listed top-row cells.</p>
           <table id="lookup">
             <thead><tr><th>Bottom-row lights on (columns)</th><th>Press in top row (columns)</th></tr></thead>
             <tbody></tbody>
           </table>
-          <p class="hint">More to remember, but fewer presses. Columns are numbered 1 to 5 from the left; top-row presses can be made in any order.</p>
+          <p class="hint">More to remember, but never more presses than the shortcut, and sometimes fewer. Columns are numbered 1 to 5 from the left; top-row presses can be made in any order.</p>
         </details>
       </section>
 
@@ -101,6 +102,7 @@
           <div class="stat"><span>Difficulty</span><strong class="word" id="tLevel">Easy</strong></div>
           <div class="stat"><span>Solved</span><strong id="tSolved">0</strong></div>
           <div class="stat"><span>Moves</span><strong id="tMoves">0</strong></div>
+          <div class="stat"><span>Fewest possible</span><strong id="tFewest">0</strong></div>
           <div class="stat"><span>Total moves</span><strong id="tTotal">0</strong></div>
         </div>
         <div class="row">
@@ -112,7 +114,9 @@
       <div class="row dev-bar" id="devBar" hidden>
         <button class="btn ghost" type="button" id="devSolve">Turn all off (dev)</button>
         <button class="btn ghost" type="button" id="devTime">Time left 10 s (dev)</button>
+        <button class="btn ghost" type="button" id="devShowSol" aria-pressed="false">Show fewest-moves solution (dev)</button>
       </div>
+      <p class="hint dev-info" id="devInfo" hidden></p>
     </aside>
   </div>
 
