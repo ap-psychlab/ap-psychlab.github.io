@@ -33,7 +33,7 @@ const CONFIG = {
   APEX_V: 90, APEX_G: .55,              // lighter gravity near the top of a held jump
   CUT: .4,                              // releasing jump early keeps this much upward speed
   MAXFALL: 780, COYOTE: .09, BUFFER: .12,
-  BOXW: 20, BOXH: 36,
+  BOXW: 20, BOXH: 34,                  // BOXH is only drawn by the ?dev hitbox view
   // Difficulty runs from the first value (ground) to the second (summit).
   DIFF: {
     RISE: [70, 98],                     // average height between platforms, px
@@ -571,15 +571,18 @@ function step(dt) {
   }
 }
 
-/* ==== SECTION: Hero sprite and animation (sheet unchanged) ==== */
-const CW = 33, CH = 41, AX = 20, AY = 41;                         // cell size and anchor (face column, bottom of feet)
-const ANIM = { idle: { f: [0], fps: 1 }, walk: { f: [0, 1, 2, 3], fps: 7 }, run: { f: [4, 5, 6, 7], fps: 12 },
-  jump: { f: [8] }, fall: { f: [9] }, land: { f: [10, 11], fps: 14 } };
+/* ==== SECTION: Hero sprite and animation (fox sheet) ==== */
+// assets/fox-sheet.png: 6 columns x 4 rows of 51x46 cells. Every frame shares one feet line (bottom row) and one
+// nose column (49), so frames swap without jitter. Rows: idle, walk, run, jump (crouch, takeoff, rise, peak, fall, land).
+const CW = 51, CH = 46, COLS = 6, AX = 30, AY = 46;              // cell size and anchor (middle of the legs, bottom of feet)
+const ANIM = { idle: { f: [0, 1, 2, 3, 4, 5], fps: 6 }, walk: { f: [6, 7, 8, 9, 10, 11], fps: 11 },
+  run: { f: [12, 13, 14, 15, 16, 17], fps: 15 }, jump: { f: [19, 20], fps: 12, once: true }, peak: { f: [21] },
+  fall: { f: [22] }, land: { f: [18, 23], fps: 14, once: true } };
 const img = new Image();
 let rimSheet = null;
 function animate(dt) {
   const h = hero; let a;
-  if (!h.onGround) a = h.vy > 60 ? 'jump' : 'fall';
+  if (!h.onGround) a = h.vy > 140 ? 'jump' : h.vy > -140 ? 'peak' : 'fall';
   else if (h.landT > 0 && Math.abs(h.vx) < 120) { h.landT -= dt; a = 'land'; }
   else if (Math.abs(h.vx) > 5) { h.landT = 0; a = Math.abs(h.vx) > CONFIG.WALK + 10 ? 'run' : 'walk'; }
   else { h.landT = 0; a = 'idle'; }
@@ -588,11 +591,11 @@ function animate(dt) {
 }
 function frameOf(name, t) {
   const A = ANIM[name]; if (A.f.length === 1) return A.f[0];
-  const i = Math.floor(t * A.fps); return name === 'land' ? A.f[Math.min(i, A.f.length - 1)] : A.f[i % A.f.length];
+  const i = Math.floor(t * A.fps); return A.once ? A.f[Math.min(i, A.f.length - 1)] : A.f[i % A.f.length];
 }
 function drawSprite(f, x, y, face, src) {
   g.save(); g.translate(x, y); g.scale(face, 1);
-  g.drawImage(src || img, (f % 4) * CW, Math.floor(f / 4) * CH, CW, CH, -AX, -AY, CW, CH); g.restore();
+  g.drawImage(src || img, (f % COLS) * CW, Math.floor(f / COLS) * CH, CW, CH, -AX, -AY, CW, CH); g.restore();
 }
 // Moonlit rim: a light-tinted copy of the sheet, drawn 1 px out in four directions behind the hero at night
 function buildRim() {
@@ -1054,6 +1057,6 @@ function start() {
   last = performance.now(); requestAnimationFrame(frame);
 }
 img.onload = () => requestAnimationFrame(() => setTimeout(start, 0));
-img.onerror = () => { gateText.textContent = 'Could not load assets/hero-sheet.png'; };
-img.src = 'assets/hero-sheet.png';
+img.onerror = () => { gateText.textContent = 'Could not load assets/fox-sheet.png'; };
+img.src = 'assets/fox-sheet.png';
 })();
