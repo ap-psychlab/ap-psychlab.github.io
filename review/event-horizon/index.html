@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Horizon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/theme.css">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<main class="wide eh">
+  <header class="eh-head">
+    <h1>Event Horizon</h1>
+    <p class="hint">Click the ship, then walk with the arrow keys or WASD.</p>
+  </header>
+
+  <div class="eh-stage" id="stage" tabindex="0" role="application" aria-label="Event Horizon. Arrow keys or W, A, S, D walk.">
+    <svg id="ship" class="eh-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Top-down view of a brain-shaped starship near a black hole. A corridor runs down the middle from the engines to the command center, with two locked system rooms on each side."></svg>
+    <p class="eh-focus" aria-hidden="true">Click the ship to use the keyboard</p>
+  </div>
+
+  <!-- Test tools: shown only with ?dev in the address -->
+  <section class="card eh-dev" id="dev" aria-label="Test tools" hidden>
+    <div class="row">
+      <strong>Test tools</strong>
+      <label><input type="checkbox" id="devGrid"> Walkable grid</label>
+      <button class="btn ghost" type="button" id="devDoors" aria-pressed="false">Open all doors</button>
+      <label>Go to <select id="devGo"></select></label>
+      <span class="eh-devpos" id="devPos"></span>
+    </div>
+  </section>
+
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</main>
+</body>
+</html>
