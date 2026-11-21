@@ -11,26 +11,48 @@
 <link rel="stylesheet" href="style.css">
 <script src="script.js" defer></script>
 </head>
-<body>
-<main class="wide">
-  <h1>Lights Off</h1>
-  <p class="hint">Press a light to flip it and its up, down, left and right neighbors. Turn every light off to win.</p>
-
-  <div class="row toolbar">
-    <div class="row seg-group" role="group" aria-label="Game mode">
-      <button class="btn ghost seg" type="button" id="modeTutorial" aria-pressed="false">Tutorial</button>
-      <button class="btn ghost seg" type="button" id="modePractice" aria-pressed="true">Practice</button>
-      <button class="btn ghost seg" type="button" id="modeTimed" aria-pressed="false">Timed (90 s)</button>
+<body class="layout-b">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <h1>Lights Off</h1>
+      <p class="tagline">Press a light to flip it and its neighbors. Turn every light off.</p>
     </div>
-    <div class="row seg-group color-group" role="group" aria-labelledby="colorLabel">
-      <span class="group-label" id="colorLabel">Light color:</span>
-      <button class="btn ghost seg swatch" type="button" id="colorYellow" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" class="dot dot-yellow"/></svg>Yellow</button>
-      <button class="btn ghost seg swatch" type="button" id="colorBlue" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" class="dot dot-blue"/></svg>Blue</button>
-      <label class="btn ghost seg swatch custom" id="customLabel"><input type="color" id="colorPick" aria-label="Custom light color">Custom</label>
+    <div class="modes" role="group" aria-label="Game mode">
+      <button class="mode" type="button" id="modeTutorial" aria-pressed="false">Tutorial</button>
+      <button class="mode" type="button" id="modePractice" aria-pressed="true">Practice</button>
+      <button class="mode" type="button" id="modeTimed" aria-pressed="false">Timed<span class="mode-extra"> (90 s)</span></button>
     </div>
-    <button class="btn alt" type="button" id="soundBtn" aria-pressed="true">Sound: On</button>
+    <div class="tools">
+      <button class="icon-btn" type="button" id="soundBtn" aria-pressed="true" aria-label="Sound" title="Sound on">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M11 5 6 9H3v6h3l5 4z"/><path class="snd-on" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="snd-on" d="M18.5 5.5a9 9 0 0 1 0 13"/><path class="snd-off" d="m16 9 6 6"/><path class="snd-off" d="m22 9-6 6"/></svg>
+      </button>
+      <div class="settings-wrap">
+        <button class="icon-btn" type="button" id="settingsBtn" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        </button>
+        <div class="settings card" id="settings" role="dialog" aria-label="Settings" hidden>
+          <h2>Settings</h2>
+          <p class="set-label" id="colorLabel">Light color</p>
+          <div class="swatches" role="group" aria-labelledby="colorLabel">
+            <button class="swatch" type="button" data-color="yellow" aria-pressed="true"><span class="dot dot-yellow" aria-hidden="true"></span>Yellow</button>
+            <button class="swatch" type="button" data-color="green" aria-pressed="false"><span class="dot dot-green" aria-hidden="true"></span>Green</button>
+            <button class="swatch" type="button" data-color="blue" aria-pressed="false"><span class="dot dot-blue" aria-hidden="true"></span>Blue</button>
+            <button class="swatch" type="button" data-color="pink" aria-pressed="false"><span class="dot dot-pink" aria-hidden="true"></span>Pink</button>
+            <button class="swatch" type="button" data-color="purple" aria-pressed="false"><span class="dot dot-purple" aria-hidden="true"></span>Purple</button>
+          </div>
+          <p class="set-label" id="layoutLabel">Layout (for testing)</p>
+          <div class="segmented" role="group" aria-labelledby="layoutLabel">
+            <button type="button" data-layout="a" aria-pressed="false">A: tabs</button>
+            <button type="button" data-layout="b" aria-pressed="true">B: bar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+</header>
 
+<main class="wide">
   <div class="split">
     <div class="play">
       <svg class="board locked" id="board" viewBox="0 0 500 500" role="group" aria-label="Lights Off board, 5 by 5">
@@ -48,7 +70,7 @@
         <rect class="board-bg" x="0" y="0" width="500" height="500" rx="16"/>
       </svg>
       <p class="board-note" id="boardNote" aria-hidden="true" hidden></p>
-      <p class="hint board-hint">Tap a light, or use the arrow keys to move and Space or Enter to press. Hovering or focusing a light outlines what will flip.</p>
+      <p class="hint board-hint"><span class="rules">Press a light to flip it and its up, down, left and right neighbors. Turn every light off. </span>Tap a light, or use the arrow keys and Space or Enter. Hovering or focusing a light outlines what will flip.</p>
       <div class="legend" aria-label="Legend">
         <span><svg viewBox="0 0 100 100" aria-hidden="true"><g class="on"><rect x="2" y="2" width="96" height="96" rx="16" class="tile lit"/><circle cx="50" cy="50" r="46" class="halo"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light on</span>
         <span><svg viewBox="0 0 100 100" aria-hidden="true"><g><rect x="2" y="2" width="96" height="96" rx="16" class="tile"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light off</span>
@@ -61,28 +83,22 @@
       <!-- Practice -->
       <section id="panelPractice">
         <p class="hint tut-prompt">New here? Solve a few puzzles on your own first. Then open the <button class="linkish" type="button" id="tutLink">Tutorial</button> to learn an algorithm that always works.</p>
-        <div class="stats">
-          <div class="stat"><span>Moves</span><strong id="pMoves">0</strong></div>
-          <div class="stat"><span>Fewest possible</span><strong id="pFewest">0</strong></div>
+        <div class="stat-row">
+          <div class="stats">
+            <div class="stat"><span>Moves</span><strong id="pMoves">0</strong></div>
+            <div class="stat"><span>Fewest possible</span><strong id="pFewest">0</strong></div>
+          </div>
+          <button class="icon-btn" type="button" id="restartBtn" aria-label="Restart this puzzle" title="Restart this puzzle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
         </div>
-        <div class="row seg-group" id="diffSeg" role="group" aria-label="Difficulty">
-          <button class="btn ghost seg" type="button" data-level="easy" aria-pressed="true">Easy</button>
-          <button class="btn ghost seg" type="button" data-level="medium" aria-pressed="false">Medium</button>
-          <button class="btn ghost seg" type="button" data-level="hard" aria-pressed="false">Hard</button>
+        <div class="segmented" id="diffSeg" role="group" aria-label="Difficulty">
+          <button type="button" data-level="easy" aria-pressed="true">Easy</button>
+          <button type="button" data-level="medium" aria-pressed="false">Medium</button>
+          <button type="button" data-level="hard" aria-pressed="false">Hard</button>
         </div>
-        <p class="hint">Easy puzzles are scrambled with 3 to 4 presses, medium with 6 to 8, hard with 11 to 15. Changing the difficulty starts a new puzzle.</p>
-        <div class="row">
+        <p class="hint">Easy puzzles are scrambled with 3 to 4 presses, medium with 6 to 8, hard with 11 to 15.</p>
+        <div class="actions">
           <button class="btn" type="button" id="newBtn">New puzzle</button>
-          <button class="btn alt" type="button" id="restartBtn">Restart this puzzle</button>
-        </div>
-        <div class="row guide-row">
-          <button class="btn alt" type="button" id="guideBtn">Guide me (algorithm)</button>
-          <label class="algo-pick" for="algoSel">Algorithm
-            <select id="algoSel">
-              <option value="shortcut">1: Chase + shortcut (Recommended)</option>
-              <option value="lookup">2: Chase + full lookup</option>
-            </select>
-          </label>
+          <button class="btn alt" type="button" id="guideBtn">Guide me</button>
         </div>
         <div class="card guide-card" id="guideCard" hidden>
           <h2>Following the algorithm</h2>
@@ -94,21 +110,19 @@
         <div class="card msg stuck" id="stuckMsg" role="status" hidden>
           <p><strong>Stuck?</strong> Hunches are fast but don't always work. An algorithm always does.</p>
           <div class="row">
-            <button class="btn alt" type="button" id="stuckGuide">Guide me (algorithm)</button>
+            <button class="btn alt" type="button" id="stuckGuide">Guide me</button>
             <button class="btn ghost" type="button" id="stuckKeep">Keep trying</button>
           </div>
         </div>
         <div class="card msg" id="pMsg" role="status" hidden></div>
 
         <details class="card strategy">
-          <summary>Strategy: two algorithms</summary>
-          <p>An <strong>algorithm</strong> is a step-by-step procedure that always reaches a solution if you follow it exactly. Both of these work on every puzzle.</p>
+          <summary>How the algorithm works</summary>
+          <p>An <strong>algorithm</strong> is a step-by-step procedure that always reaches a solution if you follow it exactly. This one works on every puzzle.</p>
           <h3>Step 1: Chase the lights down</h3>
           <p>Find the highest row (rows 1 to 4) that still has lights on. Press the cell directly below each of those lights, in any order. Repeat, row by row, until rows 1 to 4 are dark.</p>
-          <h3>Step 2: Fix the bottom row</h3>
-          <p>If lights remain in row 5, press the top-row cells listed by one of the two algorithms below. Then chase the lights down again, and the board is solved.</p>
-          <h3>Algorithm 1: Chase + shortcut <span class="tag">Recommended</span></h3>
-          <p>Look only at columns 1, 2 and 3 of the bottom row. For each one that's on, press the matching top-row cells.</p>
+          <h3>Step 2: Fix the bottom row from the top</h3>
+          <p>If lights remain in row 5, look only at its columns 1, 2 and 3. For each light that's on, press its top-row cells:</p>
           <table>
             <thead><tr><th>Bottom-row light on</th><th>Press in top row (columns)</th></tr></thead>
             <tbody>
@@ -117,44 +131,34 @@
               <tr><td>Column 3</td><td>4</td></tr>
             </tbody>
           </table>
-          <p class="hint">If a top-row cell comes up twice, skip it: two presses cancel out. Easier to remember, but sometimes takes more presses.</p>
-          <h3>Algorithm 2: Chase + full lookup</h3>
-          <p>Find the exact bottom-row pattern and press the listed top-row cells.</p>
-          <table id="lookup">
-            <thead><tr><th>Bottom-row lights on (columns)</th><th>Press in top row (columns)</th></tr></thead>
-            <tbody></tbody>
-          </table>
-          <p class="hint">More to remember, but never more presses than the shortcut, and sometimes fewer. Columns are numbered 1 to 5 from the left; top-row presses can be made in any order.</p>
+          <p class="hint">If a top-row cell comes up twice, press it twice. Columns are numbered 1 to 5 from the left.</p>
+          <h3>Step 3: Chase again</h3>
+          <p>Chase the lights down once more, and the board is solved.</p>
         </details>
       </section>
 
       <!-- Tutorial (content is filled by script.js) -->
       <section id="panelTutorial" hidden>
         <p class="tut-count" id="tutCount">Step 1 of 7</p>
+        <div class="progress" id="tutProgress" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <h2 id="tutTitle" tabindex="-1">Two ways to solve a problem</h2>
-        <div class="stats" id="tutStats">
-          <div class="stat"><span>Moves</span><strong id="uMoves">0</strong></div>
-          <div class="stat"><span>Fewest possible</span><strong id="uFewest">0</strong></div>
+        <div class="stat-row" id="tutStats">
+          <div class="stats">
+            <div class="stat"><span>Moves</span><strong id="uMoves">0</strong></div>
+            <div class="stat"><span>Fewest possible</span><strong id="uFewest">0</strong></div>
+          </div>
+          <button class="icon-btn" type="button" id="tutRestart" aria-label="Restart this board" title="Restart this board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
         </div>
         <div class="tut-body" id="tutBody"></div>
-        <div class="row algo-row" id="tutAlgoRow" hidden>
-          <label class="algo-pick" for="tutAlgo">Algorithm
-            <select id="tutAlgo">
-              <option value="shortcut">1: Chase + shortcut (Recommended)</option>
-              <option value="lookup">2: Chase + full lookup</option>
-            </select>
-          </label>
-        </div>
         <div class="card guide-card" id="tutGuide" hidden>
           <p class="guide-note" id="tutNote" hidden></p>
           <p id="tutGuideText"></p>
         </div>
         <div class="tut-extra" id="tutExtra"></div>
         <div class="card msg" id="uMsg" role="status" hidden></div>
-        <div class="row tut-nav">
+        <div class="tut-nav">
           <button class="btn ghost" type="button" id="tutBack">Back</button>
-          <button class="btn alt" type="button" id="tutRestart">Restart this board</button>
-          <button class="btn" type="button" id="tutNext">Next</button>
+          <button class="btn" type="button" id="tutNext">Next step</button>
         </div>
       </section>
 
@@ -168,7 +172,8 @@
           <div class="stat"><span>Fewest possible</span><strong id="tFewest">0</strong></div>
           <div class="stat"><span>Total moves</span><strong id="tTotal">0</strong></div>
         </div>
-        <div class="row">
+        <p class="hint timed-hint">Solve as many puzzles as you can in 90 seconds. They get harder as you go.</p>
+        <div class="actions">
           <button class="btn" type="button" id="startBtn">Start timed round</button>
         </div>
         <div class="card msg" id="tMsg" role="status" hidden></div>

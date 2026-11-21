@@ -6,6 +6,8 @@
  *             uses its own seeded stream, so its puzzles repeat whatever came before
  * Public option:
  *   ?mode=tutorial | practice | timed   open in that mode (default: practice)
+ * Test option (while comparing layouts):
+ *   ?layout=a   open in layout A (tabs under the title bar); default B (modes inside the bar)
  *
  * Dev tools (?dev): Turn all off, Time left 10 s, Show fewest-moves solution, Show algorithm
  * steps, Solve one step, Solve all (algorithm), Load mental set board, tutorial Jump to step,
@@ -129,11 +131,24 @@
     return best;
   }
   var LOOKUP = null;
-  // The two ways to fix the bottom row; both return top-row cells (0–4) to press.
+  // Fixing the bottom row. The game teaches ONE algorithm, the shortcut: for each light that's
+  // on in columns 1–3 of the bottom row, press its top-row cells (column 1 → 4, 5; column 2 →
+  // 2, 5; column 3 → 4), even when a cell comes up twice. 'simple' (pairs cancelled) and
+  // 'lookup' (fewest total presses) are shortcuts a student may find; the classifier accepts them,
+  // and the wrap-up mentions them. All return top-row cells (0–4) to press.
+  var SHORTCUT_RULES = [[3, 4], [1, 4], [3]];
   function bottomOf(b) { var out = []; for (var c = 0; c < N; c++) out.push(b[(N - 1) * N + c]); return out; }
+  function shortcutGroups(bottom) {
+    var out = [];
+    for (var c = 0; c < 3; c++) if (bottom[c]) out.push({ col: c, tops: SHORTCUT_RULES[c].slice(), left: SHORTCUT_RULES[c].slice() });
+    return out;
+  }
   function shortcutPresses(bottom) {
-    var rules = [[3, 4], [1, 4], [3]], count = {}, out = [];
-    for (var c = 0; c < 3; c++) if (bottom[c]) rules[c].forEach(function (t) { count[t] = (count[t] || 0) + 1; });
+    return shortcutGroups(bottom).reduce(function (a, g) { return a.concat(g.tops); }, []);
+  }
+  function simplePresses(bottom) {
+    var count = {}, out = [];
+    shortcutPresses(bottom).forEach(function (t) { count[t] = (count[t] || 0) + 1; });
     Object.keys(count).forEach(function (t) { if (count[t] % 2) out.push(+t); });
     return out.sort();
   }
@@ -158,11 +173,13 @@
   }
   function fewestSolution(b) { return allSolutions(b)[0] || []; }
   function fewest(b) { return fewestSolution(b).length; }
+  var PRESSERS = { shortcut: shortcutPresses, simple: simplePresses, lookup: lookupPresses };
   // Presses the algorithm makes from board b: chase, fix the bottom row, chase again.
+  // method defaults to the taught algorithm ('shortcut'); 'simple' and 'lookup' for comparison.
   function algorithmMoves(b, method) {
     var x = b.slice(), n = chase(x).length;
     if (!allOff(x)) {
-      var tops = (method === 'lookup' ? lookupPresses : shortcutPresses)(bottomOf(x));
+      var tops = PRESSERS[method || 'shortcut'](bottomOf(x));
       tops.forEach(function (t) { applyPress(x, t); });
       n += tops.length + chase(x).length;
     }
@@ -170,13 +187,15 @@
   }
 
   /* ---------- Stepper: the algorithm's valid presses from any board ---------- */
-  // makeStepper(['shortcut']) follows one method; ['shortcut', 'lookup'] accepts either
-  // (for analyzing a player's presses later). step(b) returns the valid set, not one cell:
+  // makeStepper(['shortcut']) follows the taught algorithm; ['shortcut', 'simple', 'lookup']
+  // accepts any of them (the classifier). step(b) returns the valid set, not one cell:
   //   { phase: 'chase', row, cols, cells, from }   row = highest lit row (0–3); press below each light
-  //   { phase: 'bottom', cells, bottom, fresh }    top-row presses to fix the bottom row
+  //   { phase: 'bottom', cells, fresh, group, groups, repeat }  top-row presses to fix the bottom row
   //   { phase: 'done', cells: [] }
-  // pending (method → top-row cells still to press) is needed because after the first top-row
-  // press rows 1–2 light up again, and a stateless rule would jump back to chasing.
+  // pending (method → top-row cells still to press; a cell can appear twice) is needed because
+  // after the first top-row press rows 1–2 light up again, and a stateless rule would jump back
+  // to chasing. For 'shortcut' the presses are also kept per bottom-row light (groups), so the
+  // guide can take one light at a time: group = the first light with presses left.
   function chaseStep(b) {
     for (var r = 0; r < N - 1; r++) {
       var cols = [];
@@ -192,7 +211,8 @@
     return null;
   }
   function makeStepper(methods) {
-    var pending = null, afterTop = false;
+    var pending = null, afterTop = false, groups = null, pressedTops = [];
+    function removeOne(list, i) { var k = list.indexOf(i); if (k >= 0) list.splice(k, 1); }
     function open() { return pending ? methods.filter(function (m) { return pending[m] && pending[m].length; }) : []; }
     function finished() { return pending ? methods.filter(function (m) { return pending[m] && !pending[m].length; }) : []; }
     function step(b) {
@@ -204,12 +224,21 @@
         if (ch) { ch.again = afterTop; return ch; }
         // Rows 1–4 are dark and row 5 isn't: fill pending with each method's top-row presses.
         pending = {};
-        methods.forEach(function (m) { pending[m] = (m === 'lookup' ? lookupPresses : shortcutPresses)(bottomOf(b)); });
+        methods.forEach(function (m) { pending[m] = PRESSERS[m](bottomOf(b)); });
+        groups = methods.indexOf('shortcut') >= 0 ? shortcutGroups(bottomOf(b)) : null;
+        pressedTops = [];
         fresh = true;
       }
       var cells = [];
       open().forEach(function (m) { pending[m].forEach(function (t) { if (cells.indexOf(t) < 0) cells.push(t); }); });
       var res = { phase: 'bottom', cells: cells.sort(function (p, q) { return p - q; }), fresh: fresh, methods: open() };
+      if (groups && pending.shortcut && pending.shortcut.length) {
+        var g = groups.filter(function (x) { return x.left.length; })[0];
+        if (g) {
+          res.group = g; res.groups = groups;
+          res.repeat = g.left.filter(function (t) { return pressedTops.indexOf(t) >= 0; });
+        }
+      }
       // A method whose top-row presses are all made has moved on to the second chase.
       if (finished().length) {
         var ch2 = chaseStep(b);
@@ -220,29 +249,38 @@
     // Call with the board BEFORE press i. Returns true if i was one of the algorithm's steps.
     function note(b, i) {
       var s = step(b), ok = s.cells.indexOf(i) >= 0;
-      if (!ok) { pending = null; afterTop = false; return false; }
+      if (!ok) { pending = null; afterTop = false; groups = null; return false; }
       if (s.phase === 'chase') { afterTop = s.again; return true; }
-      if (s.chase && s.chase.cells.indexOf(i) >= 0) { pending = null; afterTop = true; return true; }
+      if (s.chase && s.chase.cells.indexOf(i) >= 0) { pending = null; groups = null; afterTop = true; return true; }
       methods.forEach(function (m) {
         if (!pending[m] || !pending[m].length || pending[m].indexOf(i) < 0) delete pending[m];
-        else pending[m] = pending[m].filter(function (t) { return t !== i; });
+        else removeOne(pending[m], i);
       });
+      if (groups) {
+        if (!pending.shortcut) groups = null;
+        else {
+          var g = groups.filter(function (x) { return x.left.indexOf(i) >= 0; })[0];
+          if (g) removeOne(g.left, i);
+        }
+      }
+      pressedTops.push(i);
       return true;
     }
-    function reset() { pending = null; afterTop = false; }
+    function reset() { pending = null; afterTop = false; groups = null; pressedTops = []; }
     return { step: step, note: note, reset: reset };
   }
 
   /* ---------- Classifier: which approach did the player use? (challenge) ---------- */
-  // Replay the presses through a stepper that accepts either method and mark each press as an
+  // Replay the presses through a stepper that accepts any method and mark each press as an
   // algorithm step (in the valid set at that moment) or not; then apply the rules (constants above).
+  var ANY_METHOD = ['shortcut', 'simple', 'lookup'];
   var APPROACH = {
     heuristic: 'Heuristic', algorithm: 'Algorithm',
     'switch': 'Heuristic, then algorithm', trial: 'Trial and error / unclear'
   };
   function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : /s$/.test(word) ? 'es' : 's'); }
   function classify(start, presses, fewestN) {
-    var b = start.slice(), st = makeStepper(['shortcut', 'lookup']), flags = [];
+    var b = start.slice(), st = makeStepper(ANY_METHOD), flags = [];
     presses.forEach(function (i) { flags.push(st.note(b, i)); applyPress(b, i); });
     var n = presses.length, algo = flags.filter(Boolean).length, sw = -1, k;
     for (k = 0; k + CLASS_RUN_MIN <= n; k++) {
@@ -269,16 +307,6 @@
         ' presses were algorithm steps, with no steady run of them.';
     }
     return { label: label, evidence: evidence, flags: flags, algoSteps: algo, switchAt: sw, slips: slips };
-  }
-
-  function fillLookupTable() {
-    var best = LOOKUP, tb = document.querySelector('#lookup tbody');
-    Object.keys(best).sort(function (a, b) { return a.length - b.length || (a < b ? -1 : 1); })
-      .forEach(function (key) {
-        var tr = document.createElement('tr');
-        tr.innerHTML = '<td>' + key.split(',').join(', ') + '</td><td>' + best[key].join(', ') + '</td>';
-        tb.appendChild(tr);
-      });
   }
 
   /* ---------- Sound (Web Audio) ---------- */
@@ -338,8 +366,14 @@
   // Algorithm-step highlight: a pulsing ring on every valid press (any order works), each with
   // an arrow from the light it chases. Drawn on a layer above the cells; ignores the pointer.
   var guideLayer = null;
-  function drawGuide(cellsToRing, from) {
+  // src: a bottom-row light being fixed (dashed ring, no pulse) in the bottom-row phase.
+  function drawGuide(cellsToRing, from, src) {
     while (guideLayer.firstChild) guideLayer.removeChild(guideLayer.firstChild);
+    if (src != null) {
+      var sx = (src % N) * 100, sy = Math.floor(src / N) * 100;
+      el('rect', { x: sx + 13, y: sy + 13, width: 74, height: 74, rx: 9, 'class': 'guide-case' }, guideLayer);
+      el('rect', { x: sx + 13, y: sy + 13, width: 74, height: 74, rx: 9, 'class': 'guide-src' }, guideLayer);
+    }
     cellsToRing.forEach(function (i, k) {
       var x = (i % N) * 100, y = Math.floor(i / N) * 100;
       var g = el('g', { 'class': 'guide' }, guideLayer);
@@ -381,7 +415,7 @@
   var mode = 'practice', practiceLevel = 'easy';
   var running = false, endTime = 0, timer = null, solved = 0, totalMoves = 0, totalFewest = 0;
   // Guided mode and the stuck alert (Practice)
-  var algoMethod = 'shortcut', stepper = makeStepper(['shortcut']), curStep = null, prevStep = null;
+  var stepper = makeStepper(['shortcut']), curStep = null, prevStep = null;
   var guiding = false, guideStartMoves = 0, guidedPresses = 0, offScript = 0, devSteps = false;
   var stuckShown = false, lowestLit = 0, flatPresses = 0;
   // Tutorial progress (see the Tutorial section)
@@ -396,12 +430,12 @@
     return !tut.hold && (tut.rings || tut.peek);
   }
   function render() {
-    var showRings = ringsWanted();
+    var showRings = ringsWanted(), ringed = showRings ? ringCells(curStep) : [];
     for (var i = 0; i < TOTAL; i++) {
       var on = board[i];
       cells[i].classList.toggle('on', on);
       tiles[i].classList.toggle('lit', on);
-      var mark = showRings && curStep.cells.indexOf(i) >= 0;
+      var mark = showRings && ringed.indexOf(i) >= 0;
       cells[i].setAttribute('aria-label', 'Row ' + (Math.floor(i / N) + 1) + ', column ' + (i % N + 1) + ', ' + (on ? 'on' : 'off') + (mark ? ', algorithm step' : ''));
       cells[i].setAttribute('aria-disabled', locked ? 'true' : 'false');
     }
@@ -414,15 +448,16 @@
     $('tFewest').textContent = puzzleFewest;
     $('uMoves').textContent = moves;
     $('uFewest').textContent = tut.hideFewest ? '?' : puzzleFewest;
-    drawGuide(showRings ? curStep.cells : [], showRings ? stepFrom(curStep) : null);
+    drawGuide(ringed, showRings ? stepFrom(curStep, ringed) : null,
+      showRings && curStep.group ? (N - 1) * N + curStep.group.col : null);
     $('legendGuide').classList.toggle('show', showRings);
     if (DEV) devRender();
   }
-  // Source light for each valid press (null for top-row presses, which chase nothing).
-  function stepFrom(st) {
+  // Source light for each ringed press (null for top-row presses, which chase nothing).
+  function stepFrom(st, ringed) {
     if (st.phase === 'chase') return st.from;
-    var out = st.cells.map(function () { return null; });
-    if (st.chase) st.chase.cells.forEach(function (c, k) { out[st.cells.indexOf(c)] = st.chase.from[k]; });
+    var out = ringed.map(function () { return null; });
+    if (st.chase) st.chase.cells.forEach(function (c, k) { var at = ringed.indexOf(c); if (at >= 0) out[at] = st.chase.from[k]; });
     return out;
   }
 
@@ -541,45 +576,39 @@
     if (st.again && prevStep && prevStep.phase === 'bottom') t = 'Top-row presses done. Now chase the lights down again. ' + t;
     return t;
   }
-  function shortcutText(bottom) {
-    var rules = [[3, 4], [1, 4], [3]], parts = [], count = {};
-    for (var c = 0; c < 3; c++) {
-      if (!bottom[c]) continue;
-      parts.push('column ' + (c + 1) + ' is on, so press top-row ' + colList(rules[c]));
-      rules[c].forEach(function (t) { count[t] = (count[t] || 0) + 1; });
-    }
-    var t = 'Shortcut (it looks only at columns 1 to 3 of the bottom row): ' + parts.join('; ') + '.', cancel = false;
-    // A top-row cell can come up at most twice (5 in columns 1 and 2, 4 in columns 1 and 3).
-    var twice = Object.keys(count).filter(function (k) { return count[k] === 2; }).map(Number);
-    if (twice.length) {
-      cancel = true;
-      t += twice.length === 1
-        ? ' Top-row ' + colList(twice) + ' comes up twice, so skip it: two presses cancel.'
-        : ' Top-row ' + colList(twice) + ' each come up twice, so skip them: two presses cancel.';
-    }
-    // One rule and nothing cancels: the rule already names the presses.
-    if (parts.length === 1 && !cancel) return t.slice(0, -1) + (Object.keys(count).length > 1 ? ', in any order.' : '.');
-    return t + ' ' + pressText(Object.keys(count).filter(function (k) { return count[k] % 2; }).map(Number).sort());
-  }
+  function uniq(list) { return list.filter(function (t, k) { return list.indexOf(t) === k; }).sort(function (a, b) { return a - b; }); }
   function pressText(cells) {
     return 'Press top-row ' + colList(cells) + (cells.length > 1 ? ', in any order.' : '.');
+  }
+  // Bottom-row phase, one bottom-row light at a time (the dashed ring marks it).
+  function bottomText(st) {
+    var g = st.group;
+    if (!g) return 'Keep going with the top row. ' + pressText(uniq(st.cells.filter(function (c) { return c < N; }))) + ' Then chase the lights down again.';
+    var t = '', col = g.col + 1, first = g.left.length === g.tops.length;
+    if (st.fresh) {
+      var lit = [];
+      bottomOf(board).forEach(function (on, c) { if (on) lit.push(c); });
+      t = 'Rows 1 to 4 are dark, but row 5 still has ' + (lit.length === 1 ? 'a light in column ' : 'lights in columns ') + colList(lit) +
+        '. The chase can\'t go further, because there\'s no row below, so the algorithm fixes it from the top. ' +
+        'Take each light in columns 1 to 3 of the bottom row, one at a time' +
+        (lit.some(function (c) { return c > 2; }) ? ' (columns 4 and 5 don\'t need a rule of their own)' : '') + '. ';
+    }
+    if (first) t += (st.fresh ? 'Column ' : 'Next: column ') + col + ' of the bottom row is on (dashed ring), so press top-row ' +
+      colList(g.tops) + (g.tops.length > 1 ? ', in any order.' : '.');
+    else t += 'Column ' + col + ': now press top-row ' + colList(uniq(g.left)) + '.';
+    if (st.repeat && st.repeat.length) t += ' Yes, top-row ' + colList(st.repeat) + ' again: the two presses cancel each other out, and that\'s fine. The algorithm still works.';
+    var more = st.groups.filter(function (x) { return x !== g && x.left.length; });
+    if (!more.length && g.left.length === 1) t += ' Then chase the lights down again.';
+    return t;
   }
   function guideText(st) {
     if (st.phase === 'chase') return chaseText(st);
     if (st.phase !== 'bottom') return '';
-    var tops = st.cells.filter(function (c) { return c < N; });
-    if (st.fresh) {
-      var bottom = bottomOf(board), lit = [];
-      bottom.forEach(function (on, c) { if (on) lit.push(c); });
-      var t = 'Rows 1 to 4 are dark, but row 5 still has ' + (lit.length === 1 ? 'a light in column ' : 'lights in columns ') + colList(lit) +
-        '. The chase can\'t go further, because there\'s no row below, so fix it from the top. ';
-      t += algoMethod === 'lookup'
-        ? 'Full lookup: the bottom-row pattern ' + lit.map(function (c) { return c + 1; }).join(', ') + ' is in the table. ' + pressText(tops)
-        : shortcutText(bottom);
-      return t + ' Then chase the lights down again.';
-    }
-    return 'Keep going with the top row. ' + pressText(tops) + ' Then chase the lights down again.';
+    return bottomText(st);
   }
+  // The presses the guide rings: in the bottom-row phase only the current light's top-row cells
+  // (any press in the pending list is still accepted as an algorithm step).
+  function ringCells(st) { return st.group ? uniq(st.group.left) : st.cells; }
   function updateGuideText(off) {
     var note = $('guideNote');
     note.hidden = !off;
@@ -607,18 +636,6 @@
   }
   $('guideBtn').addEventListener('click', startGuide);
   $('stopGuide').addEventListener('click', function () { endGuide(); render(); say('Guidance off.'); $('guideBtn').focus(); });
-  $('algoSel').addEventListener('change', function () {
-    setAlgorithm(this.value);
-    if (guiding) { stepper.reset(); prevStep = null; curStep = stepper.step(board); render(); updateGuideText(false); }
-  });
-  function setAlgorithm(m) {
-    algoMethod = m === 'lookup' ? 'lookup' : 'shortcut';
-    $('algoSel').value = algoMethod;
-    $('tutAlgo').value = algoMethod;
-    stepper = makeStepper([algoMethod]);
-    curStep = stepper.step(board); prevStep = null;
-    render();
-  }
 
   /* ---------- Stuck alert (Practice) ---------- */
   function checkStuck() {
@@ -679,8 +696,8 @@
     say((noteText ? noteText + ' ' : '') + t);
   }
   function tutAllows(i) {
-    if (tut.hold) { say('Choose an algorithm in the panel first.'); return false; }
-    if (tut.strict && curStep && curStep.cells.indexOf(i) < 0) { tutGuideRefresh('strict'); return false; }
+    if (tut.hold) return false;
+    if (tut.strict && curStep && ringCells(curStep).indexOf(i) < 0) { tutGuideRefresh('strict'); return false; }
     return true;
   }
   function tutLog(i, ok) {
@@ -690,8 +707,12 @@
   function tutAfterPress(ok) {
     if (tut.step === 2) tutGuideRefresh(null);
     else if (tut.step === 3) {
-      if (tut.s3 === 'chase' && curStep.phase === 'bottom') tutChoose();
-      else tutGuideRefresh(null);
+      if (tut.s3 === 'chase' && curStep.phase === 'bottom') {
+        // The chase has stopped with lights in row 5: show the rules next to the guide.
+        tut.s3 = 'fix';
+        setExtra('<div class="card ref-card">' + refHtml() + '</div>');
+      }
+      tutGuideRefresh(null);
     } else if (tut.step === 4) {
       var wasPeek = tut.peek;
       tut.peek = false;
@@ -710,24 +731,17 @@
     loadBoard(b);
   }
 
-  // Reference card for the chosen method (step 3 after the choice, step 4).
-  function refHtml(method) {
-    var rows;
-    if (method === 'lookup') {
-      rows = Object.keys(LOOKUP).sort(function (a, b) { return a.length - b.length || (a < b ? -1 : 1); })
-        .map(function (k) { return '<tr><td>' + k.split(',').join(', ') + '</td><td>' + LOOKUP[k].join(', ') + '</td></tr>'; }).join('');
-      return '<p><strong>Chase + full lookup.</strong> Find the exact bottom-row pattern and press the listed top-row cells, then chase again.</p>' +
-        '<table class="tut-table"><thead><tr><th>Bottom-row lights on</th><th>Press in top row</th></tr></thead><tbody>' + rows + '</tbody></table>';
-    }
-    return '<p><strong>Chase + shortcut.</strong> Look only at columns 1, 2 and 3 of the bottom row. For each one that\'s on, press the matching top-row cells, then chase again.</p>' +
+  // The bottom-row rules (step 3 once the chase stops, step 4's reference, Practice's strategy panel).
+  function refHtml() {
+    return '<p><strong>Fixing the bottom row.</strong> Look only at columns 1, 2 and 3 of the bottom row. For each light that\'s on, press its top-row cells. Then chase again.</p>' +
       '<table class="tut-table"><thead><tr><th>Bottom-row light on</th><th>Press in top row</th></tr></thead><tbody>' +
       '<tr><td>Column 1</td><td>4, 5</td></tr><tr><td>Column 2</td><td>2, 5</td></tr><tr><td>Column 3</td><td>4</td></tr></tbody></table>' +
-      '<p class="hint">If a top-row cell comes up twice, skip it: two presses cancel.</p>';
+      '<p class="hint">If a top-row cell comes up twice, press it twice.</p>';
   }
-  function refDetails(method) {
+  function refDetails() {
     return '<details class="card strategy ref"><summary>Algorithm reference</summary>' +
       '<p>1. Chase: in the highest row with lights on, press the cell directly below each light. Repeat down to row 4.</p>' +
-      '<p>2. Fix the bottom row from the top (below), then 3. chase again.</p>' + refHtml(method) + '</details>';
+      '<p>2. Fix the bottom row from the top (below), then 3. chase again.</p>' + refHtml() + '</details>';
   }
 
   /* Step set-ups */
@@ -748,7 +762,7 @@
       tutGuideRefresh(null);
     },
     3: function () {
-      setBody('<p>This board needs the second part of the algorithm. Start with the chase, following the rings, and see what happens at the bottom.</p>');
+      setBody('<p>This board needs the second part of the algorithm. Start with the chase, following the rings, and see what happens at the bottom. The dashed ring marks the bottom-row light being fixed.</p>');
       tut.strict = true; tut.rings = true; tut.text = true; tut.s3 = 'chase';
       tutLoad(boardFrom(TUT_BOARD_BOTTOM));
       tutGuideRefresh(null);
@@ -779,9 +793,9 @@
     tut.step = n; tut.hold = false; tut.strict = false; tut.rings = false; tut.text = false;
     tut.peek = false; tut.hideFewest = false;
     $('tutCount').textContent = 'Step ' + n + ' of 7';
+    Array.prototype.forEach.call($('tutProgress').children, function (seg, k) { seg.classList.toggle('done', k < n); });
     $('tutTitle').textContent = TUT_TITLES[n - 1];
-    $('tutAlgoRow').hidden = n !== 4;
-    stepper = makeStepper(n === 6 ? ['shortcut', 'lookup'] : [algoMethod]);
+    stepper = makeStepper(n === 6 ? ANY_METHOD : ['shortcut']);
     STEPS[n]();
     tutNav();
   }
@@ -791,7 +805,6 @@
     $('tutNext').hidden = n === 7;
     $('tutNext').disabled = !(n === 1 || tut.done[n]);
     $('tutNext').textContent = n === 6 ? 'Next: wrap-up' : 'Next step';
-    $('tutRestart').hidden = n === 1 || n === 7 || summary;
     $('tutStats').hidden = n === 1 || n === 7 || summary;
   }
   function tutGo(n) {
@@ -814,42 +827,16 @@
     if (btn) btn.focus({ preventScroll: true });
   }
 
-  // Step 3: the chase has stopped; ask which way to fix the bottom row.
-  function tutChoose() {
-    tut.s3 = 'choose'; tut.hold = true;
-    render();
-    $('tutGuide').hidden = true;
-    setExtra('<div class="card choose-card">' +
-      '<p>Rows 1 to 4 are dark, but row 5 still has lights. The chase can\'t continue, because there\'s no row below to press. The algorithm fixes this from the top: press certain top-row cells, then chase again. Which cells depends on the pattern in row 5, and there are two ways to look them up.</p>' +
-      '<button class="btn alt choice" type="button" data-act="choose" data-method="shortcut"><span class="choice-name">Chase + shortcut <span class="tag">Recommended</span></span>' +
-      '<span class="choice-sub">Three rules for columns 1 to 3. Easier to remember; sometimes takes more presses.</span></button>' +
-      '<button class="btn alt choice" type="button" data-act="choose" data-method="lookup"><span class="choice-name">Chase + full lookup</span>' +
-      '<span class="choice-sub">Find the exact pattern in a table of 7. More to remember; never more presses, and sometimes fewer.</span></button>' +
-      '<p class="hint">Both are algorithms: either one always works. You can change your choice later.</p></div>');
-    setBoardNote('Rows 1 to 4 are dark, but row 5 isn\'t. Choose how to fix it in the panel below.');
-    say('Rows 1 to 4 are dark, but row 5 still has lights. Choose an algorithm for the bottom row: Chase plus shortcut, recommended, or Chase plus full lookup.');
-    var first = $('tutExtra').querySelector('.choice');
-    if (first) first.focus({ preventScroll: true });
-  }
-  function tutChosen(method) {
-    setAlgorithm(method);           // also the default for Practice's Guide me
-    tut.hold = false; tut.s3 = 'fix';
-    setExtra('<div class="card ref-card">' + refHtml(method) + '</div>');
-    render();
-    tutGuideRefresh(null);
-    if (curStep.cells.length) { focusIdx = curStep.cells[0]; focusBoard(); }
-  }
-
   // Step 4: three boards with fading support; each needs the bottom-row fix.
   function needsFix(b) { var x = b.slice(); chase(x); return !allOff(x); }
   function tutLoad4(k) {
     var cfg = STEP4[k], b;
     tut.s4 = k;
     tut.rings = cfg.help === 'rings'; tut.text = cfg.help !== 'none'; tut.strict = false;
-    setBody('<p>Three boards, with less help each time. They use the algorithm you chose; you can change it below.</p>' +
+    setBody('<p>Three boards, with less help each time.</p>' +
       '<p class="tut-sub">' + cfg.title + '</p><p>' + cfg.intro + '</p>');
     setExtra((cfg.help === 'none' ? '<div class="row"><button class="btn alt" type="button" data-act="peek">Show next step</button></div>' : '') +
-      refDetails(algoMethod));
+      refDetails());
     do { b = scramble('medium'); } while (!needsFix(b));
     hideMsg();
     tutLoad(b);
@@ -866,7 +853,7 @@
   // Only boards the two approaches can be told apart on (algorithm ≥ fewest + QUALIFY_GAP).
   function qualifyingBoard(level) {
     var b;
-    do { b = scramble(level, chRand); } while (algorithmMoves(b, algoMethod) < fewest(b) + QUALIFY_GAP);
+    do { b = scramble(level, chRand); } while (algorithmMoves(b) < fewest(b) + QUALIFY_GAP);
     return b;
   }
   function chLoad(k) {
@@ -883,7 +870,7 @@
     var f = fewest(start), c = classify(start, presses, f);
     return {
       level: level, presses: presses.slice(), moves: presses.length, fewest: f,
-      algoMoves: algorithmMoves(start, algoMethod), seconds: seconds, label: c.label, evidence: c.evidence
+      algoMoves: algorithmMoves(start), seconds: seconds, label: c.label, evidence: c.evidence
     };
   }
   function chSolved() {
@@ -917,7 +904,7 @@
     var alg = results.filter(function (r) { return r.label === 'algorithm' || r.label === 'switch'; });
     if (heur.length) lines.push('When a heuristic worked, it took ' + fmtNum(avg(heur, 'moves')) + ' moves on average, close to the fewest possible (' + fmtNum(avg(heur, 'fewest')) + ').');
     if (alg.length) lines.push('When you used the algorithm, it took ' + fmtNum(avg(alg, 'moves')) + ' moves on average (fewest possible ' + fmtNum(avg(alg, 'fewest')) + '), but it worked every time.');
-    if (!alg.length) lines.push('You never used the algorithm here. Try it in Practice with <strong>Guide me (algorithm)</strong>, on a hard puzzle.');
+    if (!alg.length) lines.push('You never used the algorithm here. Try it in Practice with <strong>Guide me</strong>, on a hard puzzle.');
     if (!heur.length) lines.push('You never solved a puzzle with a heuristic alone. On easy puzzles, look at the shapes first: each plus sign (or part of one at an edge) is a single press.');
     return lines;
   }
@@ -949,7 +936,7 @@
       '<tr><th>Speed</th><td>Often slower, with more moves</td><td>Often faster, with fewer moves</td></tr>' +
       '<tr><th>Watch out for</th><td>Taking the long way around when a shortcut is right there (mental set)</td><td>Dead ends when the pattern is hidden</td></tr>' +
       '</tbody></table></div><h3>Your numbers</h3>';
-    var m = tut.mental, algoN = algorithmMoves(boardFrom(MENTAL_SET_PRESSES), algoMethod);
+    var m = tut.mental, algoN = algorithmMoves(boardFrom(MENTAL_SET_PRESSES));
     html += m
       ? '<p>Mental set board: you solved it in ' + plural(m.moves, 'move') + '; the fewest possible was 3, and the algorithm takes ' + algoN + '. ' +
         (m.matched ? 'You spotted the shortcut.' : 'It\'s easy to keep using a method that worked before.') + '</p>'
@@ -967,7 +954,20 @@
       html += '</p>';
     } else html += '<p>Challenge: not finished yet (step 6).</p>';
     html += '<p>One more algorithm: the <strong>Fewest possible</strong> number comes from the computer trying all 32 ways to press the top row, chasing each one, and keeping the shortest. That\'s an algorithm in the textbook sense, attempting all possible solutions until the correct one is found, but not one a person can run in their head.</p>';
+    html += goingFurtherHtml();
     return html;
+  }
+
+  // Wrap-up extension: the bottom-row rules can be simplified.
+  function goingFurtherHtml() {
+    var rows = Object.keys(LOOKUP).sort(function (a, b) { return a.length - b.length || (a < b ? -1 : 1); })
+      .map(function (k) { return '<tr><td>' + k.split(',').join(', ') + '</td><td>' + LOOKUP[k].join(', ') + '</td></tr>'; }).join('');
+    return '<details class="card strategy ref"><summary>Going further: shorter versions</summary>' +
+      '<p><strong>Cancel pairs.</strong> Two presses on the same cell cancel out, so a top-row cell that comes up twice can be skipped. With columns 1 and 3 on, the rules say top-row 4 and 5, then 4 again: that\'s the same as just 5.</p>' +
+      '<p><strong>Learn the patterns.</strong> Only 7 bottom rows can ever be left after the chase. This table gives the top-row presses that finish each one in the fewest total presses. It\'s more to remember, but it is never longer than the rules and is sometimes shorter.</p>' +
+      '<div class="table-wrap"><table class="tut-table"><thead><tr><th>Bottom-row lights on</th><th>Press in top row</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p><strong>Why can two different answers both work?</strong> Some sets of presses change nothing at all: press top-row 2, 3 and 4 on a dark board and chase, and it ends dark again (top-row 1, 3 and 5 does the same). Add one of those sets to any answer and you get another answer. That\'s why every board has exactly 4 solutions.</p>' +
+      '</details>';
   }
 
   // After a tutorial board is solved.
@@ -992,7 +992,7 @@
       tut.hideFewest = false; render();
       tut.mentalTries++;
       var matched = moves === puzzleFewest, c = classify(startBoard, tut.log, puzzleFewest);
-      var algoN = algorithmMoves(startBoard, algoMethod);
+      var algoN = algorithmMoves(startBoard);
       if (!tut.mental) tut.mental = { moves: moves, matched: matched, label: c.label };
       tut.done[5] = true;
       if (matched) {
@@ -1031,20 +1031,11 @@
     if (tut.text) tutGuideRefresh(null);
     say('Board restarted.');
   }
-  $('tutAlgo').addEventListener('change', function () {
-    setAlgorithm(this.value);
-    if (mode === 'tutorial' && tut.step === 4) {
-      var d = $('tutExtra').querySelector('details.ref');
-      if (d) { var open = d.open; d.outerHTML = refDetails(algoMethod); if (open) $('tutExtra').querySelector('details.ref').open = true; }
-      tutGuideRefresh(null);
-    }
-  });
   $('panelTutorial').addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('[data-act]') : null;
     if (!b) return;
     var act = b.getAttribute('data-act');
-    if (act === 'choose') tutChosen(b.getAttribute('data-method'));
-    else if (act === 'next-board') { tutLoad4(tut.s4 + 1); tutNav(); say(STEP4[tut.s4].title + '.'); focusBoard(); }
+    if (act === 'next-board') { tutLoad4(tut.s4 + 1); tutNav(); say(STEP4[tut.s4].title + '.'); focusBoard(); }
     else if (act === 'peek') { if (!locked) { tut.peek = true; render(); tutGuideRefresh(null); } }
     else if (act === 'retry') { hideMsg(); tutShow(5); say('Try the board again.'); focusBoard(); }
     else if (act === 'ch-next') { chLoad(tut.ch.results.length); tutNav(); say('Puzzle ' + (tut.ch.results.length + 1) + ' of 6.'); focusBoard(); }
@@ -1094,7 +1085,7 @@
     mode = m;
     hideMsg(); clearPreview(); endGuide(); hideStuck(); stuckShown = false; setBoardNote('');
     tut.hideFewest = false;
-    stepper = makeStepper([algoMethod]);
+    stepper = makeStepper(['shortcut']);
     $('modeTutorial').setAttribute('aria-pressed', m === 'tutorial' ? 'true' : 'false');
     $('modePractice').setAttribute('aria-pressed', m === 'practice' ? 'true' : 'false');
     $('modeTimed').setAttribute('aria-pressed', m === 'timed' ? 'true' : 'false');
@@ -1121,72 +1112,53 @@
   $('tutLink').addEventListener('click', function () { setMode('tutorial'); say('Tutorial.'); $('tutTitle').focus({ preventScroll: true }); });
   $('modeTimed').addEventListener('click', function () { if (mode !== 'timed') { setMode('timed'); say('Timed mode.'); } });
 
-  /* ---------- Sound toggle ---------- */
+  /* ---------- Sound toggle (speaker icon) ---------- */
   $('soundBtn').addEventListener('click', function () {
     soundOn = !soundOn;
     this.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-    this.textContent = 'Sound: ' + (soundOn ? 'On' : 'Off');
+    this.title = soundOn ? 'Sound on' : 'Sound off';
+    say(soundOn ? 'Sound on.' : 'Sound off.');
     if (soundOn) clickSound();
   });
 
-  /* ---------- Light color ---------- */
-  // Presets use the hand-tuned colors in style.css (body.glow-blue swaps them in).
-  // A custom color sets the five glow variables inline on <body>, all derived from one color.
-  var GLOW_VARS = ['--glow-core', '--glow-mid', '--glow-edge', '--glow-halo', '--tile-lit'];
-  var L_MIN = 55, L_MAX = 78; // lit bulbs stay this bright (HSL lightness, %) to stand out from the dark board
-  function hexToRgb(hex) {
-    var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex.trim());
-    return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [0, 0, 0];
+  /* ---------- Settings (gear): light color and, for now, the layout ---------- */
+  function openSettings(open) {
+    $('settings').hidden = !open;
+    $('settingsBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) { var b = $('settings').querySelector('[aria-pressed="true"]'); if (b) b.focus(); }
   }
-  function rgbToHsl(rgb) {
-    var r = rgb[0] / 255, g = rgb[1] / 255, b = rgb[2] / 255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, h = 0, s = 0, d = max - min;
-    if (d) {
-      s = d / (1 - Math.abs(2 * l - 1));
-      h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
-      h = (h * 60 + 360) % 360;
-    }
-    return [h, s * 100, l * 100];
+  $('settingsBtn').addEventListener('click', function () { openSettings($('settings').hidden); });
+  document.addEventListener('click', function (e) {
+    if (!$('settings').hidden && !e.target.closest('.settings-wrap')) openSettings(false);
+  });
+  $('settings').addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { openSettings(false); $('settingsBtn').focus(); }
+  });
+
+  // Light color: hand-tuned presets in style.css (body.glow-<name>); yellow is the default.
+  var COLORS = ['yellow', 'green', 'blue', 'pink', 'purple'];
+  function setLightColor(name) {
+    COLORS.forEach(function (c) { document.body.classList.toggle('glow-' + c, c === name && c !== 'yellow'); });
+    swatchBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-color') === name ? 'true' : 'false'); });
   }
-  function hslToRgb(h, s, l) {
-    s /= 100; l /= 100;
-    var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, rgb;
-    if (h < 60) rgb = [c, x, 0]; else if (h < 120) rgb = [x, c, 0]; else if (h < 180) rgb = [0, c, x];
-    else if (h < 240) rgb = [0, x, c]; else if (h < 300) rgb = [x, 0, c]; else rgb = [c, 0, x];
-    return rgb.map(function (v) { return Math.round((v + m) * 255); });
+  var swatchBtns = Array.prototype.slice.call(document.querySelectorAll('.swatch'));
+  swatchBtns.forEach(function (b) {
+    b.addEventListener('click', function () { var c = b.getAttribute('data-color'); setLightColor(c); say('Light color: ' + c + '.'); });
+  });
+
+  // Layout A (tabs under the title bar) or B (modes inside the bar). Temporary, for comparing;
+  // ?layout=a opens in A.
+  var layoutBtns = Array.prototype.slice.call(document.querySelectorAll('[data-layout]'));
+  function setLayout(l) {
+    l = l === 'a' ? 'a' : 'b';
+    document.body.classList.toggle('layout-a', l === 'a');
+    document.body.classList.toggle('layout-b', l === 'b');
+    layoutBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-layout') === l ? 'true' : 'false'); });
   }
-  function mix(a, b, t) { return a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }); }
-  function css(rgb) { return 'rgb(' + rgb.join(', ') + ')'; }
-  function deriveGlow(hex) {
-    var hsl = rgbToHsl(hexToRgb(hex));
-    var l = Math.min(L_MAX, Math.max(L_MIN, hsl[2]));
-    var mid = hslToRgb(hsl[0], hsl[1], l);
-    var tileArt = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--tile-art'));
-    return {
-      '--glow-core': css(mix(mid, [255, 255, 255], 0.85)),
-      '--glow-mid': css(mid),
-      '--glow-edge': css(hslToRgb(hsl[0], hsl[1], l - 18)),
-      '--glow-halo': css(mid),
-      '--tile-lit': css(mix(tileArt, mid, 0.25))
-    };
-  }
-  function setLightColor(which, hex) {
-    var body = document.body;
-    GLOW_VARS.forEach(function (v) { body.style.removeProperty(v); });
-    body.classList.toggle('glow-blue', which === 'blue');
-    if (which === 'custom') {
-      var vars = deriveGlow(hex);
-      GLOW_VARS.forEach(function (v) { body.style.setProperty(v, vars[v]); });
-    }
-    $('colorYellow').setAttribute('aria-pressed', which === 'yellow' ? 'true' : 'false');
-    $('colorBlue').setAttribute('aria-pressed', which === 'blue' ? 'true' : 'false');
-    $('customLabel').classList.toggle('active', which === 'custom');
-  }
-  $('colorYellow').addEventListener('click', function () { setLightColor('yellow'); say('Light color: yellow.'); });
-  $('colorBlue').addEventListener('click', function () { setLightColor('blue'); say('Light color: blue.'); });
-  $('colorPick').addEventListener('input', function () { setLightColor('custom', this.value); });
-  $('colorPick').addEventListener('change', function () { say('Light color: custom.'); });
-  $('colorPick').value = getComputedStyle(document.documentElement).getPropertyValue('--preset-yellow-mid').trim().toLowerCase();
+  layoutBtns.forEach(function (b) {
+    b.addEventListener('click', function () { setLayout(b.getAttribute('data-layout')); say('Layout ' + b.getAttribute('data-layout').toUpperCase() + '.'); });
+  });
+  setLayout((params.get('layout') || '').toLowerCase());
 
   /* ---------- Debug tools (?dev) ---------- */
   var devMarks = [], devShow = false;
@@ -1194,16 +1166,16 @@
     var sols = allSolutions(board), best = sols[0] || [];
     devMarks.forEach(function (m, i) { m.classList.toggle('show', devShow && best.indexOf(i) >= 0); });
     $('devInfo').textContent = allOff(board) ? 'Board is dark.' :
-      'From here: fewest ' + best.length + ' · Algorithm 1 (shortcut) ' + algorithmMoves(board, 'shortcut') +
-      ' · Algorithm 2 (lookup) ' + algorithmMoves(board, 'lookup') +
+      'From here: fewest ' + best.length + ' · algorithm ' + algorithmMoves(board) +
+      ' (simplified ' + algorithmMoves(board, 'simple') + ', lookup ' + algorithmMoves(board, 'lookup') + ')' +
       ' · all 4 solutions: ' + sols.map(function (p) { return p.length; }).join(', ') +
       '. Puzzle fewest (from the start): ' + puzzleFewest + '.' +
-      (mode !== 'timed' && curStep ? ' Algorithm (' + (mode === 'tutorial' && tut.step === 6 ? 'either' : algoMethod) + ') valid set: ' + curStep.phase + ' [' +
+      (mode !== 'timed' && curStep ? ' Algorithm (' + (mode === 'tutorial' && tut.step === 6 ? 'any' : 'shortcut') + ') valid set: ' + curStep.phase + ' [' +
         curStep.cells.map(function (c) { return 'r' + (Math.floor(c / N) + 1) + 'c' + (c % N + 1); }).join(' ') + '].' : '') +
       (mode === 'tutorial' && tut.step >= 5 && tut.log.length ? ' Presses so far (A = algorithm step, h = not): ' + devFlags() + '.' : '');
   }
   function devFlags() {
-    var b = startBoard.slice(), st = makeStepper(['shortcut', 'lookup']);
+    var b = startBoard.slice(), st = makeStepper(ANY_METHOD);
     return tut.log.map(function (i) { var ok = st.note(b, i); applyPress(b, i); return ok ? 'A' : 'h'; }).join(' ');
   }
   // Auto-play the current board: 'h' = the fewest-moves solution in random order,
@@ -1220,7 +1192,7 @@
       if (kind === 'h') { if (!queue.length) { devStopAll(); return; } i = queue.shift(); }
       else if (lead > 0) { lead--; i = Math.floor(R() * TOTAL); }
       else if (!curStep || !curStep.cells.length) { devStopAll(); return; }
-      else i = kind === 'ha' && R() < 0.08 ? Math.floor(R() * TOTAL) : curStep.cells[Math.floor(R() * curStep.cells.length)];
+      else { var pool = ringCells(curStep); i = kind === 'ha' && R() < 0.08 ? Math.floor(R() * TOTAL) : pool[Math.floor(R() * pool.length)]; }
       focusIdx = i; setRoving(); press(i);
     }, reducedMotion() ? 30 : 120);
   }
@@ -1233,7 +1205,7 @@
     while (ch.results.length < CHALLENGE_LEVELS.length) {
       var k = ch.results.length, lv = ch.order[k];
       if (!ch.boards[k]) ch.boards[k] = qualifyingBoard(lv);
-      var b = ch.boards[k], x = b.slice(), p = [], st = makeStepper([algoMethod]), g = 0, i;
+      var b = ch.boards[k], x = b.slice(), p = [], st = makeStepper(['shortcut']), g = 0, i;
       if (lv === 'easy') p = shuffle(fewestSolution(b), R);
       else {
         var lead = alt++ % 2 ? 3 + Math.floor(R() * 4) : 0;
@@ -1248,7 +1220,7 @@
   function devStopAll() { clearInterval(devAllTimer); devAllTimer = null; }
   function devOneStep() {
     if (locked || mode === 'timed' || !curStep || !curStep.cells.length || (mode === 'tutorial' && tut.hold)) { devStopAll(); return; }
-    var i = curStep.cells[0];
+    var i = ringCells(curStep)[0];
     focusIdx = i; setRoving(); press(i);
     if (locked) devStopAll();
   }
@@ -1268,7 +1240,7 @@
       if (locked) return;
       if (mode === 'tutorial') { // run the algorithm, so the tutorial's own checks see real presses
         var g = 0;
-        while (!locked && !tut.hold && curStep && curStep.cells.length && g++ < 300) press(curStep.cells[0]);
+        while (!locked && !tut.hold && curStep && curStep.cells.length && g++ < 300) press(ringCells(curStep)[0]);
         return;
       }
       board = emptyBoard(); moves++; render(); onSolved();
@@ -1312,7 +1284,6 @@
   /* ---------- Start ---------- */
   LOOKUP = lookupTable();
   buildBoard();
-  fillLookupTable();
   if (DEV) initDev();
   var startMode = params.get('mode');
   setMode(startMode === 'timed' || startMode === 'tutorial' ? startMode : 'practice');
