@@ -44,8 +44,16 @@
   /* Astronaut */
   --eh-suit: #F3EEE4; --eh-suitarm: #EFE9DD; --eh-suitleg: #D9D2C4; --eh-suitshade: #BDB4A4; --eh-helmet: #F7F3EA; --eh-pack: #8D97AE;
   --eh-visor1: #2D5C8A; --eh-visor2: #173252; --eh-visor3: #0F2038; --eh-visorhi: #BFE8FF;
+  /* Failures and repairs: hot (broken) cores, alarm wash and beams, screen text when faulted, smoke, steam,
+     sparks, the repair ring */
+  --eh-hot1: #FFF3D6; --eh-hot2: #FFB35C; --eh-hot3: #FF5A2E;
+  --eh-washred: #FF2A1F; --eh-faulttext: #FF9A8A;
+  --eh-smoke: #9AA0B4; --eh-steam: #E8EEF6; --eh-spark: #FFD35A; --eh-sparkhi: #FFF1B0;
+  --eh-mint: #A9F0C0;
   /* Test tools (?dev) */
   --eh-devfloor: #7EE08A; --eh-devdoor: #E2B13F;
+  /* ---------- UI (not art) ---------- */
+  --eh-scrim: rgba(7, 9, 18, .55);   /* behind the end card */
 }
 
 /* ---------- Page layout: the ship fills the window ---------- */
@@ -57,9 +65,52 @@ main.eh {
   height: 100dvh;
   padding: 8px 12px 12px;
 }
-.eh-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 16px; }
+/* Title and hint on the left, the HUD on the right; the HUD wraps under the title on narrow screens */
+.eh-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.eh-head { flex: 0 1 auto; min-width: 0; }
 .eh-head h1 { font-size: 1.5rem; margin: 0; }
 .eh-head .hint { margin: 0; }
+
+/* ---------- HUD ---------- */
+.eh-hud { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+.eh-clock {
+  position: relative;
+  display: grid; grid-template-columns: auto auto; align-items: baseline; gap: 0 8px;
+  min-width: 128px; padding: 4px 10px 6px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-btn);
+  color: var(--heading); overflow: hidden;
+}
+.eh-clock span { grid-column: 1 / -1; font-size: .75rem; line-height: 1.2; color: var(--text); }
+.eh-clock strong { font-size: 1.3rem; line-height: 1.15; font-variant-numeric: lining-nums tabular-nums; }
+.eh-clock em { font-style: normal; font-size: .75rem; font-weight: 700; color: var(--text); }
+/* hyperdrive: a thin charge bar along the bottom */
+.eh-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--border); }
+.eh-bar b { display: block; height: 100%; width: 0; background: var(--plum); }
+/* event horizon: red while draining (with "▼ Draining", not color alone), sage briefly after a repair */
+.eh-clock:is([data-mode="drain"], [data-mode="crossed"]) { background: var(--error); border-color: var(--error); }
+.eh-clock:is([data-mode="drain"], [data-mode="crossed"]) :is(span, strong, em) { color: var(--bg); }
+.eh-clock[data-mode="drain"] { animation: eh-drain 1s ease-in-out infinite alternate; }
+.eh-clock[data-mode="drain"].is-low { animation-duration: .5s; }
+.eh-clock[data-mode="bonus"] { background: var(--sage); border-color: var(--sage); }
+.eh-clock[data-mode="bonus"] :is(span, em) { color: var(--heading); }
+@keyframes eh-drain { from { box-shadow: 0 0 0 0 var(--error); } to { box-shadow: 0 0 0 3px var(--error); } }
+
+.eh-systems { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.eh-sys {
+  display: flex; align-items: center; gap: 6px; min-width: 112px; padding: 4px 10px 4px 8px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-btn); color: var(--heading);
+}
+.eh-sys-txt { display: flex; flex-direction: column; line-height: 1.2; }
+.eh-sys-name { font-size: .75rem; color: var(--text); }
+.eh-sys-st { display: inline-flex; align-items: center; gap: 3px; font-size: .9rem; }
+.eh-ico, .eh-ico-s { flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.eh-ico { width: 20px; height: 20px; }
+.eh-ico-s { width: 13px; height: 13px; stroke-width: 2; }
+.eh-sys[data-state="ok"] { background: var(--sage); border-color: var(--sage); }
+.eh-sys[data-state="broken"] { background: var(--error); border-color: var(--error); color: var(--bg); }
+.eh-sys[data-state="broken"] .eh-sys-name { color: var(--bg); }
+.eh-sys[data-state="repairing"] { background: var(--honey); border-color: var(--honey); }
+.eh-sys[data-state="ok"] .eh-sys-name, .eh-sys[data-state="repairing"] .eh-sys-name { color: var(--heading); }
 
 .eh-stage {
   position: relative;
@@ -86,6 +137,43 @@ main.eh {
 }
 .eh-stage:focus .eh-focus { display: none; }
 
+/* ---------- Text on the ship (HTML overlay, placed by script.js) ---------- */
+.eh-ui { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.eh-prompt, .eh-toast { position: absolute; left: 0; top: 0; will-change: transform; }
+.eh-prompt {
+  display: flex; align-items: center; gap: 6px; padding: 3px 8px 3px 3px; white-space: nowrap;
+  translate: -50% -100%;
+  background: var(--bg); color: var(--heading); border: 2px solid var(--eh-outline); border-radius: 8px;
+  font-size: .85rem; font-weight: 700; line-height: 1.2;
+}
+.eh-prompt[hidden] { display: none; }
+.eh-prompt kbd {
+  padding: 2px 6px; border-radius: 4px; background: var(--heading); color: var(--bg);
+  font: 700 .7rem var(--font-body); letter-spacing: .04em; text-transform: uppercase;
+}
+.eh-toast { translate: -50% -100%; }
+.eh-toast span {
+  display: block; padding: 4px 12px; white-space: nowrap;
+  background: var(--sage); color: var(--heading); border: 2px solid var(--eh-outline); border-radius: 8px;
+  font-size: .9rem; font-weight: 700;
+  animation: eh-toast 3s ease-out forwards;
+}
+@keyframes eh-toast {
+  0% { opacity: 0; transform: translateY(6px); }
+  10%, 70% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-14px); }
+}
+
+/* ---------- End card (placeholder until step 6) ---------- */
+.eh-end {
+  position: absolute; inset: 0; display: grid; place-items: center; padding: 16px;
+  background: var(--eh-scrim);
+}
+.eh-end .card { width: min(440px, 100%); max-height: 100%; overflow: auto; text-align: center; background: var(--bg); }
+.eh-end .stats { margin-bottom: 8px; }
+.eh-end .stat span { color: var(--text); }   /* muted on --card is too faint for small text */
+.eh-end .row { margin-bottom: 0; }
+
 /* Twinkling stars (off with reduced motion) */
 .eh-tw { animation: eh-twinkle 2.6s ease-in-out infinite alternate; }
 @keyframes eh-twinkle { from { opacity: .15; } to { opacity: 1; } }
@@ -94,7 +182,9 @@ main.eh {
 .eh-dev { padding: 8px 16px; }
 .eh-dev .row { margin: 0; justify-content: flex-start; gap: 8px 16px; }
 .eh-dev label { display: inline-flex; align-items: center; gap: 6px; }
-.eh-dev select { font: inherit; min-height: 36px; }
+.eh-dev .row + .row { margin-top: 8px; }
+.eh-dev select, .eh-dev input[type="number"] { font: inherit; min-height: 36px; }
+.eh-dev input[type="number"] { width: 6em; }
 .eh-devpos { color: var(--muted); font-variant-numeric: lining-nums tabular-nums; }
 
 .sr-only {
@@ -104,8 +194,27 @@ main.eh {
 
 @media (prefers-reduced-motion: reduce) {
   .eh-tw { animation: none; }
+  .eh-clock[data-mode="drain"] { animation: none; box-shadow: 0 0 0 2px var(--error); }
+  .eh-toast span { animation-name: eh-toast-still; }
 }
+@keyframes eh-toast-still { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
 @media (max-width: 600px) {
   .eh-head h1 { font-size: 1.25rem; }
   .eh-head .hint { font-size: .85rem; }
+  .eh-hud { flex: 1 1 100%; }
+  .eh-clock { min-width: 0; flex: 1 1 120px; }
+  .eh-systems { flex: 1 1 100%; }
+  .eh-sys { min-width: 0; flex: 1 1 40%; }   /* two per row */
+}
+/* Short screens (phones held sideways, small embeds): hide the hint and shrink the HUD */
+@media (max-height: 520px) {
+  main.eh { gap: 4px; padding: 4px 8px 8px; }
+  .eh-head .hint { display: none; }
+  .eh-head h1 { font-size: 1.1rem; }
+  .eh-clock { min-width: 0; padding: 2px 8px 4px; }
+  .eh-clock span, .eh-sys-name { font-size: .68rem; }
+  .eh-clock strong { font-size: 1.05rem; }
+  .eh-sys { min-width: 0; padding: 2px 8px 2px 6px; }
+  .eh-ico { width: 16px; height: 16px; }
+  .eh-sys-st { font-size: .8rem; }
 }

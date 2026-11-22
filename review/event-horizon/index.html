@@ -13,14 +13,43 @@
 </head>
 <body>
 <main class="wide eh">
-  <header class="eh-head">
-    <h1>Event Horizon</h1>
-    <p class="hint">Click the ship, then walk with the arrow keys or WASD.</p>
-  </header>
+  <div class="eh-top">
+    <header class="eh-head">
+      <h1>Event Horizon</h1>
+      <p class="hint">Arrow keys or WASD walk. Space repairs a broken machine.</p>
+    </header>
 
-  <div class="eh-stage" id="stage" tabindex="0" role="application" aria-label="Event Horizon. Arrow keys or W, A, S, D walk.">
+    <!-- HUD: the clocks and the four systems (credits come in step 3) -->
+    <div class="eh-hud" id="hud" aria-label="Ship status" role="group">
+      <div class="eh-clock" id="hudHyper">
+        <span>Hyperdrive ready in</span>
+        <strong id="hudHyperT">10:00</strong>
+        <i class="eh-bar" aria-hidden="true"><b id="hudHyperBar"></b></i>
+      </div>
+      <div class="eh-clock" id="hudHorizon" data-mode="stable">
+        <span>Event horizon in</span>
+        <strong id="hudHorizonT">3:00</strong>
+        <em id="hudHorizonS">Stable</em>
+      </div>
+      <ul class="eh-systems" id="hudSys" aria-label="Systems"></ul>
+    </div>
+  </div>
+
+  <div class="eh-stage" id="stage" tabindex="0" role="application" aria-label="Event Horizon. Arrow keys or W, A, S, D walk. Space repairs a broken machine when you stand next to it.">
     <svg id="ship" class="eh-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Top-down view of a brain-shaped starship near a black hole. A corridor runs down the middle from the engines to the command center, with two locked system rooms on each side."></svg>
+    <div class="eh-ui" id="ui" aria-hidden="true">
+      <div class="eh-prompt" id="prompt" hidden><kbd>Space</kbd> Repair</div>
+    </div>
     <p class="eh-focus" aria-hidden="true">Click the ship to use the keyboard</p>
+    <!-- End card (placeholder until step 6) -->
+    <div class="eh-end" id="end" hidden>
+      <section class="card" role="dialog" aria-modal="true" aria-labelledby="endTitle" aria-describedby="endText">
+        <h2 id="endTitle"></h2>
+        <p id="endText"></p>
+        <div class="stats" id="endStats"></div>
+        <div class="row"><button class="btn" type="button" id="again">Play again</button></div>
+      </section>
+    </div>
   </div>
 
   <!-- Test tools: shown only with ?dev in the address -->
@@ -31,6 +60,16 @@
       <button class="btn ghost" type="button" id="devDoors" aria-pressed="false">Open all doors</button>
       <label>Go to <select id="devGo"></select></label>
       <span class="eh-devpos" id="devPos"></span>
+    </div>
+    <div class="row">
+      <label>Break <select id="devBreak"></select></label>
+      <button class="btn ghost" type="button" id="devRepair">Repair all</button>
+      <button class="btn ghost" type="button" id="devNext">Next failure</button>
+      <label>Hyperdrive <input type="number" id="devHyper" min="0" max="600" step="10" placeholder="s left"></label>
+      <label>Horizon <input type="number" id="devHorizon" min="0" max="180" step="5" placeholder="s left"></label>
+      <label><input type="checkbox" id="devInvincible"> Invincible</label>
+      <label><input type="checkbox" id="devFreeze"> Freeze clocks</label>
+      <span class="eh-devpos" id="devGame"></span>
     </div>
   </section>
 

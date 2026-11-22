@@ -2,11 +2,14 @@
 // drifts toward a black hole. Walk the ship, earn credits at the main terminal, pay for doors and repair
 // failed systems before the event horizon clock runs out.
 // Plan and handoff: project doc "claude/Event Horizon - Plan.md".
-// Built so far: step 1 (the ship drawn in vector, walking with keys, collisions on a walkable grid) and step 1b
-// (angular plated hull, NASA-style black hole, command center moved right, chibi astronaut).
+// Built so far: step 1 (the ship drawn in vector, walking with keys, collisions on a walkable grid), step 1b
+// (angular plated hull, NASA-style black hole, command center moved right, chibi astronaut) and step 2
+// (failures, alarms, repairs with Space, both clocks, the HUD, win and lose).
 //
 // URL options:
-//   ?dev   test tools: walkable-grid overlay, open all doors, jump to a room, player position
+//   ?dev     test tools: walkable-grid overlay, open all doors, jump to a room, player position, break or repair
+//            systems, set the clocks, skip to the next failure, invincible, freeze the clocks
+//   ?seed=N  repeatable failure order (N is any whole number)
 (function () {
 'use strict';
 
@@ -17,7 +20,17 @@ const SETTINGS = {
   FOOT_W: 9, FOOT_H: 5,  // half-width and half-height of the player's foot box (collisions)
   CELL: 8,               // walkable-grid cell size, ship units
   DOOR_SPEED: 3.5,       // door slide speed (share of a full slide per second)
-  START: { x: 1114, y: 522, dir: 'right' }
+  START: { x: 1114, y: 522, dir: 'right' },
+  // Clocks and failures (Normal)
+  HYPERDRIVE: 600,       // hyperdrive clock at the start, s; the player wins when it reaches 0:00
+  HORIZON: 180,          // event horizon clock at the start and its maximum, s; the player loses at 0:00
+  DRAIN: 1,              // horizon seconds lost per second while any system is down (same for one or four)
+  REPAIR_BONUS: 15,      // horizon seconds added by each repair, up to HORIZON
+  REPAIR_TIME: 3,        // seconds a repair takes; the player can't move meanwhile
+  REACH: 26,             // how close (ship units) the player's feet must be to a machine's footprint to repair it
+  // The 8 failures: [mission time s, door cost in credits]. Each hits a random working system other than the
+  // previous failure's (any working one if that's the only choice; skipped if all four are down). Costs: step 3.
+  FAILURES: [[30, 5], [110, 5], [185, 10], [255, 10], [320, 10], [380, 10], [435, 15], [485, 15]]
 };
 const SHIP_W = 1536, SHIP_H = 1024;           // floor-plan coordinates
 const BOX = { x: 70, y: 50, w: 1470, h: 936 }; // the part of the plan that is fit to the screen
@@ -76,6 +89,23 @@ function inShape(x, y, s) {
   return inPoly(x, y, s.p);
 }
 const mirror = (p) => [p[0], SHIP_H - p[1]];  // the ship is symmetric about y = 512
+// Distance from a point to a blocker shape's edge (0 inside); rects and circles only
+function distToShape(x, y, s) {
+  if (s.c) return Math.max(0, Math.hypot(x - s.c[0], y - s.c[1]) - s.c[2]);
+  const dx = Math.max(s.r[0] - x, 0, x - s.r[2]), dy = Math.max(s.r[1] - y, 0, y - s.r[3]);
+  return Math.hypot(dx, dy);
+}
+// A point on edge i of a clockwise polygon, share s along it, pushed out by d (positive = outside)
+function edgePoint(poly, i, s, d) {
+  const a = poly[i], b = poly[(i + 1) % poly.length], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
+  return [a[0] + dx * s + dy / len * d, a[1] + dy * s - dx / len * d];
+}
+const mmss = (s) => { const n = Math.max(0, Math.ceil(s - 1e-6)); return Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0'); };
+// For animation callbacks: returns the system's state, and calls look(state) once whenever it changes
+function watch(id, look) {
+  let shown = null;
+  return () => { const st = SYS[id].state; if (st !== shown) { shown = st; look(st); } return st; };
+}
 
 /* ==== SECTION: Floor plan ====
    Landscape brain seen from above: engines on the left, command center (front) on the right,
@@ -83,18 +113,29 @@ const mirror = (p) => [p[0], SHIP_H - p[1]];  // the ship is symmetric about y =
    gets a wall face (3/4 view), which is not walkable. */
 const W_BAND = 26;   // thickness of the cream wall tops around each floor
 const FACE = 20;     // height of the north wall faces
+// Per room: hud = HUD label; fixed = the line shown after a repair; hit = the machine's footprint (the player
+// repairs within REACH of it); ring = repair ring [x, y, radius]; tint = machine color (art palette name);
+// beacons = alarm beacons on the wall top, as [edge index, share along the edge] of poly.
 const ROOMS = [
   { id: 'engine', name: 'Engine room', machine: 'Anti-gravity thruster', at: { x: 480, y: 318 },
+    hud: 'Engine', fixed: 'Thruster recalibrated', tint: 'cyan',
+    hit: [{ c: [480, 318, 58] }], ring: [480, 318, 68], beacons: [[8, .5], [1, .5]],
     door: { x: 485, side: 's' },
     poly: [[448, 200], [604, 200], [640, 236], [640, 386], [616, 410], [344, 410], [320, 386], [320, 292], [372, 238]] },
   { id: 'life', name: 'Life support', machine: 'Oxygen tank and scrubbers', at: { x: 800, y: 290 },
+    hud: 'Life support', fixed: 'Scrubbers reset', tint: 'o2',
+    hit: [{ r: [720, 228, 786, 344] }, { r: [796, 246, 888, 318] }], ring: [752, 287, 62], beacons: [[0, .5], [6, .55]],
     door: { x: 855, side: 's' },
     poly: [[700, 226], [736, 190], [784, 190], [796, 150], [884, 150], [896, 190], [930, 190], [1010, 262],
       [1010, 386], [986, 410], [724, 410], [700, 386]] },
   { id: 'reactor', name: 'Reactor', machine: 'Reactor core', at: { x: 486, y: 734 },
+    hud: 'Reactor', fixed: 'Coolant vented', tint: 'rx2',
+    hit: [{ c: [486, 734, 52] }], ring: [486, 734, 64], beacons: [[5, .5], [3, .5]],
     door: { x: 485, side: 'n' },
     poly: [[344, 614], [616, 614], [640, 638], [640, 780], [596, 824], [448, 824], [372, 786], [320, 732], [320, 638]] },
   { id: 'shield', name: 'Shield bay', machine: 'Shield generator', at: { x: 858, y: 742 },
+    hud: 'Shields', fixed: 'Emitter realigned', tint: 'sh2',
+    hit: [{ c: [858, 742, 56] }], ring: [858, 742, 72], beacons: [[5, .5], [3, .5]],
     door: { x: 855, side: 'n' },
     poly: [[724, 614], [986, 614], [1010, 638], [1010, 764], [940, 834], [764, 834], [700, 770], [700, 638]] }
 ];
@@ -146,7 +187,11 @@ function faceQuads(f) {
 const BLOCKERS = [];                 // shapes the player can't walk into
 const block = (...s) => BLOCKERS.push(...s);
 const ANIM = [];                     // per-frame idle animations: (t, dt) => void
-const SYS = {};                      // systems by room id (state, machine center) for later steps
+// Systems by room id. state: 'ok' | 'broken' | 'repairing'; progress: repair progress 0–1;
+// fail: which scheduled failure broke it (−1 = a dev break) and cost: that failure's door cost (step 3).
+const SYS = {};
+ROOMS.forEach((r) => { SYS[r.id] = { room: r, state: 'ok', progress: 0, fail: -1, cost: 0 }; });
+const isDown = (id) => SYS[id].state !== 'ok';
 
 /* ==== SECTION: Defs (patterns and gradients) ==== */
 function drawDefs() {
@@ -213,6 +258,16 @@ function drawDefs() {
     ${core('coreViolet', C.sh1, C.sh2, C.sh3, C.sh4)}
     ${core('coreMagenta', C.hd1, C.hd2, C.hd3, C.hd4)}
     ${core('eyeRed', C.eye1, C.eye2, C.eye3, C.outline)}
+    ${core('coreRed', C.hot1, C.hot2, C.hot3, C.eye3)}
+    <linearGradient id="eh-o2liqBad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${C.hot3}"/><stop offset="1" stop-color="${C.eye3}"/>
+    </linearGradient>
+    <radialGradient id="eh-smokeG"><stop offset="0" stop-color="${C.smoke}"/><stop offset=".55" stop-color="${C.smoke}" stop-opacity=".7"/><stop offset="1" stop-color="${C.smoke}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="eh-steamG"><stop offset="0" stop-color="${C.steam}"/><stop offset=".55" stop-color="${C.steam}" stop-opacity=".6"/><stop offset="1" stop-color="${C.steam}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="eh-beam" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="120">
+      <stop offset="0" stop-color="${C.washred}" stop-opacity=".5"/><stop offset="1" stop-color="${C.washred}" stop-opacity="0"/>
+    </radialGradient>
+    ${glow('glowFault', C.hot3, .5)}
   </defs>`);
 }
 
@@ -616,12 +671,143 @@ function radSign(x, y, r) {   // radiation trefoil
 const label = (x, y, text, color) => `<g transform="translate(${x} ${y})"><rect x="-12" y="-4" width="24" height="8" rx="1.5" fill="${C.armor}" stroke="${C.outline}" stroke-width="1"/>` +
   `<text y="2" text-anchor="middle" font-size="4.8" fill="${color}">${text}</text></g>`;
 
+/* ==== SECTION: Particles and effects ====
+   In the front layer's #eh-fx group. Puffs (smoke, steam) and sparks are pooled SVG elements; when a pool is
+   full, new ones are dropped. They move with the idle animations (about 30 fps). Callers skip them under
+   reduced motion. Also here: the repair ring and the burst rings when a repair finishes. */
+const FX = { puffs: [], sparks: [], bursts: [], ring: null, ringBack: null };
+const FX_PUFFS = 48, FX_SPARKS = 64, FX_BURSTS = 3;
+function fxInit(g) {
+  const many = (n, s) => { let o = ''; for (let i = 0; i < n; i++) o += s; return o; };
+  const gp = add(g, `<g>${many(FX_PUFFS, '<circle r="0" opacity="0"/>')}</g>`);
+  const gsp = add(g, `<g stroke-linecap="round">${many(FX_SPARKS, '<line stroke-width="2" opacity="0"/>')}</g>`);
+  const gb = add(g, `<g fill="none">${many(FX_BURSTS, '<circle r="0" stroke-width="5" opacity="0"/>')}</g>`);
+  FX.puffs = [...gp.children].map((el) => ({ el, life: 0, max: 0 }));
+  FX.sparks = [...gsp.children].map((el) => ({ el, life: 0, max: 0 }));
+  FX.bursts = [...gb.children].map((el) => ({ el, life: 0, max: 0 }));
+  // repair ring: a dark backing ring and a mint arc that fills clockwise from the top
+  FX.ringBack = add(g, `<circle fill="none" stroke="${C.outline}" stroke-width="9" opacity="0"/>`);
+  FX.ring = add(g, `<circle fill="none" stroke="${C.mint}" stroke-width="5" stroke-linecap="round" opacity="0"/>`);
+  ANIM.push((t, dt) => fxTick(dt));
+}
+const freeSlot = (pool) => pool.find((p) => p.life >= p.max) || null;
+function puff(kind, x, y, vx, vy, r0, grow, max, alpha) {
+  const p = freeSlot(FX.puffs);
+  if (!p) return;
+  Object.assign(p, { x, y, vx, vy, r0, grow, max, alpha, life: 0 });
+  p.el.setAttribute('fill', kind === 'smoke' ? 'url(#eh-smokeG)' : 'url(#eh-steamG)');
+}
+// n sparks from (x, y) around direction dir (radians) within spread; gravity pulls them down the screen
+function sparks(x, y, n, colors, dir, spread, gravity) {
+  for (let i = 0; i < n; i++) {
+    const p = freeSlot(FX.sparks);
+    if (!p) return;
+    const a = dir + (Math.random() - .5) * spread, v = 70 + Math.random() * 140;
+    Object.assign(p, { x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0, max: .3 + Math.random() * .35, g: gravity == null ? 380 : gravity });
+    p.el.setAttribute('stroke', colors[i % colors.length]);
+  }
+}
+function burstRing(x, y, r, color) {
+  const p = freeSlot(FX.bursts);
+  if (!p) return;
+  Object.assign(p, { x, y, r, life: 0, max: .8 });
+  p.el.setAttribute('cx', x); p.el.setAttribute('cy', y); p.el.setAttribute('stroke', color);
+}
+function fxTick(dt) {
+  FX.puffs.forEach((p) => {
+    if (p.life >= p.max) { if (p.on) { p.on = false; p.el.setAttribute('opacity', 0); } return; }
+    p.on = true; p.life = Math.min(p.max, p.life + dt);
+    const k = p.life / p.max;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.el.setAttribute('cx', f1(p.x)); p.el.setAttribute('cy', f1(p.y));
+    p.el.setAttribute('r', f1(p.r0 + p.grow * k));
+    p.el.setAttribute('opacity', (p.alpha * Math.min(1, k * 6) * (1 - k)).toFixed(2));
+  });
+  FX.sparks.forEach((p) => {
+    if (p.life >= p.max) { if (p.on) { p.on = false; p.el.setAttribute('opacity', 0); } return; }
+    p.on = true; p.life = Math.min(p.max, p.life + dt);
+    p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    p.el.setAttribute('x1', f1(p.x)); p.el.setAttribute('y1', f1(p.y));
+    p.el.setAttribute('x2', f1(p.x - p.vx * .035)); p.el.setAttribute('y2', f1(p.y - p.vy * .035));
+    p.el.setAttribute('opacity', (1 - p.life / p.max).toFixed(2));
+  });
+  FX.bursts.forEach((p) => {
+    if (p.life >= p.max) { if (p.on) { p.on = false; p.el.setAttribute('opacity', 0); } return; }
+    p.on = true; p.life = Math.min(p.max, p.life + dt);
+    const k = p.life / p.max;
+    p.el.setAttribute('r', f1(p.r + 70 * k));
+    p.el.setAttribute('opacity', (1 - k).toFixed(2));
+  });
+}
+function fxClear() { [...FX.puffs, ...FX.sparks, ...FX.bursts].forEach((p) => { p.life = p.max; }); }
+function repairRing(r, k) {   // k = progress 0–1, or null to hide
+  if (k == null) { FX.ring.setAttribute('opacity', 0); FX.ringBack.setAttribute('opacity', 0); return; }
+  const [x, y, rad] = r.ring, len = 2 * Math.PI * rad;
+  [FX.ringBack, FX.ring].forEach((el) => { el.setAttribute('cx', x); el.setAttribute('cy', y); el.setAttribute('r', rad); });
+  FX.ring.setAttribute('transform', `rotate(-90 ${x} ${y})`);
+  FX.ring.setAttribute('stroke-dasharray', `${f1(len * k)} ${f1(len + 10)}`);
+  FX.ring.setAttribute('opacity', 1); FX.ringBack.setAttribute('opacity', .45);
+}
+
+/* ==== SECTION: Alarms (every broken room) ====
+   Under the machines: a red wash over the floor and a hot glow around the machine. Over them: two rotating
+   beacons on the wall top (beams clipped to the room). The door's lock light blinks; the HUD shows the rest. */
+function drawAlarms(gUnder, gOver) {
+  const wedge = 'M0 0 L112 -26 A115 115 0 0 1 112 26 Z';
+  const rooms = ROOMS.map((r) => {
+    add(DEFS, `<clipPath id="eh-rclip-${r.id}"><polygon points="${pts(r.poly)}"/></clipPath>`);
+    const [cx, cy, rr] = r.ring;
+    const under = add(gUnder, `<g id="eh-alarm-${r.id}" style="display:none">
+      <polygon class="eh-wash" points="${pts(r.poly)}" fill="${C.washred}" opacity=".1"/>
+      <circle class="eh-faultglow" cx="${cx}" cy="${cy}" r="${rr + 46}" fill="url(#eh-glowFault)"/>
+    </g>`);
+    let beams = '', lamps = '';
+    r.beacons.forEach(([i, s]) => {
+      const [x, y] = edgePoint(r.poly, i, s, 13).map(f1);
+      beams += `<g transform="translate(${x} ${y})"><g class="eh-beam"><path d="${wedge}" fill="url(#eh-beam)"/>` +
+        `<path d="${wedge}" fill="url(#eh-beam)" transform="rotate(180)"/></g></g>`;
+      lamps += `<g transform="translate(${x} ${y})"><circle r="8.5" fill="${C.outline}"/><circle r="6.5" fill="${C.armor}"/>` +
+        `<circle class="eh-lamp" r="4.6" fill="${C.redoff}"/><circle cx="-1.6" cy="-1.9" r="1.5" fill="${C.white}" opacity=".5"/></g>`;
+    });
+    const over = add(gOver, `<g><g clip-path="url(#eh-rclip-${r.id})" style="display:none">${beams}</g>${lamps}</g>`);
+    return { r, under, beamsG: over.firstElementChild, beams: [...over.querySelectorAll('.eh-beam')],
+      lamps: [...over.querySelectorAll('.eh-lamp')], wash: under.querySelector('.eh-wash'), glow: under.querySelector('.eh-faultglow'),
+      on: false, lamp: '' };
+  });
+  ANIM.push((t) => {
+    const pulse = REDUCE ? .5 : .5 + .5 * Math.sin(t * 5);     // about 0.8 pulses a second
+    const blink = Math.sin(t * 4 * Math.PI) > 0;                // 2 blinks a second
+    rooms.forEach((a) => {
+      const on = isDown(a.r.id);
+      if (on !== a.on) {
+        a.on = on;
+        a.under.style.display = on ? '' : 'none';
+        a.beamsG.style.display = on && !REDUCE ? '' : 'none';  // reduced motion: no sweeping beams
+      }
+      const lamp = !on ? 'off' : REDUCE || blink ? 'a' : 'b';
+      if (lamp !== a.lamp) {
+        a.lamp = lamp;
+        a.lamps.forEach((l, k) => l.setAttribute('fill', lamp === 'off' ? C.redoff : (lamp === 'a') === (k === 0) || REDUCE ? C.red : C.eye3));
+      }
+      if (!on) return;
+      a.wash.setAttribute('opacity', (.05 + .09 * pulse).toFixed(3));
+      a.glow.setAttribute('opacity', (.55 + .45 * pulse).toFixed(2));
+      if (!REDUCE) a.beams.forEach((b, k) => b.setAttribute('transform', `rotate(${f1((k ? 180 - t * 150 : t * 150 + 40) % 360)})`));
+    });
+    // lock lights: green while open, blinking red while the room's system is down, otherwise steady red
+    DOORS.forEach((d) => {
+      const c = d.t > .5 ? C.green : !isDown(d.room.id) || REDUCE || blink ? C.red : C.redoff;
+      if (c !== d.lockC) { d.lockC = c; d.lock.setAttribute('fill', c); }
+    });
+  });
+}
+
 /* ==== SECTION: Engine room (anti-gravity thruster) ====
    Each room draws into gs (static layer, painted once) and gd (front layer, for anything that moves). */
 function drawEngineRoom(gs, gd) {
   const graph = screen(452, 202, 52, 16, `<polyline id="eh-eng-graph" fill="none" stroke="${C.cyan}" stroke-width="1"/>` +
     `<g fill="${C.cyan}"><rect x="42" y="10" width="2" height="4"/><rect x="45" y="7" width="2" height="7"/><rect x="48" y="4" width="2" height="10"/></g>` +
-    `<text x="3" y="6" font-size="4" fill="${C.cyanhi}">AG-THRUST OK</text>`);
+    `<text id="eh-eng-text" x="3" y="6" font-size="4" fill="${C.cyanhi}">AG-THRUST OK</text>`);
   const radar = screen(532, 202, 52, 16, `<circle cx="9" cy="8" r="6" fill="none" stroke="${C.cyan}" stroke-width=".8" opacity=".7"/>` +
     `<line id="eh-eng-radar" x1="9" y1="8" x2="15" y2="8" stroke="${C.cyanhi}" stroke-width="1"/>` +
     `<g fill="${C.cyan}"><rect x="19" y="3" width="29" height="1.6" rx=".8" opacity=".7"/><rect x="19" y="7" width="21" height="1.6" rx=".8" opacity=".5"/><rect x="19" y="11" width="25" height="1.6" rx=".8" opacity=".6"/></g>`);
@@ -651,13 +837,33 @@ function drawEngineRoom(gs, gd) {
   drawThruster(gd, 480, 318);
   block({ r: [320, 298, 364, 392] }, { r: [580, 244, 640, 392] }, { c: [480, 318, 58] }, { r: [448, 200, 604, 230] });
 
-  const gr = ref('eng-graph'), radarLine = ref('eng-radar'), lv = [...gd.querySelectorAll('.eh-eng-lvl')];
-  ANIM.push((t) => {
+  const gr = ref('eng-graph'), radarLine = ref('eng-radar'), lv = [...gd.querySelectorAll('.eh-eng-lvl')], txt = ref('eng-text');
+  const state = watch('engine', (st) => {
+    const bad = st !== 'ok';
+    txt.textContent = st === 'ok' ? 'AG-THRUST OK' : st === 'broken' ? 'AG-THRUST FAULT' : 'RECALIBRATING';
+    txt.setAttribute('fill', st === 'broken' ? C.faulttext : C.cyanhi);
+    gr.setAttribute('stroke', bad ? C.faulttext : C.cyan);
+    lv.forEach((r) => r.setAttribute('fill', bad ? C.red : C.amber));
+  });
+  let sparkT = 1;
+  ANIM.push((t, dt) => {
+    const st = state(), broken = st === 'broken';
     const p = [];
-    for (let x = 3; x <= 38; x += 2.5) p.push(f1(x) + ',' + f1(11 + 2.6 * Math.sin(x * .35 + t * 4) + 1.2 * Math.sin(x * .9 + t * 7)));
+    for (let x = 3; x <= 38; x += 2.5) {
+      const y = broken ? 11 + (Math.random() - .5) * 8 : 11 + 2.6 * Math.sin(x * .35 + t * 4) + 1.2 * Math.sin(x * .9 + t * 7);
+      p.push(f1(x) + ',' + f1(y));
+    }
     gr.setAttribute('points', p.join(' '));
     radarLine.setAttribute('transform', `rotate(${f1(t * 120 % 360)} 9 8)`);
-    lv.forEach((r, i) => { const h = 16 * (.75 + .2 * Math.sin(t * 1.3 + i * 1.7)); r.setAttribute('y', f1(22 - h)); r.setAttribute('height', f1(h)); });
+    lv.forEach((r, i) => {
+      const h = 16 * (st === 'ok' ? .75 + .2 * Math.sin(t * 1.3 + i * 1.7) : .2 + .12 * Math.sin(t * 3 + i));
+      r.setAttribute('y', f1(22 - h)); r.setAttribute('height', f1(h));
+    });
+    // the junction box by the thruster spits sparks now and then
+    if (broken && !REDUCE && (sparkT -= dt) <= 0) {
+      sparkT = .6 + Math.random() * 1.1;
+      sparks(387, 329, 7 + (Math.random() * 6 | 0), [C.spark, C.sparkhi], -Math.PI / 2, 2.6);
+    }
   });
 }
 function drawThruster(g, cx, cy) {
@@ -692,13 +898,39 @@ function drawThruster(g, cx, cy) {
       <circle cx="-3.5" cy="-4" r="2.5" fill="${C.white}" opacity=".55"/></g>
     ${label(0, 47, 'AG-7', C.cyanhi)}
   </g>`);
-  const outer = ref('thr-outer'), inner = ref('thr-inner'), core = ref('thr-core');
-  let a1 = 0, a2 = 0;
+  const outer = ref('thr-outer'), inner = ref('thr-inner'), core = ref('thr-core'), coreFill = core.firstElementChild;
+  const lights = [...g.querySelectorAll('.eh-thr-ring, .eh-thr-em')];
+  const S = SYS.engine;
+  const state = watch('engine', (st) => {
+    coreFill.setAttribute('fill', st === 'ok' ? 'url(#eh-coreBlue)' : 'url(#eh-coreRed)');
+    lights.forEach((l) => l.setAttribute(l.tagName === 'circle' ? 'stroke' : 'fill', st === 'ok' ? C.cyan : C.red));
+  });
+  let a1 = 0, a2 = 0, flick = 1, shownFlick = 1, flickT = 0, smokeT = 0;
   ANIM.push((t, dt) => {
-    a1 = (a1 + 70 * dt) % 360; a2 = (a2 - 112 * dt) % 360;
+    const st = state();
+    // working: smooth spin; broken: the rings stutter (lurch, stall, slip back); repairing: spinning back up
+    let v = 70;
+    if (st === 'broken') v = REDUCE ? 14 : (Math.sin(t * 13) > .2 ? 30 : -6);
+    else if (st === 'repairing') v = 25 + 70 * S.progress;
+    a1 = (a1 + v * dt) % 360; a2 = (a2 - v * 1.6 * dt) % 360;
     outer.setAttribute('transform', `rotate(${f1(a1)})`);
     inner.setAttribute('transform', `rotate(${f1(a2)})`);
-    core.setAttribute('transform', `scale(${(1 + .06 * Math.sin(t * 3)).toFixed(3)})`);
+    // the broken core sputters: a short dip about once a second (well under 3 flashes per second)
+    if (st === 'broken' && !REDUCE) {
+      if ((flickT -= dt) <= 0) { flick = flick < 1 ? 1 : .3; flickT = flick < 1 ? .09 : .5 + Math.random() * .7; }
+    } else flick = 1;
+    if (flick !== shownFlick) {
+      shownFlick = flick;
+      core.setAttribute('opacity', flick);
+      lights.forEach((l) => l.setAttribute('opacity', flick < 1 ? .3 : 1));
+    }
+    const pulse = st === 'broken' ? .9 + .06 * Math.sin(t * 9) : 1 + .06 * Math.sin(t * 3);
+    core.setAttribute('transform', `scale(${pulse.toFixed(3)})`);
+    if (st === 'broken' && !REDUCE && (smokeT -= dt) <= 0) {
+      smokeT = .2;
+      puff('smoke', cx + (Math.random() - .5) * 40, cy + (Math.random() - .5) * 16,
+        (Math.random() - .5) * 14, -22 - Math.random() * 16, 6 + Math.random() * 5, 20, 1.8 + Math.random(), .65);
+    }
   });
 }
 
@@ -722,7 +954,7 @@ function drawLifeSupport(gs, gd) {
       </g><circle r="3.5" fill="${C.metal1}" stroke="${C.outline}" stroke-width="1"/></g>
       <rect y="46" width="38" height="16" rx="2" fill="${C.face}" stroke="${C.outline}" stroke-width="1.5"/>
       <g stroke="${C.faceline}" stroke-width="1.5"><line x1="4" y1="51" x2="26" y2="51"/><line x1="4" y1="55" x2="26" y2="55"/><line x1="4" y1="59" x2="26" y2="59"/></g>
-      <circle cx="32" cy="54" r="2.5" fill="${C.green}" stroke="${C.outline}" stroke-width=".8"/>
+      <circle class="eh-scr-led" cx="32" cy="54" r="2.5" fill="${C.green}" stroke="${C.outline}" stroke-width=".8"/>
     </g>`;
   let cans = '';
   [942, 962, 982].forEach((x) => {
@@ -739,15 +971,15 @@ function drawLifeSupport(gs, gd) {
     <rect x="936" y="296" width="64" height="42" rx="4" fill="${C.floorbg}" stroke="${C.outline}" stroke-width="1.5"/>${cans}
     <rect x="936" y="314" width="64" height="4" fill="${C.metal3}"/>
     ${grate(930, 380, 50, 14)}${lightBar(740, 404, 22, 3)}${lightBar(946, 404, 22, 3)}`);
-  add(gd, `${screen(740, 192, 40, 15, `<text x="3" y="6" font-size="4.2" fill="${C.cyanhi}">O₂ 21%</text><polyline id="eh-o2-wave" fill="none" stroke="${C.o2}" stroke-width="1"/>`)}
+  add(gd, `${screen(740, 192, 40, 15, `<text id="eh-o2-text" x="3" y="6" font-size="4.2" fill="${C.cyanhi}">O₂ 21%</text><polyline id="eh-o2-wave" fill="none" stroke="${C.o2}" stroke-width="1"/>`)}
     ${wallEye(913, 200)}
     ${plant(820, 0)}${plant(840, 1)}${plant(860, 2)}
     <ellipse cx="752" cy="334" rx="31" ry="10" fill="${C.outline}"/><ellipse cx="752" cy="332" rx="29" ry="8.5" fill="${C.metal3}"/>
     <rect x="726" y="240" width="52" height="92" rx="12" fill="${C.glass}"/>
     <g clip-path="url(#eh-tankclip)">
-      <rect x="724" y="262" width="56" height="74" fill="url(#eh-o2liq)"/>
+      <rect id="eh-o2-liq" x="724" y="262" width="56" height="74" fill="url(#eh-o2liq)"/>
       <ellipse id="eh-o2-surface" cx="752" cy="262" rx="26" ry="3" fill="${C.o2hi}" opacity=".5"/>
-      <g>${bub}</g>
+      <g id="eh-o2-bubs">${bub}</g>
     </g>
     <rect x="733" y="248" width="6" height="76" rx="3" fill="${C.white}" opacity=".22"/>
     <rect x="726" y="240" width="52" height="92" rx="12" fill="none" stroke="${C.outline}" stroke-width="2.5"/>
@@ -761,21 +993,50 @@ function drawLifeSupport(gs, gd) {
   block({ r: [796, 150, 884, 198] }, { r: [720, 228, 786, 344] }, { r: [796, 246, 888, 318] }, { r: [932, 292, 1004, 342] });
 
   const fans = [ref('fan1'), ref('fan2')], bubs = [...gd.querySelectorAll('.eh-bub')], plants = [...gd.querySelectorAll('.eh-plant')];
-  const wave = ref('o2-wave'), surf = ref('o2-surface');
+  const wave = ref('o2-wave'), surf = ref('o2-surface'), liq = ref('o2-liq'), txt = ref('o2-text'), bubG = ref('o2-bubs');
+  const leds = [...gd.querySelectorAll('.eh-scr-led')];
   const B = bubs.map((b, i) => ({ x: 736 + (i * 37 % 32), y: 330 - i * 10, v: 14 + (i % 4) * 5 }));
-  let fa = 0;
+  const S = SYS.life;
+  const state = watch('life', (st) => {
+    const bad = st !== 'ok';
+    liq.setAttribute('fill', bad ? 'url(#eh-o2liqBad)' : 'url(#eh-o2liq)');
+    surf.setAttribute('fill', bad ? C.eye1 : C.o2hi);
+    bubG.style.display = st === 'broken' ? 'none' : '';     // the bubbles stop
+    txt.textContent = st === 'ok' ? 'O₂ 21%' : st === 'broken' ? 'O₂ LOW' : 'RESETTING';
+    txt.setAttribute('fill', st === 'broken' ? C.faulttext : C.cyanhi);
+    wave.setAttribute('stroke', bad ? C.faulttext : C.o2);
+    if (!bad) leds.forEach((l) => { l.setAttribute('fill', C.green); l.setAttribute('opacity', 1); });
+  });
+  let fa = 0, fv = 300, hissT = 0, puffT = 0;
   ANIM.push((t, dt) => {
-    fa = (fa + 300 * dt) % 360;
+    const st = state(), broken = st === 'broken';
+    // the fans spin down when broken and back up during a repair
+    const want = st === 'ok' ? 300 : broken ? 0 : 60 + 240 * S.progress;
+    fv += (want - fv) * Math.min(1, dt * 1.2);
+    fa = (fa + fv * dt) % 360;
     fans[0].setAttribute('transform', `rotate(${f1(fa)})`); fans[1].setAttribute('transform', `rotate(${f1(-fa * 1.1)})`);
-    B.forEach((b, i) => {
-      b.y -= b.v * dt; if (b.y < 264) { b.y = 330; b.x = 734 + Math.random() * 36; }
-      bubs[i].setAttribute('cx', f1(b.x + Math.sin(t * 3 + i) * 1.5)); bubs[i].setAttribute('cy', f1(b.y));
-    });
+    if (!broken) {
+      B.forEach((b, i) => {
+        b.y -= b.v * dt; if (b.y < 264) { b.y = 330; b.x = 734 + Math.random() * 36; }
+        bubs[i].setAttribute('cx', f1(b.x + Math.sin(t * 3 + i) * 1.5)); bubs[i].setAttribute('cy', f1(b.y));
+      });
+    }
     surf.setAttribute('ry', f1(2.6 + .6 * Math.sin(t * 2)));
     plants.forEach((p, i) => p.setAttribute('transform', `rotate(${f1(4 * Math.sin(t * 1.2 + i * 1.3))})`));
     const p = [];
-    for (let x = 22; x <= 38; x += 1.5) p.push(f1(x) + ',' + f1(8 + 3 * Math.sin(x * .6 - t * 3)));
+    for (let x = 22; x <= 38; x += 1.5) p.push(f1(x) + ',' + f1(broken ? 8 + (Math.random() - .5) * 2 : 8 + 3 * Math.sin(x * .6 - t * 3)));
     wave.setAttribute('points', p.join(' '));
+    if (broken) {
+      const on = Math.sin(t * 4 * Math.PI) > 0;   // the scrubbers' status lights blink red (2 per second)
+      leds.forEach((l, i) => { l.setAttribute('fill', C.red); l.setAttribute('opacity', REDUCE || (i % 2 ? !on : on) ? 1 : .25); });
+      // the vents hiss: bursts of steam out of the scrubbers' front grilles (1.6 s on, 1 s off)
+      hissT = (hissT + dt) % 2.6;
+      if (!REDUCE && hissT < 1.6 && (puffT -= dt) <= 0) {
+        puffT = .09;
+        const x = (Math.random() < .5 ? 815 : 861) + (Math.random() - .5) * 18;
+        puff('steam', x, 312, (Math.random() - .5) * 18, 34 + Math.random() * 20, 3 + Math.random() * 2, 12, .8 + Math.random() * .4, .6);
+      }
+    }
   });
 }
 
@@ -799,7 +1060,7 @@ function drawReactor(gs, gd) {
     ${label(486, 793, 'RX-2', C.rx2)}
     <rect x="324" y="652" width="62" height="64" rx="4" fill="${C.floorbg}" opacity=".7"/>${barrels}
     ${grate(548, 786, 36, 14)}${lightBar(458, 818, 22, 3)}${lightBar(532, 818, 22, 3)}`);
-  add(gd, `${screen(544, 616, 58, 15, `<text x="3" y="6" font-size="4" fill="${C.rx2}">RX-2 TEMP</text>` +
+  add(gd, `${screen(544, 616, 58, 15, `<text id="eh-rx-text" x="3" y="6" font-size="4" fill="${C.rx2}">RX-2 TEMP</text>` +
       `<g transform="translate(44 8)"><circle r="5.5" fill="none" stroke="${C.rx2}" stroke-width=".8"/><line id="eh-rx-needle" x2="0" y2="-4.5" stroke="${C.rx1}" stroke-width="1"/></g>` +
       `<g fill="${C.rx2}"><rect x="3" y="9" width="18" height="1.6" rx=".8"/><rect x="3" y="12" width="12" height="1.6" rx=".8" opacity=".6"/></g>`)}
     ${wallEye(414, 624)}
@@ -819,16 +1080,37 @@ function drawReactor(gs, gd) {
       <circle cx="27" cy="44" r="4" fill="${C.red}" stroke="${C.outline}" stroke-width="1"/><circle cx="27" cy="56" r="4" fill="${C.green}" stroke="${C.outline}" stroke-width="1"/></g>`);
   block({ c: [486, 734, 52] }, { r: [322, 650, 388, 718] }, { r: [594, 660, 640, 738] });
 
-  const ring = ref('rx-ring'), core = ref('rx-core'), needle = ref('rx-needle'), bar = ref('rx-bar');
+  const ring = ref('rx-ring'), core = ref('rx-core'), needle = ref('rx-needle'), bar = ref('rx-bar'), txt = ref('rx-text');
   const lights = [...gd.querySelectorAll('.eh-rx-light')];
-  let a = 0;
+  const state = watch('reactor', (st) => {
+    const bad = st !== 'ok';
+    core.firstElementChild.setAttribute('fill', bad ? 'url(#eh-coreRed)' : 'url(#eh-coreAmber)');
+    ring.firstElementChild.setAttribute('stroke', bad ? C.red : C.rx3);
+    bar.setAttribute('fill', bad ? C.red : C.rx3);
+    lights.forEach((l) => l.setAttribute('fill', bad ? C.red : C.rx2));
+    txt.textContent = st === 'ok' ? 'RX-2 TEMP' : st === 'broken' ? 'RX-2 OVERHEAT' : 'VENTING';
+    txt.setAttribute('fill', st === 'broken' ? C.faulttext : C.rx2);
+  });
+  // steam escapes where the four coolant pipes meet the pad
+  const VENTS = [[446, 694], [526, 694], [446, 774], [526, 774]];
+  let a = 0, steamT = 0;
   ANIM.push((t, dt) => {
-    a = (a + 30 * dt) % 360;
+    const st = state(), broken = st === 'broken';
+    a = (a + (broken ? 95 : 30) * dt) % 360;
     ring.setAttribute('transform', `rotate(${f1(a)})`);
-    core.setAttribute('transform', `scale(${(1 + .07 * Math.sin(t * 2.2)).toFixed(3)})`);
-    needle.setAttribute('transform', `rotate(${f1(20 + 10 * Math.sin(t * .9))})`);
-    const h = 30 * (.6 + .1 * Math.sin(t * 1.7)); bar.setAttribute('y', f1(60 - h)); bar.setAttribute('height', f1(h));
-    lights.forEach((l, i) => l.setAttribute('opacity', f1(.65 + .35 * Math.sin(t * 2.2 + i * .8))));
+    // broken: the core throbs (bigger, faster pulse; a smooth swell, not a flash)
+    const s = broken && !REDUCE ? 1 + .14 * Math.sin(t * 10) : 1 + .07 * Math.sin(t * 2.2);
+    core.setAttribute('transform', `scale(${s.toFixed(3)})`);
+    needle.setAttribute('transform', `rotate(${f1(broken ? 68 + (REDUCE ? 0 : 6 * Math.sin(t * 23)) : 20 + 10 * Math.sin(t * .9))})`);
+    const h = 30 * (broken ? .96 : .6 + .1 * Math.sin(t * 1.7)); bar.setAttribute('y', f1(60 - h)); bar.setAttribute('height', f1(h));
+    lights.forEach((l, i) => l.setAttribute('opacity', broken
+      ? (REDUCE ? 1 : f1(.25 + .75 * Math.max(0, Math.sin(t * 7 - i * .785))))     // a warning chase around the ring
+      : f1(.65 + .35 * Math.sin(t * 2.2 + i * .8))));
+    if (broken && !REDUCE && (steamT -= dt) <= 0) {
+      steamT = .16;
+      const [x, y] = VENTS[Math.random() * 4 | 0];
+      puff('steam', x + (Math.random() - .5) * 8, y, (Math.random() - .5) * 16, -24 - Math.random() * 18, 4 + Math.random() * 3, 16, 1.2 + Math.random() * .5, .55);
+    }
   });
 }
 
@@ -838,7 +1120,7 @@ function drawShieldBay(gs, gd) {
   let nodes = '', caps = '';
   for (let i = 0; i < 6; i++) {
     const a = i * 60 * Math.PI / 180, x = f1(38 * Math.cos(a)), y = f1(38 * Math.sin(a));
-    nodes += `<g transform="translate(${x} ${y})"><polygon points="${hex(6.5, 30)}" fill="url(#eh-metalDark)" stroke="${C.outline}" stroke-width="1.2"/><circle r="2.6" fill="${C.sh2}"/></g>`;
+    nodes += `<g transform="translate(${x} ${y})"><polygon points="${hex(6.5, 30)}" fill="url(#eh-metalDark)" stroke="${C.outline}" stroke-width="1.2"/><circle class="eh-sh-node" r="2.6" fill="${C.sh2}"/></g>`;
   }
   [670, 702, 734].forEach((y) => {
     caps += `<g transform="translate(728 ${y})"><circle r="13" fill="url(#eh-metal)" stroke="${C.outline}" stroke-width="2"/>` +
@@ -857,7 +1139,7 @@ function drawShieldBay(gs, gd) {
     </g>
     ${label(858, 806, 'SG-4', C.sh1)}
     ${grate(900, 812, 36, 12)}${lightBar(800, 828, 22, 3)}${lightBar(900, 828, 22, 3)}`);
-  add(gd, `${screen(736, 616, 60, 15, `<text x="3" y="6" font-size="4" fill="${C.sh1}">SHIELD 100%</text><polyline id="eh-sh-wave" fill="none" stroke="${C.sh2}" stroke-width="1"/>`)}
+  add(gd, `${screen(736, 616, 60, 15, `<text id="eh-sh-text" x="3" y="6" font-size="4" fill="${C.sh1}">SHIELD 100%</text><polyline id="eh-sh-wave" fill="none" stroke="${C.sh2}" stroke-width="1"/>`)}
     ${wallEye(930, 624)}${caps}
     <g transform="translate(858 742)">
       <g id="eh-sh-ring">${nodes}</g>
@@ -871,19 +1153,42 @@ function drawShieldBay(gs, gd) {
   block({ c: [858, 742, 56] }, { r: [706, 648, 750, 754] }, { r: [944, 664, 1002, 726] });
 
   const ring = ref('sh-ring'), field = ref('sh-field'), orb = ref('sh-orb'), holo = ref('sh-holo'), wave = ref('sh-wave');
-  const capL = [...gd.querySelectorAll('.eh-cap')];
-  let a = 0, b = 0;
+  const capL = [...gd.querySelectorAll('.eh-cap')], nodeL = [...gd.querySelectorAll('.eh-sh-node')], txt = ref('sh-text');
+  const S = SYS.shield;
+  const state = watch('shield', (st) => {
+    const bad = st !== 'ok';
+    nodeL.forEach((n) => n.setAttribute('fill', bad ? C.red : C.sh2));
+    holo.setAttribute('fill', bad ? C.red : C.sh2); holo.setAttribute('stroke', bad ? C.red : C.sh2);
+    wave.setAttribute('stroke', bad ? C.faulttext : C.sh2);
+    txt.textContent = st === 'ok' ? 'SHIELD 100%' : st === 'broken' ? 'SHIELD 0%' : 'REALIGNING';
+    txt.setAttribute('fill', st === 'broken' ? C.faulttext : C.sh1);
+  });
+  let a = 0, b = 0, flashT = 0, flashOn = 0, sparkT = .4;
   ANIM.push((t, dt) => {
-    a = (a + 24 * dt) % 360; b = (b - 9 * dt) % 360;
+    const st = state(), broken = st === 'broken';
+    a = (a + (broken ? 6 : 24) * dt) % 360; b = (b - 9 * dt) % 360;
     ring.setAttribute('transform', `rotate(${f1(a)})`);
     field.setAttribute('transform', `rotate(${f1(b)})`);
-    field.setAttribute('opacity', f1(.6 + .4 * Math.sin(t * 1.8)));
-    orb.setAttribute('transform', `scale(${(1 + .1 * Math.sin(t * 3)).toFixed(3)})`);
+    // broken: the field is off except for brief flickers (at most 2 a second); repairing: it fades back in
+    let fo = .6 + .4 * Math.sin(t * 1.8);
+    if (broken) {
+      if (!REDUCE && (flashT -= dt) <= 0) { flashOn = flashOn ? 0 : 1; flashT = flashOn ? .07 : .5 + Math.random() * .9; }
+      fo = flashOn && !REDUCE ? .45 : 0;
+    } else if (st === 'repairing') fo = .15 + .6 * S.progress;
+    field.setAttribute('opacity', f1(fo));
+    orb.setAttribute('opacity', broken ? (flashOn && !REDUCE ? .8 : .35) : 1);
+    orb.setAttribute('transform', `scale(${(broken ? .8 : 1 + .1 * Math.sin(t * 3)).toFixed(3)})`);
     holo.setAttribute('r', f1(16 + 1.5 * Math.sin(t * 1.8)));
-    capL.forEach((c, i) => c.setAttribute('opacity', f1(.35 + .65 * Math.max(0, Math.sin(t * 3 - i * 1.1)))));
+    capL.forEach((c, i) => c.setAttribute('opacity', broken ? .1 : f1(.35 + .65 * Math.max(0, Math.sin(t * 3 - i * 1.1)))));
     const p = [];
-    for (let x = 34; x <= 57; x += 1.5) p.push(f1(x) + ',' + f1(8 + 2.5 * Math.sin(x * .9 + t * 4)));
+    for (let x = 34; x <= 57; x += 1.5) p.push(f1(x) + ',' + f1(broken ? 8 + (Math.random() - .5) * 5 : 8 + 2.5 * Math.sin(x * .9 + t * 4)));
     wave.setAttribute('points', p.join(' '));
+    // the emitter sparks: bursts from one of the six nodes as the ring grinds round
+    if (broken && !REDUCE && (sparkT -= dt) <= 0) {
+      sparkT = .45 + Math.random() * .9;
+      const k = Math.random() * 6 | 0, ang = (k * 60 + a) * Math.PI / 180;
+      sparks(858 + 38 * Math.cos(ang), 742 + 38 * Math.sin(ang), 7 + (Math.random() * 5 | 0), [C.sh1, C.sparkhi], ang, 2.2);
+    }
   });
 }
 
@@ -1077,7 +1382,7 @@ function drawPlayer(g) {
     </g>
   </g></g>`);
 }
-const PL = { x: SETTINGS.START.x, y: SETTINGS.START.y, dir: SETTINGS.START.dir, walk: 0, moving: false };
+const PL = { x: SETTINGS.START.x, y: SETTINGS.START.y, dir: SETTINGS.START.dir, walk: 0, moving: false, working: false };
 let PR = null;   // player element refs
 const PLAYER_PARTS = {   // which parts each view shows
   chest: ['down'], pack: ['up'], helmBack: ['up'], visorF: ['down'], visorS: ['left', 'right'],
@@ -1113,6 +1418,16 @@ function posePlayer(t) {
     PR.legF.setAttribute('transform', `translate(5 ${f1(-Math.max(0, -sw) * 2.6)})`);
     PR.armL.setAttribute('transform', `translate(0 ${f1(sw * 2)})`);
     PR.armR.setAttribute('transform', `translate(0 ${f1(-sw * 2)})`);
+  }
+  if (PL.working) {   // repairing: arms reach forward and work quickly
+    const w = REDUCE ? 0 : Math.sin(t * 18);
+    if (side) {
+      PR.armNear.setAttribute('transform', `rotate(${f1(-62 + w * 16)} 0 -21)`);
+      PR.armFar.setAttribute('transform', `rotate(${f1(-50 - w * 16)} 2.5 -21)`);
+    } else {
+      PR.armL.setAttribute('transform', `translate(0 ${f1(-2 + w * 1.8)})`);
+      PR.armR.setAttribute('transform', `translate(0 ${f1(-2 - w * 1.8)})`);
+    }
   }
 }
 
@@ -1172,7 +1487,7 @@ window.addEventListener('keydown', (e) => {
   if (e.altKey || e.ctrlKey || e.metaKey || !gameHasFocus()) return;
   const k = KEYMAP[e.code];
   if (k) { keys[k] = true; e.preventDefault(); }
-  else if (e.code === 'Space') e.preventDefault();   // Space will interact (step 2); never scroll the page
+  else if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) interact(); }   // never scroll the page
 });
 window.addEventListener('keyup', (e) => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
 const releaseKeys = () => { for (const k in keys) keys[k] = false; };
@@ -1183,7 +1498,9 @@ stage.addEventListener('pointerdown', () => stage.focus({ preventScroll: true })
 function movePlayer(dt) {
   let vx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), vy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
   PL.moving = false;
+  if (GAME.state !== 'play' || GAME.repair) return;   // no walking during a repair or after the game ends
   if (!vx && !vy) return;
+  if (vy) bumpDoor(vy);
   const len = Math.hypot(vx, vy); vx /= len; vy /= len;
   const dist = SETTINGS.SPEED * dt, n = Math.ceil(dist / 2), sx = vx * dist / n, sy = vy * dist / n;
   const x0 = PL.x, y0 = PL.y;
@@ -1208,30 +1525,239 @@ function nudge(axis, d) {
   }
 }
 
-/* ==== SECTION: Doors (state) ==== */
+/* ==== SECTION: Doors (state) ====
+   Walking into a closed door (bumpDoor): from inside the room it always opens; from the corridor it opens
+   while the room's system is down. FOR NOW it's free: step 3 charges the failure's cost and adds B.F. 9000's
+   lines. An opened door relocks once the player has been in the room and left it (or walked away without
+   going in). d.dev marks doors held open by the test tools. */
 function setDoor(d, open) { d.want = open; }
+function bumpDoor(vy) {
+  const y = PL.y + Math.sign(vy) * (SETTINGS.FOOT_H + 4);
+  const d = DOORS.find((q) => !q.want && PL.x > q.x1 + 4 && PL.x < q.x2 - 4 && y >= q.y1 - 2 && y <= q.y2 + 2);
+  if (!d) return;
+  const inside = areaAt(PL.x, PL.y) === d.room.id;
+  if (inside || isDown(d.room.id)) { setDoor(d, true); d.visited = inside; }
+}
+function drawDoor(d) {
+  const e = d.t * d.t * (3 - 2 * d.t), off = f1(e * 44);
+  d.elL.setAttribute('transform', `translate(${-off} 0)`);
+  d.elR.setAttribute('transform', `translate(${off} 0)`);
+}
 function updateDoors(dt) {
+  const here = areaAt(PL.x, PL.y);
   DOORS.forEach((d) => {
+    if (d.want && !d.dev) {
+      if (here === d.room.id) d.visited = true;
+      else if (!playerInDoor(d) && (d.visited || Math.hypot(PL.x - d.x, PL.y - d.mid) > 90)) { d.want = false; d.visited = false; }
+    }
     if (!d.want && d.t > 0 && playerInDoor(d)) return;   // never close on the player
     d.open = d.want;
     const t0 = d.t;
     d.t = Math.max(0, Math.min(1, d.t + (d.open ? 1 : -1) * dt * SETTINGS.DOOR_SPEED));
-    if (d.t === t0) return;
-    const e = d.t * d.t * (3 - 2 * d.t), off = f1(e * 44);
-    d.elL.setAttribute('transform', `translate(${-off} 0)`);
-    d.elR.setAttribute('transform', `translate(${off} 0)`);
-    d.lock.setAttribute('fill', d.t > .5 ? C.green : C.red);
+    if (d.t !== t0) drawDoor(d);
   });
 }
 
-/* ==== SECTION: Fit the ship to the stage ==== */
-function fit() {
-  const r = stage.getBoundingClientRect();
-  if (!r.width || !r.height) return;
-  const s = Math.min(r.width / BOX.w, r.height / BOX.h), vw = r.width / s, vh = r.height / s;
-  const vb = [BOX.x + BOX.w / 2 - vw / 2, BOX.y + BOX.h / 2 - vh / 2, vw, vh].map(f1).join(' ');
-  ALL_SVGS.forEach((el) => el.setAttribute('viewBox', vb));
+/* ==== SECTION: Game: clocks, failures and repairs ==== */
+const SEED = params.has('seed') ? (parseInt(params.get('seed'), 10) || 0) : null;
+const GAME = { state: 'play', t: 0, horizon: SETTINGS.HORIZON, next: 0, last: null, repair: null,
+  repairs: 0, failures: 0, rand: Math.random, invincible: false, frozen: false, bonus: 0, bonusT: 0, warned: 999 };
+const hyperLeft = () => Math.max(0, SETTINGS.HYPERDRIVE - GAME.t);
+const anyDown = () => ROOMS.some((r) => isDown(r.id));
+const live = $('live');
+function announce(msg) { live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 60); }
+
+function resetGame() {
+  Object.assign(GAME, { state: 'play', t: 0, horizon: SETTINGS.HORIZON, next: 0, last: null, repair: null,
+    repairs: 0, failures: 0, bonus: 0, bonusT: 0, warned: 999,
+    rand: SEED === null ? Math.random : rng(((SEED % 2147483646) + 2147483646) % 2147483646 + 1) });
+  ROOMS.forEach((r) => Object.assign(SYS[r.id], { state: 'ok', progress: 0, fail: -1, cost: 0 }));
+  DOORS.forEach((d) => { Object.assign(d, { want: false, open: false, t: 0, visited: false, dev: false }); drawDoor(d); });
+  Object.assign(PL, { x: SETTINGS.START.x, y: SETTINGS.START.y, dir: SETTINGS.START.dir, walk: 0, moving: false, working: false });
+  repairRing(null); fxClear(); clearToasts();
+  $('end').hidden = true;
+  if (DEV) devReset();
 }
+// Failure number n (index into SETTINGS.FAILURES) breaks a random working system other than the last one
+function scheduledFailure() {
+  const n = GAME.next++, working = ROOMS.filter((r) => !isDown(r.id));
+  if (!working.length) return;                              // all four are down: this failure is skipped
+  const fresh = working.filter((r) => r.id !== GAME.last), pool = fresh.length ? fresh : working;
+  failSystem(pool[Math.floor(GAME.rand() * pool.length)].id, n, SETTINGS.FAILURES[n][1]);
+}
+function failSystem(id, n, cost) {
+  const S = SYS[id];
+  if (GAME.repair && GAME.repair.r.id === id) { GAME.repair = null; PL.working = false; repairRing(null); }
+  Object.assign(S, { state: 'broken', progress: 0, fail: n, cost });
+  GAME.last = id; GAME.failures++;
+  announce(`Alert: ${S.room.name} failure. The event horizon clock is draining.`);
+}
+// The room whose machine the player is standing next to (inside that room), or null
+function machineNear() {
+  const r = ROOMS.find((q) => q.id === areaAt(PL.x, PL.y));
+  return r && Math.min(...r.hit.map((s) => distToShape(PL.x, PL.y, s))) <= SETTINGS.REACH ? r : null;
+}
+function interact() {   // Space
+  if (GAME.state !== 'play' || GAME.repair) return;
+  const r = machineNear();
+  if (r && SYS[r.id].state === 'broken') startRepair(r);
+}
+function startRepair(r) {
+  GAME.repair = { r, t: 0, sparkT: 0 };
+  Object.assign(SYS[r.id], { state: 'repairing', progress: 0 });
+  PL.working = true; PL.moving = false;
+  const dx = r.ring[0] - PL.x, dy = r.ring[1] - PL.y;   // turn to face the machine
+  PL.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+  announce(`Repairing the ${r.machine.toLowerCase()}.`);
+}
+function tickRepair(dt) {
+  const R = GAME.repair, r = R.r, S = SYS[r.id];
+  R.t += dt; S.progress = Math.min(1, R.t / SETTINGS.REPAIR_TIME);
+  repairRing(r, S.progress);
+  // sparks fly from the machine's edge toward the player's tools
+  if (!REDUCE && (R.sparkT -= dt) <= 0) {
+    R.sparkT = .08;
+    const a = Math.atan2(PL.y - 20 - r.ring[1], PL.x - r.ring[0]);
+    sparks(r.ring[0] + Math.cos(a) * (r.ring[2] - 6), r.ring[1] + Math.sin(a) * (r.ring[2] - 6), 3, [C.cyanpale, C.cyan], a, 2.2, 200);
+  }
+  if (S.progress >= 1) finishRepair();
+}
+function finishRepair() {
+  const r = GAME.repair.r, S = SYS[r.id], [x, y, rad] = r.ring, tint = C[r.tint];
+  Object.assign(S, { state: 'ok', progress: 0, fail: -1, cost: 0 });
+  GAME.repair = null; PL.working = false; repairRing(null);
+  const before = GAME.horizon;
+  GAME.horizon = Math.min(SETTINGS.HORIZON, GAME.horizon + SETTINGS.REPAIR_BONUS);
+  GAME.repairs++;
+  GAME.bonus = Math.round(GAME.horizon - before); GAME.bonusT = 2.5;
+  GAME.warned = GAME.horizon > 60 ? 999 : GAME.horizon > 30 ? 60 : GAME.warned;   // re-arm the spoken warnings
+  if (!REDUCE) {
+    burstRing(x, y, rad, tint);
+    for (let i = 0; i < 4; i++) sparks(x, y, 5, [tint, C.white], i * Math.PI / 2, 1.6, 40);
+  }
+  toast('✓ ' + r.fixed, x, y - rad - 10);
+  announce(`${r.fixed}. ${r.name} is back online.` + (GAME.bonus ? ` Event horizon plus ${GAME.bonus} seconds.` : ''));
+}
+function tickGame(dt) {
+  if (GAME.state !== 'play') return;
+  if (!GAME.frozen) {
+    GAME.t += dt;
+    const F = SETTINGS.FAILURES;
+    while (GAME.next < F.length && GAME.t >= F[GAME.next][0]) scheduledFailure();
+    if (anyDown() && !GAME.invincible) GAME.horizon = Math.max(0, GAME.horizon - SETTINGS.DRAIN * dt);
+  }
+  if (GAME.repair) tickRepair(dt);
+  if (GAME.bonusT > 0) GAME.bonusT -= dt;
+  // screen readers hear the horizon clock at 1:00 and 0:30
+  [60, 30].forEach((s) => { if (GAME.horizon <= s && GAME.warned > s) { GAME.warned = s; announce(`Event horizon in ${s} seconds.`); } });
+  if (hyperLeft() <= 0) endGame('won');
+  else if (GAME.horizon <= 0) endGame('lost');
+}
+// Win or lose: freeze the clocks, cancel a repair in progress and show the end card (placeholder until step 6)
+function endGame(result) {
+  if (GAME.state !== 'play') return;
+  GAME.state = result;
+  if (GAME.repair) { Object.assign(SYS[GAME.repair.r.id], { state: 'broken', progress: 0 }); GAME.repair = null; PL.working = false; repairRing(null); }
+  releaseKeys();
+  const won = result === 'won';
+  $('endTitle').textContent = won ? 'Hyperdrive engaged!' : 'Lost to the black hole';
+  $('endText').textContent = won
+    ? `The ship jumped to safety with ${mmss(GAME.horizon)} left on the event horizon clock.`
+    : `The ship crossed the event horizon with ${mmss(hyperLeft())} still to go on the hyperdrive.`;
+  const stat = (label, value) => `<div class="stat"><span>${label}</span><strong>${value}</strong></div>`;
+  $('endStats').innerHTML = stat('Repairs made', GAME.repairs) + stat('Failures', GAME.failures) +
+    (won ? stat('Horizon left', mmss(GAME.horizon)) : stat('Hyperdrive left', mmss(hyperLeft())));
+  $('end').hidden = false;
+  $('again').focus({ preventScroll: true });
+}
+
+/* ==== SECTION: Fit the ship to the stage ==== */
+const VIEW = { x: 0, y: 0, s: 1 };   // ship units → stage pixels, for the HTML overlay
+function fit() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (!w || !h) return;
+  const s = Math.min(w / BOX.w, h / BOX.h), vw = w / s, vh = h / s;
+  const vb = [BOX.x + BOX.w / 2 - vw / 2, BOX.y + BOX.h / 2 - vh / 2, vw, vh].map(f1);
+  ALL_SVGS.forEach((el) => el.setAttribute('viewBox', vb.join(' ')));
+  Object.assign(VIEW, { x: vb[0], y: vb[1], s: w / vb[2] });
+  placeToasts();
+}
+const toStage = (x, y) => [(x - VIEW.x) * VIEW.s, (y - VIEW.y) * VIEW.s];
+
+/* ==== SECTION: HUD and on-screen text ====
+   The HUD (#hud) is HTML above the stage. Text that sits on the ship (the "Space Repair" prompt and the
+   "✓ Thruster recalibrated" toasts) is HTML too, in the #ui overlay, so it stays readable at any size;
+   it's placed with toStage() and uses the site tokens. */
+const ICONS = {
+  engine: '<circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.4"/><path d="M8 0.8V3M8 13V15.2M0.8 8H3M13 8H15.2"/>',
+  life: '<path d="M2.5 13.5C2.5 6.5 6.5 2.5 13.5 2.5C13.5 9.5 9.5 13.5 2.5 13.5Z"/><path d="M2.5 13.5L9 7"/>',
+  reactor: '<ellipse cx="8" cy="8" rx="6.8" ry="2.6"/><ellipse cx="8" cy="8" rx="6.8" ry="2.6" transform="rotate(60 8 8)"/>' +
+    '<ellipse cx="8" cy="8" rx="6.8" ry="2.6" transform="rotate(-60 8 8)"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/>',
+  shield: '<path d="M8 1.5L14 3.8V8C14 11.4 11.4 13.7 8 14.6C4.6 13.7 2 11.4 2 8V3.8Z"/>',
+  ok: '<path d="M3 8.5L6.5 12L13 4.5"/>',
+  broken: '<path d="M8 1.8L15 14.2H1Z"/><path d="M8 6.2V9.8"/><circle cx="8" cy="12" r=".5"/>',
+  repairing: '<path d="M10.6 1.8a3.6 3.6 0 0 0-3.4 4.8L1.9 11.9a1.4 1.4 0 0 0 2 2L9.2 8.6a3.6 3.6 0 0 0 4.8-3.4L12 7.2L9 4.2Z"/>'
+};
+const icon = (name, cls) => `<svg class="${cls}" viewBox="0 0 16 16" aria-hidden="true" focusable="false">${ICONS[name]}</svg>`;
+const STATE_WORD = { ok: 'OK', broken: 'Failure', repairing: 'Repairing' };
+const HUD = { shown: {} };
+function hudInit() {
+  $('hudSys').innerHTML = ROOMS.map((r) => `<li class="eh-sys" data-state="ok" id="hud-${r.id}">${icon(r.id, 'eh-ico')}` +
+    `<span class="eh-sys-txt"><span class="eh-sys-name">${r.hud}</span><strong class="eh-sys-st"></strong></span></li>`).join('');
+  HUD.hyper = $('hudHyperT'); HUD.bar = $('hudHyperBar'); HUD.horizon = $('hudHorizon');
+  HUD.horizonT = $('hudHorizonT'); HUD.horizonS = $('hudHorizonS');
+  HUD.sys = ROOMS.map((r) => { const li = $('hud-' + r.id); return { id: r.id, li, st: li.querySelector('.eh-sys-st') }; });
+}
+function hudSet(key, el, value, how) {   // touch the DOM only when a value changes
+  if (HUD.shown[key] === value) return;
+  HUD.shown[key] = value; how(el, value);
+}
+function hudTick() {
+  const text = (el, v) => { el.textContent = v; };
+  hudSet('hyper', HUD.hyper, mmss(hyperLeft()), text);
+  hudSet('bar', HUD.bar, f1(100 * GAME.t / SETTINGS.HYPERDRIVE), (el, v) => { el.style.width = Math.min(100, v) + '%'; });
+  hudSet('horizonT', HUD.horizonT, mmss(GAME.horizon), text);
+  const drain = GAME.state === 'play' && anyDown() && !GAME.invincible && !GAME.frozen;
+  const mode = GAME.state === 'lost' ? 'crossed' : GAME.bonusT > 0 && GAME.bonus ? 'bonus' : drain ? 'drain' : 'stable';
+  hudSet('horizonM', HUD.horizon, mode + (GAME.horizon <= 30 ? ' low' : ''), (el, v) => {
+    el.dataset.mode = v.split(' ')[0]; el.classList.toggle('is-low', v.endsWith('low'));
+  });
+  const word = { bonus: `+${GAME.bonus} s`, drain: '▼ Draining', crossed: 'Crossed', stable: GAME.state === 'won' ? 'Escaped' : 'Stable' };
+  hudSet('horizonS', HUD.horizonS, word[mode], text);
+  HUD.sys.forEach((h) => hudSet('sys-' + h.id, h, SYS[h.id].state, (o, st) => {
+    o.li.dataset.state = st;
+    o.st.innerHTML = icon(st, 'eh-ico-s') + STATE_WORD[st];
+  }));
+}
+
+// "Space Repair" prompt above the player whenever a broken machine is in reach
+const ui = $('ui'), promptEl = $('prompt');
+let promptAt = '', promptFor = null;
+function uiTick() {
+  const r = GAME.state === 'play' && !GAME.repair ? machineNear() : null, show = !!(r && SYS[r.id].state === 'broken');
+  if (show !== !promptEl.hidden) promptEl.hidden = !show;
+  if (show && promptFor !== r && !(GAME.t - r.said < 8)) { r.said = GAME.t; announce(`Press Space to repair the ${r.machine.toLowerCase()}.`); }
+  promptFor = show ? r : null;
+  if (!show) return;
+  const [x, y] = toStage(PL.x, PL.y - 50), at = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+  if (at !== promptAt) { promptAt = at; promptEl.style.transform = at; }
+}
+// Toasts: a short line that rises and fades over a spot on the ship (3 s)
+const toasts = [];
+function toast(text, x, y) {
+  const el = document.createElement('div');
+  el.className = 'eh-toast';
+  el.innerHTML = '<span></span>';
+  el.firstChild.textContent = text;
+  ui.appendChild(el);
+  const t = { el, x, y };
+  toasts.push(t); placeToasts();
+  el.firstChild.addEventListener('animationend', () => { el.remove(); toasts.splice(toasts.indexOf(t), 1); });
+}
+function placeToasts() {
+  toasts.forEach((t) => { const [x, y] = toStage(t.x, t.y); t.el.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`; });
+}
+function clearToasts() { toasts.splice(0).forEach((t) => t.el.remove()); }
 
 /* ==== SECTION: Test tools (?dev) ==== */
 let devGridOn = false;
@@ -1265,13 +1791,47 @@ function devInit() {
     const open = e.currentTarget.getAttribute('aria-pressed') !== 'true';
     e.currentTarget.setAttribute('aria-pressed', open);
     e.currentTarget.textContent = open ? 'Close all doors' : 'Open all doors';
-    DOORS.forEach((d) => setDoor(d, open));
+    DOORS.forEach((d) => { setDoor(d, open); d.dev = open; d.visited = false; });
   });
+  // Failures and clocks
+  const brk = $('devBreak');
+  brk.innerHTML = '<option value="">Choose a system…</option>' + ROOMS.map((r) => `<option value="${r.id}">${r.hud}</option>`).join('');
+  brk.addEventListener('change', () => {
+    if (brk.value && GAME.state === 'play' && SYS[brk.value].state !== 'broken') failSystem(brk.value, -1, 5);
+    brk.value = ''; stage.focus({ preventScroll: true });
+  });
+  $('devRepair').addEventListener('click', () => {
+    if (GAME.repair) { GAME.repair = null; PL.working = false; repairRing(null); }
+    ROOMS.forEach((r) => Object.assign(SYS[r.id], { state: 'ok', progress: 0, fail: -1, cost: 0 }));
+  });
+  $('devNext').addEventListener('click', () => {
+    const f = SETTINGS.FAILURES[GAME.next];
+    if (f && GAME.state === 'play') GAME.t = Math.max(GAME.t, f[0]);
+  });
+  $('devHyper').addEventListener('change', (e) => devSetHyper(+e.target.value));
+  $('devHorizon').addEventListener('change', (e) => { GAME.horizon = Math.max(0, Math.min(SETTINGS.HORIZON, +e.target.value || 0)); });
+  $('devInvincible').addEventListener('change', (e) => { GAME.invincible = e.target.checked; });
+  $('devFreeze').addEventListener('change', (e) => { GAME.frozen = e.target.checked; });
 }
-let devLast = '';
+// Set the hyperdrive clock (s left). Failures scheduled before the new mission time are skipped, later ones still come.
+function devSetHyper(left) {
+  GAME.t = Math.max(0, Math.min(SETTINGS.HYPERDRIVE, SETTINGS.HYPERDRIVE - (left || 0)));
+  GAME.next = SETTINGS.FAILURES.findIndex((f) => f[0] > GAME.t);
+  if (GAME.next < 0) GAME.next = SETTINGS.FAILURES.length;
+}
+function devReset() {   // after Play again: the test tools' toggles start over too (except invincible and freeze)
+  const b = $('devDoors');
+  b.setAttribute('aria-pressed', 'false'); b.textContent = 'Open all doors';
+  GAME.invincible = $('devInvincible').checked; GAME.frozen = $('devFreeze').checked;
+}
+let devLast = '', devLastG = '';
 function devTick() {
   const s = `x ${Math.round(PL.x)}, y ${Math.round(PL.y)} · ${areaAt(PL.x, PL.y) || '—'}`;
   if (s !== devLast) { $('devPos').textContent = s; devLast = s; }
+  const f = SETTINGS.FAILURES[GAME.next];
+  const g = `mission ${mmss(GAME.t)} · next failure ${f ? `#${GAME.next + 1} at ${mmss(f[0])}` : 'none'} · ` +
+    `failures ${GAME.failures} · repairs ${GAME.repairs} · ${GAME.state}`;
+  if (g !== devLastG) { $('devGame').textContent = g; devLastG = g; }
   const foot = ref('dev-foot');
   if (foot) { foot.setAttribute('x', f1(PL.x - SETTINGS.FOOT_W)); foot.setAttribute('y', f1(PL.y - SETTINGS.FOOT_H)); }
 }
@@ -1285,33 +1845,41 @@ function build() {
   drawHull(gHullLow, gHullHigh);
   drawEngines(gUnder, layer('engines'), SVG_SKY.firstChild);
   drawFloors(layer('walls'), layer('floors'));
-  const gs = layer('props'), gd = layer('machines', SVG_FRONT);
+  const gs = layer('props'), gAlarmUnder = layer('alarm-under', SVG_FRONT), gd = layer('machines', SVG_FRONT);
   drawCorridor(gs, gd);
   drawEngineRoom(gs, gd); drawLifeSupport(gs, gd); drawReactor(gs, gd); drawShieldBay(gs, gd); drawCommand(gs, gd);
   drawDoors(layer('doors', SVG_FRONT));
+  drawAlarms(gAlarmUnder, layer('alarm-over', SVG_FRONT));
   layer('devgrid', SVG_FRONT);
   drawPlayer(layer('actors', SVG_FRONT));
-  layer('fx', SVG_FRONT);
+  fxInit(layer('fx', SVG_FRONT));
   const eyes = [...SVG_FRONT.querySelectorAll('.eh-bfeye')];
   ANIM.push((t) => eyes.forEach((e, i) => e.setAttribute('r', f1(3 + .6 * Math.sin(t * 2 + i)))));
-  ROOMS.forEach((r) => { SYS[r.id] = { room: r, state: 'ok' }; });
   buildGrid();
+  hudInit();
 }
 
 build();
 fit();
 new ResizeObserver(fit).observe(stage);
 if (DEV) devInit();
+resetGame();
+$('again').addEventListener('click', () => { resetGame(); stage.focus({ preventScroll: true }); });
+$('end').addEventListener('keydown', (e) => { if (e.key === 'Tab') { e.preventDefault(); $('again').focus(); } });  // one control: keep focus in the card
 stage.focus({ preventScroll: true });
 
 // Main loop: the player moves every frame; idle machine animations run at about 30 fps to save painting.
+// Walking uses a step capped at 50 ms; the clocks use real time capped at 250 ms (a hidden tab pauses the game).
 let last = performance.now(), T = 0, animDt = 0, frameNo = 0;
 function frame(now) {
-  const dt = Math.min(.05, (now - last) / 1000);
+  const raw = (now - last) / 1000, dt = Math.min(.05, raw);
   last = now; T += dt; animDt += dt;
   movePlayer(dt);
   posePlayer(T);
   updateDoors(dt);
+  tickGame(Math.min(.25, raw));
+  hudTick();
+  uiTick();
   if (++frameNo % 2 === 0 || animDt > .05) {
     for (let i = 0; i < ANIM.length; i++) ANIM[i](T, animDt);
     animDt = 0;
@@ -1322,5 +1890,8 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // Test hooks for automated checks, only with ?dev
-if (DEV) window.__eh = { PL, DOORS, keys, setDoor, free, areaAt, posePlayer, SETTINGS, ANIM };
+if (DEV) {
+  window.__eh = { PL, DOORS, keys, setDoor, free, areaAt, posePlayer, SETTINGS, ANIM,
+    GAME, SYS, ROOMS, FX, failSystem, startRepair, interact, machineNear, resetGame, endGame, devSetHyper, toStage };
+}
 })();
