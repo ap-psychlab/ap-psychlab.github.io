@@ -5,7 +5,8 @@
  *   ?seed=N   repeatable scrambles (any whole number); the challenge (tutorial step 6)
  *             uses its own seeded stream, so its puzzles repeat whatever came before
  * Public option:
- *   ?mode=tutorial | practice | timed   open in that mode (default: practice)
+ *   ?mode=tutorial | practice | timed   open in that mode (default: practice). Choosing a mode
+ *             writes it to the address, so teachers can copy the address bar to share a mode.
  *
  * Title bar, ⓘ, sound and the settings popover come from ../../shared/ui.js (APPSYCH_UI).
  * Sound is off on every page load; tone() checks APPSYCH_UI.sound.on.
@@ -1081,9 +1082,19 @@
   }
 
   /* ---------- Modes ---------- */
-  function setMode(m) {
+  // Keep ?mode= in the address in step with the mode, so a copied address opens the same mode.
+  // replaceState: no reload and no Back-button entry; other options (?dev, ?seed) are kept.
+  function writeModeParam(m) {
+    try {
+      var q = new URLSearchParams(location.search);
+      q.set('mode', m);
+      history.replaceState(history.state, '', location.pathname + '?' + q.toString().replace(/=(?=&|$)/g, '') + location.hash);
+    } catch (e) { /* some browsers block this on file://; the mode still changes */ }
+  }
+  function setMode(m, fromStart) {
     clearInterval(timer); running = false; devStopAll();
     mode = m;
+    if (!fromStart) writeModeParam(m);
     hideMsg(); clearPreview(); endGuide(); hideStuck(); stuckShown = false; setBoardNote('');
     tut.hideFewest = false;
     stepper = makeStepper(['shortcut']);
@@ -1254,5 +1265,5 @@
   buildBoard();
   if (DEV) initDev();
   var startMode = params.get('mode');
-  setMode(startMode === 'timed' || startMode === 'tutorial' ? startMode : 'practice');
+  setMode(startMode === 'timed' || startMode === 'tutorial' ? startMode : 'practice', true);
 })();

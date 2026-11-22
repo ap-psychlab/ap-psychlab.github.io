@@ -17,6 +17,8 @@
  *   howTo        2–3 short lines for the ⓘ popover
  *   links        teacher links for the ⓘ popover: { query: "?mode=tutorial", label: "…" }, or
  *                { current: true, label: "…" } to copy the page's address as it is (topics chosen)
+ *                Empty when the demo writes its options to the address itself (e.g. Lights Off
+ *                writes ?mode= when a mode is chosen), so the address bar is the link to share.
  *
  * howTo and links are checked against each demo when it moves to the shared title bar.
  */
@@ -70,11 +72,7 @@ window.APPSYCH_DEMOS = [
       "Try a few puzzles on your own in Practice, then learn the algorithm in the Tutorial.",
       "Timed: solve as many puzzles as you can in 90 seconds."
     ],
-    links: [
-      { query: "?mode=tutorial", label: "Opens the tutorial" },
-      { query: "?mode=practice", label: "Opens Practice" },
-      { query: "?mode=timed", label: "Opens the 90-second timed round" }
-    ]
+    links: []
   },
   {
     id: "condition-the-cat",
