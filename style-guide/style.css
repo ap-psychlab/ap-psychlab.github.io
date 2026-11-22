@@ -92,3 +92,8 @@ code {
   .spec { grid-template-columns: 1fr; }
   .spec .meta { justify-self: start; text-align: left; }
 }
+
+/* Title bar examples: framed, since they sit inside the page column */
+.sg-bars { display: grid; gap: 16px; margin-bottom: 16px; }
+.sg-bars .topbar { border: 1px solid var(--border); border-radius: var(--radius-card); }
+.sg-seg { max-width: 360px; }

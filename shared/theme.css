@@ -1,5 +1,5 @@
 /* ==========================================================
-   AP Psych Demos — shared theme
+   AP Psych Lab — shared theme
    Link from a demo folder with:
    <link rel="stylesheet" href="../../shared/theme.css">
    Demo-specific styles go in that demo's own style.css.
@@ -30,6 +30,8 @@
 
   /* Non-color tokens */
   --shadow: 0 1px 2px rgba(0, 0, 0, .06);
+  --shadow-pop: 0 8px 24px rgba(59, 42, 32, .18);  /* popovers and modals */
+  --scrim: rgba(59, 42, 32, .45);                  /* behind a modal */
   --radius-card: 12px;
   --radius-btn: 8px;
   --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
@@ -162,7 +164,204 @@ a { color: var(--link); }
   font-variant-numeric: lining-nums tabular-nums;
 }
 
+/* ---------- Title bar ---------- */
+/* Every demo page starts with the shared title bar; shared/ui.js adds the ⓘ button and its
+   popover, and the sound and settings icons. Markup and options: see the top of shared/ui.js.
+   <header class="topbar"> lines up with <main> (900px); <header class="topbar wide"> with
+   <main class="wide"> (1400px). */
+.topbar {
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 8px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: "brand modes tools";
+  align-items: center;
+  gap: 8px 16px;
+}
+.topbar.wide .topbar-inner { max-width: 1400px; }
+.topbar .brand { grid-area: brand; display: flex; align-items: center; gap: 8px; min-width: 0; position: relative; }
+.topbar h1, .topbar .title { margin: 0; font: 700 1.6rem/1.2 var(--font-heading); color: var(--heading); }
+.topbar .tools { grid-area: tools; justify-self: end; display: flex; gap: 8px; position: relative; }
+
+/* Mode switch (only for demos with more than one mode): pill buttons with aria-pressed */
+.topbar .modes {
+  grid-area: modes;
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.mode {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-btn);
+  background: transparent;
+  color: var(--heading);
+  font: 700 1rem var(--font-body);
+  cursor: pointer;
+}
+.mode:hover { background: var(--bg-alt); }
+.mode[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
+
+@media (max-width: 760px) {
+  .topbar-inner { grid-template-columns: 1fr auto; grid-template-areas: "brand tools" "modes modes"; }
+  .mode { flex: 1 1 0; padding: 0 8px; }
+  .mode-extra { display: none; }  /* e.g. Timed<span class="mode-extra"> (90 s)</span> */
+}
+@media (max-width: 420px) {
+  .topbar h1, .topbar .title { font-size: 1.35rem; }
+}
+
+/* ---------- Icon buttons ---------- */
+/* <button class="icon-btn" aria-label="Restart this puzzle" title="Restart this puzzle"><svg …></button>
+   44px square; pressed (aria-pressed) and open (aria-expanded) states are filled. */
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--btn);
+  border-radius: var(--radius-btn);
+  background: transparent;
+  color: var(--heading);
+  cursor: pointer;
+  transition: background-color .15s, transform .1s;
+}
+.icon-btn:hover { background: var(--card); }
+.icon-btn:active { transform: scale(.97); }
+.icon-btn[aria-expanded="true"] { background: var(--btn); color: var(--bg); }
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* A small round ⓘ next to the page title */
+.icon-btn.info { width: 32px; height: 32px; border-radius: 50%; border-color: var(--border); }
+.icon-btn.info svg { width: 20px; height: 20px; }
+/* The sound icon shows waves when on and an X when off */
+.icon-btn .snd-off { display: none; }
+.icon-btn[aria-pressed="false"] .snd-on { display: none; }
+.icon-btn[aria-pressed="false"] .snd-off { display: inline; }
+
+/* ---------- Segmented control ---------- */
+/* <div class="segmented" role="group" aria-label="Difficulty"><button aria-pressed="true">Easy</button>…</div>
+   One bordered strip; the chosen part is filled. */
+.segmented {
+  display: flex;
+  border: 1px solid var(--btn);
+  border-radius: var(--radius-btn);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.segmented button {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-left: 1px solid var(--btn);
+  background: transparent;
+  color: var(--heading);
+  font: 700 1rem var(--font-body);
+  cursor: pointer;
+}
+.segmented button:first-child { border-left: 0; }
+.segmented button:hover { background: var(--bg-alt); }
+.segmented button[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
+.segmented button:focus-visible { outline-offset: -5px; }
+
+/* ---------- Popovers ---------- */
+/* A small panel under the button that opens it (aria-controls + aria-expanded). Under the
+   title (ⓘ) it opens to the right; under the tools it opens to the left. */
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  width: 340px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-pop);
+  text-align: left;
+}
+.tools .popover { left: auto; right: 0; width: 300px; }
+.popover > :first-child { margin-top: 0; }
+.popover > :last-child { margin-bottom: 0; }
+.popover h2 { font-size: 1.1rem; }
+.popover h3 { font-family: var(--font-body); font-size: .95rem; font-weight: 700; margin: 16px 0 4px; }
+.popover p, .popover ul { margin: 0 0 8px; }
+.popover ul { padding-left: 20px; }
+
+/* ⓘ popover contents (built by ui.js) */
+.info-topic { font-size: .9rem; }
+.info-links { list-style: none; padding: 0 !important; display: grid; gap: 8px; }
+.info-links li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; align-items: center; }
+.info-links code { font-size: .85rem; color: var(--heading); overflow-wrap: anywhere; }
+.info-links .copy { min-height: 36px; padding: 0 12px; font-size: .9rem; }
+.info-home { display: inline-block; margin-top: 8px; font-weight: 700; }
+
+/* ---------- Modals ---------- */
+/* <dialog class="modal" id="rules" aria-labelledby="rulesTitle">
+     <div class="modal-head"><h2 id="rulesTitle">Rules</h2><button class="icon-btn" data-ui="close" aria-label="Close">…</button></div>
+     <div class="modal-body">…</div>
+   </dialog>
+   Open with APPSYCH_UI.openModal('rules') or a button with data-modal="rules". */
+.modal {
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow-pop);
+}
+.modal::backdrop { background: var(--scrim); }
+.modal.wide { width: min(1000px, calc(100vw - 32px)); }
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 16px 0;
+}
+.modal-head h2 { margin: 0; }
+.modal-body { padding: 16px; }
+.modal-body > :last-child { margin-bottom: 0; }
+
 /* ---------- Accessibility ---------- */
+/* Visually hidden text for screen readers (live regions, labels) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 3px solid var(--heading);
   outline-offset: 3px;
@@ -171,8 +370,8 @@ a { color: var(--link); }
 [hidden] { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
-  .btn { transition: none; }
-  .btn:active { transform: none; }
+  .btn, .icon-btn { transition: none; }
+  .btn:active, .icon-btn:active { transform: none; }
 }
 
 /* ---------- Small screens ---------- */

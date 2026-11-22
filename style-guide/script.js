@@ -22,4 +22,13 @@
   // Keep the focus example outlined so the style is always visible
   var f = document.getElementById('focusDemo');
   if (f) f.classList.add('show-focus');
+
+  // Example mode pills and segmented controls: pressing one marks it pressed.
+  document.querySelectorAll('#ui .modes, #ui .segmented').forEach(function (group) {
+    group.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      group.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    });
+  });
 })();
