@@ -15,12 +15,8 @@
  *                "listed" only after I confirm a demo is finished.
  *   image, alt   card image (assets/card.webp, 1200×750) and its alt text; "" until made
  *   howTo        2–3 short lines for the ⓘ popover
- *   links        teacher links for the ⓘ popover: { query: "?mode=tutorial", label: "…" }, or
- *                { current: true, label: "…" } to copy the page's address as it is (topics chosen)
- *                Empty when the demo writes its options to the address itself (e.g. Lights Off
- *                writes ?mode= when a mode is chosen), so the address bar is the link to share.
  *
- * howTo and links are checked against each demo when it moves to the shared title bar.
+ * howTo is checked against each demo when it moves to the shared title bar.
  */
 window.APPSYCH_DEMOS = [
   {
@@ -37,8 +33,7 @@ window.APPSYCH_DEMOS = [
       "Watch and listen as the colors flash, then repeat the sequence in the same order.",
       "Each round adds one more color. The game ends at your first mistake.",
       "Your score is the longest sequence you repeated correctly."
-    ],
-    links: []
+    ]
   },
   {
     id: "outguess-the-robot",
@@ -54,8 +49,7 @@ window.APPSYCH_DEMOS = [
       "Each round, guess whether Chip the robot will pick red or blue.",
       "Chip picks red 70% of the time, and every pick is independent of the last.",
       "After 40 rounds, compare your score with simply guessing red every time."
-    ],
-    links: []
+    ]
   },
   {
     id: "lights-off",
@@ -71,8 +65,7 @@ window.APPSYCH_DEMOS = [
       "Pressing a light flips it and its up, down, left and right neighbors. Turn every light off.",
       "Try a few puzzles on your own in Practice, then learn the algorithm in the Tutorial.",
       "Timed: solve as many puzzles as you can in 90 seconds."
-    ],
-    links: []
+    ]
   },
   {
     id: "condition-the-cat",
@@ -88,8 +81,7 @@ window.APPSYCH_DEMOS = [
       "Lead the cat with the laser pointer. You can't move it directly.",
       "Reward (Treat, Pet) or punish (Spray, Buzzer) what the cat just did.",
       "Win by getting the cat through the whole machine in one run."
-    ],
-    links: []
+    ]
   },
   {
     id: "big-five-reunion",
@@ -105,8 +97,7 @@ window.APPSYCH_DEMOS = [
       "Click or tap a guest to read their profile.",
       "Rate their Openness, Conscientiousness, Extraversion, Agreeableness and Emotional Stability.",
       "Check your ratings against the answers, and rate all 11 guests to end the night."
-    ],
-    links: []
+    ]
   },
   {
     id: "term-browser",
@@ -121,8 +112,7 @@ window.APPSYCH_DEMOS = [
     howTo: [
       "Pick a unit, then a topic, to list its terms.",
       "Or search: the search covers the chosen topic, else the chosen unit, else every term."
-    ],
-    links: []
+    ]
   },
   {
     id: "word-search",
@@ -137,9 +127,6 @@ window.APPSYCH_DEMOS = [
     howTo: [
       "Choose your topics, then read each definition and find its term in the grid.",
       "Terms can run in any direction."
-    ],
-    links: [
-      { current: true, label: "This page with the topics you've chosen (choose them first)" }
     ]
   },
   {
@@ -156,9 +143,6 @@ window.APPSYCH_DEMOS = [
       "Choose your topics, then a quiz (scored at the end) or endless practice (instant feedback).",
       "After answering, open each choice's feedback and the terms used in the question.",
       "Retry missed replays only the questions you got wrong."
-    ],
-    links: [
-      { current: true, label: "This page with the topics you've chosen (choose them first)" }
     ]
   },
   {
@@ -174,9 +158,6 @@ window.APPSYCH_DEMOS = [
     howTo: [
       "Choose your topics, then climb from island to island.",
       "Answer the practice question at each lantern on the way up to the treasure at 500 ft."
-    ],
-    links: [
-      { current: true, label: "This page with the topics you've chosen (choose them first)" }
     ]
   },
   {
@@ -192,9 +173,6 @@ window.APPSYCH_DEMOS = [
     howTo: [
       "Choose topics and teams, then teams take turns picking a topic and a point value.",
       "Harder questions are worth more. Keep score for up to 12 teams."
-    ],
-    links: [
-      { current: true, label: "This page with the topics you've chosen (choose them first)" }
     ]
   },
   {
@@ -211,9 +189,6 @@ window.APPSYCH_DEMOS = [
       "Walk the ship with the arrow keys or WASD. Press Space to repair a failed system.",
       "Earn credits at the main terminal by answering questions, and pay B.F. 9000 to open doors.",
       "Keep the ship out of the event horizon until the hyperdrive is ready."
-    ],
-    links: [
-      { current: true, label: "This page with the topics you've chosen (choose them first)" }
     ]
   }
 ];

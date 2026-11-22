@@ -23,8 +23,8 @@
  *     </div>
  *   </header>
  *   - data-demo is the demo's id in demos.js. The ⓘ popover shows its description, howTo,
- *     CED topic(s) and class unit(s), teacher links (each with a Copy link button) and
- *     "All demos". Without a matching entry there is no ⓘ button.
+ *     CED topic(s) and class unit(s), and "All demos". Without a matching entry there is no
+ *     ⓘ button.
  *   - ui.js gives data-ui="sound" and data-ui="settings" buttons their icon, label and title.
  *
  * SOUND — off on every page load.
@@ -46,12 +46,12 @@
  *   APPSYCH_UI.demo                     this page's demos.js entry, or null
  *   APPSYCH_UI.homeUrl                  the home page's address (works from file:// too)
  *   APPSYCH_UI.announce(text)           read text aloud to screen readers (polite)
- *   APPSYCH_UI.icons                    SVG markup: info, sound, settings, restart, close, copy
+ *   APPSYCH_UI.icons                    SVG markup: info, sound, settings, restart, close
  *   APPSYCH_UI.refresh()                wire popover buttons and sound/settings icons added later
  *
- * TEACHER LINKS (demos.js "links"): { query: "?mode=tutorial", label: "Opens the tutorial" }
- *   copies this page's address + query; { current: true, label: "…" } copies the address as it
- *   is now (e.g. after choosing topics in a review game, which writes ?groups= to the address).
+ * SHARING A LINK — there are no teacher links in the ⓘ. A demo keeps its shareable choices in
+ *   the address (e.g. ?mode= when a mode is chosen, ?groups= when topics are chosen), so teachers
+ *   copy the address bar.
  */
 window.APPSYCH_UI = (function () {
   var ICONS = {
@@ -61,8 +61,7 @@ window.APPSYCH_UI = (function () {
       '<path class="snd-off" d="m16 9 6 6"/><path class="snd-off" d="m22 9-6 6"/></svg>',
     settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
     restart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
-    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
-    copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>'
+    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>'
   };
 
   // The home page: one folder above shared/, where this script lives.
@@ -192,27 +191,6 @@ window.APPSYCH_UI = (function () {
     else { var d = t.closest('dialog'); if (d) d.close(); }
   });
 
-  /* ---------- Copy a link ---------- */
-  function pageUrl(query) {
-    return window.location.href.split(/[?#]/)[0] + (query || '');
-  }
-  function copyText(text, done) {
-    function fallback() {
-      var ta = el('textarea', { readonly: '', 'aria-hidden': 'true' });
-      ta.value = text;
-      ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      var ok = false;
-      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
-      document.body.removeChild(ta);
-      done(ok);
-    }
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(function () { done(true); }, fallback);
-    } else fallback();
-  }
-
   /* ---------- The ⓘ popover ---------- */
   function topicLines(demo) {
     var T = window.APPSYCH_TOPICS, lines = [];
@@ -245,28 +223,10 @@ window.APPSYCH_UI = (function () {
     }
     var topics = topicLines(demo);
     if (topics.length) html += topics.map(function (l) { return '<p class="info-topic">' + esc(l) + '</p>'; }).join('');
-    if (demo.links && demo.links.length) {
-      html += '<h3>For teachers</h3><ul class="info-links">' +
-        demo.links.map(function (l) {
-          var q = l.current ? '' : (l.query || '');
-          return '<li><span>' + esc(l.label) + (q ? '<br><code>' + esc(q) + '</code>' : '') + '</span>' +
-            '<button class="btn ghost copy" type="button" data-copy="' + (l.current ? '*' : esc(q)) + '">Copy link</button></li>';
-        }).join('') + '</ul>';
-    }
     html += '<a class="info-home" href="' + esc(homeUrl) + '">All demos</a>';
     var pop = el('div', { 'class': 'popover info-pop', id: id, role: 'dialog', 'aria-label': 'About ' + demo.title, hidden: '' }, html);
     brand.appendChild(btn);
     brand.appendChild(pop);
-    pop.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-copy]');
-      if (!b) return;
-      var q = b.getAttribute('data-copy'), url = q === '*' ? window.location.href.split('#')[0] : pageUrl(q);
-      copyText(url, function (ok) {
-        b.textContent = ok ? 'Copied' : 'Copy failed';
-        announce(ok ? 'Link copied.' : 'Couldn\'t copy. The link is ' + url);
-        setTimeout(function () { b.textContent = 'Copy link'; }, 1600);
-      });
-    });
     wirePopoverButton(btn);
   }
 

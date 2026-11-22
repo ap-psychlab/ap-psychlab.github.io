@@ -313,10 +313,6 @@ a { color: var(--link); }
 
 /* ⓘ popover contents (built by ui.js) */
 .info-topic { font-size: .9rem; }
-.info-links { list-style: none; padding: 0 !important; display: grid; gap: 8px; }
-.info-links li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; align-items: center; }
-.info-links code { font-size: .85rem; color: var(--heading); overflow-wrap: anywhere; }
-.info-links .copy { min-height: 36px; padding: 0 12px; font-size: .9rem; }
 .info-home { display: inline-block; margin-top: 8px; font-weight: 700; }
 
 /* ---------- Modals ---------- */
