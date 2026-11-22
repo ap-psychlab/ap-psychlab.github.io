@@ -2,7 +2,8 @@
 // drifts toward a black hole. Walk the ship, earn credits at the main terminal, pay for doors and repair
 // failed systems before the event horizon clock runs out.
 // Plan and handoff: project doc "claude/Event Horizon - Plan.md".
-// Built so far: step 1 (the ship drawn in vector, walking with keys, collisions on a walkable grid).
+// Built so far: step 1 (the ship drawn in vector, walking with keys, collisions on a walkable grid) and step 1b
+// (angular plated hull, NASA-style black hole, command center moved right, chibi astronaut).
 //
 // URL options:
 //   ?dev   test tools: walkable-grid overlay, open all doors, jump to a room, player position
@@ -16,10 +17,10 @@ const SETTINGS = {
   FOOT_W: 9, FOOT_H: 5,  // half-width and half-height of the player's foot box (collisions)
   CELL: 8,               // walkable-grid cell size, ship units
   DOOR_SPEED: 3.5,       // door slide speed (share of a full slide per second)
-  START: { x: 1094, y: 522, dir: 'right' }
+  START: { x: 1114, y: 522, dir: 'right' }
 };
 const SHIP_W = 1536, SHIP_H = 1024;           // floor-plan coordinates
-const BOX = { x: 60, y: 58, w: 1440, h: 908 }; // the part of the plan that is fit to the screen
+const BOX = { x: 70, y: 50, w: 1470, h: 936 }; // the part of the plan that is fit to the screen
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -74,38 +75,6 @@ function inShape(x, y, s) {
   if (s.c) return (x - s.c[0]) ** 2 + (y - s.c[1]) ** 2 <= s.c[2] ** 2;
   return inPoly(x, y, s.p);
 }
-// Catmull-Rom curve through points (open), then evenly spaced points with arc length and outward normal
-function spline(p, perSeg) {
-  const out = [], n = p.length;
-  for (let i = 0; i < n - 1; i++) {
-    const p0 = p[Math.max(0, i - 1)], p1 = p[i], p2 = p[i + 1], p3 = p[Math.min(n - 1, i + 2)];
-    for (let k = 0; k < perSeg; k++) {
-      const t = k / perSeg, t2 = t * t, t3 = t2 * t;
-      out.push([0, 1].map((d) => .5 * (2 * p1[d] + (p2[d] - p0[d]) * t +
-        (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * t2 + (3 * p1[d] - p0[d] - 3 * p2[d] + p3[d]) * t3)));
-    }
-  }
-  out.push(p[n - 1].slice());
-  return out;
-}
-function resample(line, step) {
-  const cum = [0];
-  for (let i = 1; i < line.length; i++) cum.push(cum[i - 1] + Math.hypot(line[i][0] - line[i - 1][0], line[i][1] - line[i - 1][1]));
-  const total = cum[cum.length - 1], n = Math.max(2, Math.round(total / step)), out = [];
-  let j = 0;
-  for (let k = 0; k <= n; k++) {
-    const s = total * k / n;
-    while (j < cum.length - 2 && cum[j + 1] < s) j++;
-    const u = (s - cum[j]) / ((cum[j + 1] - cum[j]) || 1);
-    out.push({ x: line[j][0] + (line[j + 1][0] - line[j][0]) * u, y: line[j][1] + (line[j + 1][1] - line[j][1]) * u, s });
-  }
-  out.forEach((q, i) => {       // clockwise travel, so the outward normal is (ty, -tx)
-    const a = out[Math.max(0, i - 1)], b = out[Math.min(out.length - 1, i + 1)];
-    const tx = b.x - a.x, ty = b.y - a.y, l = Math.hypot(tx, ty) || 1;
-    q.nx = ty / l; q.ny = -tx / l;
-  });
-  return out;
-}
 const mirror = (p) => [p[0], SHIP_H - p[1]];  // the ship is symmetric about y = 512
 
 /* ==== SECTION: Floor plan ====
@@ -117,22 +86,25 @@ const FACE = 20;     // height of the north wall faces
 const ROOMS = [
   { id: 'engine', name: 'Engine room', machine: 'Anti-gravity thruster', at: { x: 480, y: 318 },
     door: { x: 485, side: 's' },
-    poly: [[380, 200], [604, 200], [640, 236], [640, 386], [616, 410], [344, 410], [320, 386], [320, 262]] },
+    poly: [[448, 200], [604, 200], [640, 236], [640, 386], [616, 410], [344, 410], [320, 386], [320, 292], [372, 238]] },
   { id: 'life', name: 'Life support', machine: 'Oxygen tank and scrubbers', at: { x: 800, y: 290 },
     door: { x: 855, side: 's' },
     poly: [[700, 226], [736, 190], [784, 190], [796, 150], [884, 150], [896, 190], [930, 190], [1010, 262],
       [1010, 386], [986, 410], [724, 410], [700, 386]] },
   { id: 'reactor', name: 'Reactor', machine: 'Reactor core', at: { x: 486, y: 734 },
     door: { x: 485, side: 'n' },
-    poly: [[344, 614], [616, 614], [640, 638], [640, 780], [596, 824], [382, 824], [320, 762], [320, 638]] },
+    poly: [[344, 614], [616, 614], [640, 638], [640, 780], [596, 824], [448, 824], [372, 786], [320, 732], [320, 638]] },
   { id: 'shield', name: 'Shield bay', machine: 'Shield generator', at: { x: 858, y: 742 },
     door: { x: 855, side: 'n' },
     poly: [[724, 614], [986, 614], [1010, 638], [1010, 764], [940, 834], [764, 834], [700, 770], [700, 638]] }
 ];
-const CORRIDOR = [[290, 462], [1060, 462], [1060, 562], [290, 562]];
-const CC_POLY = [[1050, 346], [1106, 290], [1240, 290], [1340, 352], [1366, 452], [1366, 572], [1340, 672],
-  [1240, 734], [1106, 734], [1050, 678]];
-const TERMINAL = { x: 1144, y: 512 };
+const CORRIDOR = [[290, 462], [1080, 462], [1080, 562], [290, 562]];
+// The command center sits CC_DX right of where step 1 drew it, so its wall top clears the front rooms' walls.
+// drawCommand() keeps its step 1 coordinates inside a translate(CC_DX 0) group; everything here is already shifted.
+const CC_DX = 20;
+const CC_POLY = [[1070, 346], [1126, 290], [1260, 290], [1360, 352], [1386, 452], [1386, 572], [1360, 672],
+  [1260, 734], [1126, 734], [1070, 678]];
+const TERMINAL = { x: 1164, y: 512 };
 
 // Doors: one per room, 90 wide, through the wall between the room and the corridor
 const DOORS = ROOMS.map((r, i) => {
@@ -144,7 +116,7 @@ const DOORS = ROOMS.map((r, i) => {
 });
 const FLOORS = [
   ...ROOMS.map((r) => ({ id: r.id, poly: r.poly, tile: 'floor', gaps: r.door.side === 'n' ? [[r.door.x1, r.door.x2]] : [] })),
-  { id: 'corridor', poly: CORRIDOR, tile: 'floor2', faceMaxX: 1050,
+  { id: 'corridor', poly: CORRIDOR, tile: 'floor2', faceMaxX: 1070,
     gaps: DOORS.filter((d) => d.side === 's').map((d) => [d.x1, d.x2]) },
   { id: 'cc', poly: CC_POLY, tile: 'floor', gaps: [] }
 ];
@@ -188,13 +160,6 @@ function drawDefs() {
       <g fill="${C.floorbolt}"><circle cx="4" cy="4.5" r=".8"/><circle cx="24" cy="4.5" r=".8"/><circle cx="4" cy="24" r=".8"/><circle cx="24" cy="24" r=".8"/></g>
     </pattern>`;
   DEFS = add(svg, `<defs id="eh-defs">
-    <pattern id="eh-plating" width="72" height="48" patternUnits="userSpaceOnUse">
-      <rect width="72" height="48" fill="${C.hull}"/>
-      <rect width="72" height="1.6" fill="${C.hullline}"/><rect width="1.6" height="48" fill="${C.hullline}"/>
-      <rect x="1.6" y="1.6" width="70.4" height="2.2" fill="${C.hulllit}"/>
-      <g fill="${C.hullrivet}"><circle cx="6" cy="7" r="1.2"/><circle cx="66" cy="7" r="1.2"/><circle cx="6" cy="42" r="1.2"/><circle cx="66" cy="42" r="1.2"/></g>
-      <rect x="23" y="19" width="26" height="9" rx="2" fill="${C.hullpanel}"/>
-    </pattern>
     ${floorTile('floor', C.floorbg, C.floor, C.floorlit)}
     ${floorTile('floor2', C.floor2bg, C.floor2, C.floor2lit)}
     <pattern id="eh-grate" width="6" height="6" patternUnits="userSpaceOnUse">
@@ -224,11 +189,19 @@ function drawDefs() {
     <linearGradient id="eh-visorG" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="${C.visor1}"/><stop offset=".6" stop-color="${C.visor2}"/><stop offset="1" stop-color="${C.visor3}"/>
     </linearGradient>
-    <linearGradient id="eh-bhDisk" gradientUnits="userSpaceOnUse" x1="-170" y1="0" x2="170" y2="0">
-      <stop offset="0" stop-color="${C.bhdisk4}" stop-opacity="0"/><stop offset=".18" stop-color="${C.bhdisk3}"/>
-      <stop offset=".5" stop-color="${C.bhdisk1}"/><stop offset=".82" stop-color="${C.bhdisk3}"/><stop offset="1" stop-color="${C.bhdisk4}" stop-opacity="0"/>
+    <linearGradient id="eh-bhBand" gradientUnits="userSpaceOnUse" x1="-200" y1="0" x2="200" y2="0">
+      <stop offset="0" stop-color="${C.bhdisk1}" stop-opacity="0"/><stop offset=".16" stop-color="${C.bhhot}"/><stop offset=".42" stop-color="${C.bhdisk1}"/>
+      <stop offset=".62" stop-color="${C.bhdisk2}"/><stop offset=".82" stop-color="${C.bhdisk3}" stop-opacity=".85"/><stop offset="1" stop-color="${C.bhdeep}" stop-opacity="0"/>
     </linearGradient>
-    <radialGradient id="eh-bhGlow"><stop offset=".2" stop-color="${C.bhdisk3}" stop-opacity=".28"/><stop offset=".55" stop-color="${C.bhdisk4}" stop-opacity=".1"/><stop offset="1" stop-color="${C.bhdisk4}" stop-opacity="0"/></radialGradient>
+    <linearGradient id="eh-bhArc" gradientUnits="userSpaceOnUse" x1="-140" y1="0" x2="140" y2="0">
+      <stop offset="0" stop-color="${C.bhhot}"/><stop offset=".3" stop-color="${C.bhdisk1}"/><stop offset=".58" stop-color="${C.bhdisk2}"/>
+      <stop offset=".82" stop-color="${C.bhdisk3}"/><stop offset="1" stop-color="${C.bhdeep}"/>
+    </linearGradient>
+    <linearGradient id="eh-bhCore" gradientUnits="userSpaceOnUse" x1="-200" y1="0" x2="200" y2="0">
+      <stop offset=".08" stop-color="${C.white}" stop-opacity="0"/><stop offset=".25" stop-color="${C.white}" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="${C.bhhot}" stop-opacity=".6"/><stop offset=".85" stop-color="${C.bhdisk2}" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="eh-bhGlow"><stop offset=".18" stop-color="${C.bhdisk2}" stop-opacity=".3"/><stop offset=".5" stop-color="${C.bhdisk3}" stop-opacity=".1"/><stop offset="1" stop-color="${C.bhdisk4}" stop-opacity="0"/></radialGradient>
     <radialGradient id="eh-neb1"><stop offset="0" stop-color="${C.nebula1}" stop-opacity=".5"/><stop offset="1" stop-color="${C.nebula1}" stop-opacity="0"/></radialGradient>
     <radialGradient id="eh-neb2"><stop offset="0" stop-color="${C.nebula2}" stop-opacity=".55"/><stop offset="1" stop-color="${C.nebula2}" stop-opacity="0"/></radialGradient>
     <radialGradient id="eh-vignette" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="${C.black}" stop-opacity="0"/><stop offset="1" stop-color="${C.black}" stop-opacity=".42"/></radialGradient>
@@ -263,49 +236,95 @@ function drawSpace(gBg, gSky) {
       `cx="${f1(-300 + R() * 2150)}" cy="${f1(-260 + R() * 1560)}" r="${f1(1.1 + R() * .9)}" fill="${C.star}"/>`;
   }
   // The black hole sits behind the ship's rear; step 5 grows it as the event horizon clock runs down.
-  add(gSky, `${tw}<g id="eh-bh" transform="translate(150 150)">
-    <circle r="260" fill="url(#eh-bhGlow)"/>
-    <g transform="rotate(-16)">
-      <ellipse rx="164" ry="36" fill="none" stroke="url(#eh-bhDisk)" stroke-width="26" opacity=".9"/>
-      <ellipse id="eh-bh-sw1" rx="164" ry="36" fill="none" stroke="${C.bhdisk1}" stroke-width="2.5" stroke-dasharray="20 30" opacity=".5"/>
-    </g>
-    <ellipse rx="72" ry="66" fill="none" stroke="${C.bhdisk2}" stroke-width="7" opacity=".45"/>
-    <circle r="61" fill="none" stroke="${C.bhring}" stroke-width="3" opacity=".9"/>
-    <circle r="57" fill="${C.black}"/>
-    <g transform="rotate(-16)">
-      <path d="M-164 0 A164 36 0 0 0 164 0" fill="none" stroke="url(#eh-bhDisk)" stroke-width="26"/>
-      <path id="eh-bh-sw2" d="M-164 0 A164 36 0 0 0 164 0" fill="none" stroke="${C.bhdisk1}" stroke-width="2.5" stroke-dasharray="20 30" opacity=".6"/>
-    </g>
-  </g>`);
-  const sw1 = ref('bh-sw1'), sw2 = ref('bh-sw2');
-  ANIM.push((t) => { const o = f1(-t * 36 % 50); sw1.setAttribute('stroke-dashoffset', o); sw2.setAttribute('stroke-dashoffset', o); });
+  // A flat take on NASA Goddard's accretion-disk visualization (J. Schnittman): the disk is seen nearly edge-on;
+  // its far side is bent by gravity into a big arch over the shadow and a thin arc under it. The left side,
+  // turning toward us, is brighter (Doppler beaming); the right side is dimmer and redder.
+  const semi = (ro, ry, ri, riy, y0, down) => {      // half an elliptical ring, from y0 over the top (or under the bottom)
+    const s = down ? 0 : 1;
+    return `M${-ro} ${y0} A${ro} ${ry} 0 0 ${s} ${ro} ${y0} L${ri} ${y0} A${ri} ${riy} 0 0 ${1 - s} ${-ri} ${y0} Z`;
+  };
+  const archLine = (r, ry, y0) => `M${-r} ${y0} A${r} ${ry} 0 0 1 ${r} ${y0}`;
+  const BAND = 'M-215 3 C-140 -3 -70 -9 0 -9 C70 -9 140 -3 215 3 C140 10 70 23 0 23 C-70 23 -140 10 -215 3 Z';
+  const CORE = 'M-205 3 C-130 5.5 -64 7.5 0 7.5 C64 7.5 130 5.5 205 3';
+  const LOW = 'M-180 5 C-110 8.5 -50 13 0 13 C50 13 110 8.5 180 5';
+  let fine = '';
+  [[66, 61], [76, 68], [96, 80], [124, 100]].forEach(([r, ry], i) => {
+    fine += `<path d="${archLine(r, ry, 4)}" stroke="${i % 2 ? C.bhdisk3 : C.bhhot}" opacity="${i % 2 ? .35 : .3}"/>`;
+  });
+  // #eh-bh is placed in the top-left corner; the inner group holds the tilt and the starting size.
+  add(gSky, `${tw}<g id="eh-bh" transform="translate(146 174)"><g transform="rotate(-8) scale(.85)">
+    <circle r="250" fill="url(#eh-bhGlow)"/>
+    <ellipse rx="240" ry="60" fill="url(#eh-bhGlow)" opacity=".8"/>
+    <path d="${semi(150, 122, 60, 57, 4)}" fill="${C.bhdisk2}" opacity=".2"/>
+    <path d="${semi(122, 98, 56, 54, 4)}" fill="url(#eh-bhArc)" opacity=".88"/>
+    <g fill="none" stroke-width=".9">${fine}</g>
+    <path d="${archLine(59, 56, 4)}" fill="none" stroke="url(#eh-bhArc)" stroke-width="5" opacity=".95"/>
+    <path d="${archLine(58, 55, 4)}" fill="none" stroke="${C.white}" stroke-width="1.6" opacity=".7"/>
+    <path id="eh-bh-arcflow" d="${archLine(90, 76, 4)}" fill="none" stroke="${C.bhhot}" stroke-width="1.5" stroke-dasharray="14 24" opacity=".45"/>
+    <path d="${semi(60, 61, 52, 53, 6, true)}" fill="url(#eh-bhArc)" opacity=".8"/>
+    <circle r="47" fill="${C.black}"/>
+    <circle r="49.5" fill="none" stroke="${C.bhring}" stroke-width="2.2"/>
+    <path d="${BAND}" fill="url(#eh-bhBand)"/>
+    <path d="${CORE}" fill="none" stroke="url(#eh-bhCore)" stroke-width="3.5" stroke-linecap="round"/>
+    <path id="eh-bh-flow1" d="${CORE}" fill="none" stroke="${C.white}" stroke-width="1.4" stroke-dasharray="16 30" opacity=".5"/>
+    <path id="eh-bh-flow2" d="${LOW}" fill="none" stroke="${C.bhdisk1}" stroke-width="1.2" stroke-dasharray="10 26" opacity=".45"/>
+  </g></g>`);
+  // slow streaks: the near side of the disk flows left to right, its bent far side right to left
+  const flows = [[ref('bh-flow1'), -14], [ref('bh-flow2'), -22], [ref('bh-arcflow'), 10]];
+  ANIM.push((t) => { if (!REDUCE) flows.forEach(([el, v]) => el.setAttribute('stroke-dashoffset', f1(t * v % 1000))); });
 }
 
-/* ==== SECTION: Engines (left) and the bridge nose (right) ==== */
-function drawEngines(gs, gSky) {
-  const NOZ = [[116, 352, 32], [116, 672, 32], [120, 512, 58]];
-  add(gSky, NOZ.map(([x, y, h]) => `<ellipse class="eh-plume" cx="${x - 34}" cy="${y}" rx="44" ry="${f1(h * .4)}" fill="url(#eh-plume)"/>`).join(''));
-  const nozzle = (x, y, h) => `
-    <rect x="${x - 4}" y="${y - h / 2 - 5}" width="22" height="${h + 10}" rx="6" fill="url(#eh-metalDark)" stroke="${C.outline}" stroke-width="3"/>
-    <rect x="${x - 9}" y="${y - h / 2}" width="12" height="${h}" rx="5" fill="${C.hullblue}" stroke="${C.outline}" stroke-width="2.5"/>
-    <rect x="${x - 7}" y="${y - h / 2 + 4}" width="4" height="${h - 8}" rx="2" fill="${C.cyanpale}" opacity=".85"/>`;
-  const pod = (y) => `<rect x="126" y="${y - 23}" width="100" height="46" rx="14" fill="${C.armor}" stroke="${C.outline}" stroke-width="4"/>
-    <rect x="134" y="${y - 16}" width="84" height="32" rx="10" fill="${C.armorlit}"/>
-    <rect x="146" y="${y - 6}" width="26" height="12" rx="2" fill="url(#eh-grate)" stroke="${C.outline}" stroke-width="1.5"/>
-    ${nozzle(116, y, 32)}`;
-  add(gs, `${pod(352)}${pod(672)}
-    <path d="M268 468 L212 462 Q170 459 148 473 L130 489 L130 535 L148 551 Q170 565 212 562 L268 556 Z" fill="${C.armor}" stroke="${C.outline}" stroke-width="4" stroke-linejoin="round"/>
-    <path d="M262 475 L212 470 Q176 468 157 480 L144 493 L144 531 L157 544 Q176 556 212 554 L262 549 Z" fill="${C.armorlit}"/>
-    <rect x="168" y="482" width="30" height="8" rx="2" fill="url(#eh-grate)" stroke="${C.outline}" stroke-width="1.5"/>
-    <rect x="168" y="534" width="30" height="8" rx="2" fill="url(#eh-grate)" stroke="${C.outline}" stroke-width="1.5"/>
-    <rect x="150" y="500" width="10" height="24" rx="3" fill="${C.pink}" stroke="${C.outline}" stroke-width="1.5"/>
-    ${nozzle(120, 512, 58)}
-    <path d="M1388 476 L1446 480 Q1482 487 1488 512 Q1482 537 1446 544 L1388 548 Z" fill="${C.armor}" stroke="${C.outline}" stroke-width="4" stroke-linejoin="round"/>
-    <path d="M1394 483 L1444 487 Q1474 493 1479 512 Q1474 531 1444 537 L1394 541 Z" fill="${C.armorlit}"/>
-    <path d="M1440 494 Q1468 498 1472 512 Q1468 526 1440 530 Z" fill="${C.screen}" stroke="${C.outline}" stroke-width="2"/>
-    <path d="M1446 500 Q1462 503 1464 512" fill="none" stroke="${C.cyan}" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
-    <line x1="1466" y1="486" x2="1490" y2="470" stroke="${C.outline}" stroke-width="2.5"/>
-    <circle cx="1491" cy="469" r="3.5" fill="${C.pink}" stroke="${C.outline}" stroke-width="1.5"/>`);
+/* ==== SECTION: Engines (left) and the bridge nose (right) ====
+   Layered metal housings: a dark housing with its side face, blue glow bands, beveled cream caps, and nozzles
+   whose plumes flicker in the sky layer. The side pods and the nose are drawn under the hull and stick out
+   past it (gUnder); the main engine plugs into the back notch on top of it (gOver). */
+const NOZZLES = [[102, 352, 46], [102, 672, 46], [94, 512, 70]];   // [exit x, center y, height]
+function drawEngines(gUnder, gOver, gSky) {
+  add(gSky, NOZZLES.map(([x, y, h]) => `<ellipse class="eh-plume" cx="${x - 36}" cy="${y}" rx="46" ry="${f1(h * .36)}" fill="url(#eh-plume)"/>`).join(''));
+  const o = C.outline;
+  // a beveled cream cap: side face, top, light rim, rivets (chamfered rectangle)
+  const cap = (x1, y1, x2, y2, c) => {
+    const p = (dy) => pts([[x1 + c, y1 + dy], [x2 - c, y1 + dy], [x2, y1 + c + dy], [x2, y2 - c + dy], [x2 - c, y2 + dy], [x1 + c, y2 + dy], [x1, y2 - c + dy], [x1, y1 + c + dy]]);
+    return `<polygon points="${p(5)}" fill="${C.hullside}" stroke="${o}" stroke-width="3" stroke-linejoin="round"/>
+      <polygon points="${p(0)}" fill="${C.hull}" stroke="${o}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M${x1 + c + 1} ${y1 + 3.5} H${x2 - c - 1}" stroke="${C.hulllit}" stroke-width="2.5" stroke-linecap="round"/>
+      <g fill="${C.hullrivet}"><circle cx="${x1 + 5}" cy="${y1 + c + 3}" r="1.3"/><circle cx="${x2 - 5}" cy="${y1 + c + 3}" r="1.3"/>
+        <circle cx="${x1 + 5}" cy="${y2 - c - 1}" r="1.3"/><circle cx="${x2 - 5}" cy="${y2 - c - 1}" r="1.3"/></g>`;
+  };
+  // a blue glow band (a lit ring around a housing)
+  const band = (x, y1, y2, w) => `<rect x="${x}" y="${y1}" width="${w}" height="${y2 - y1}" rx="${w / 2}" fill="${C.armordark}" stroke="${o}" stroke-width="3"/>
+    <rect x="${x + 2.5}" y="${y1 + 4}" width="${w - 5}" height="${y2 - y1 - 8}" rx="${(w - 5) / 2}" fill="${C.hullblue}"/>
+    <rect x="${x + w / 2 - 1}" y="${y1 + 8}" width="2" height="${y2 - y1 - 16}" rx="1" fill="${C.cyanpale}" opacity=".9"/>`;
+  // a nozzle bell flaring toward the rear, with the lit exit
+  const nozzle = (x, cy, h) => `<path d="M${x + 34} ${cy - h * .38} L${x + 34} ${cy + h * .38} L${x + 6} ${cy + h / 2} L${x + 6} ${cy - h / 2} Z" fill="url(#eh-metalDark)" stroke="${o}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M${x + 14} ${cy - h * .45} V${cy + h * .45} M${x + 24} ${cy - h * .42} V${cy + h * .42}" stroke="${C.metal3}" stroke-width="2"/>
+    <rect x="${x - 2}" y="${cy - h / 2 - 1}" width="11" height="${h + 2}" rx="5" fill="${C.hullblue}" stroke="${o}" stroke-width="2.5"/>
+    <rect x="${x + 1}" y="${cy - h / 2 + 5}" width="4" height="${h - 10}" rx="2" fill="${C.cyanpale}" opacity=".85"/>`;
+  const housing = (x1, y1, x2, y2, r) => `<rect x="${x1}" y="${y1 + 6}" width="${x2 - x1}" height="${y2 - y1}" rx="${r}" fill="${C.armordark}" stroke="${o}" stroke-width="4"/>
+    <rect x="${x1}" y="${y1}" width="${x2 - x1}" height="${y2 - y1}" rx="${r}" fill="${C.armor}" stroke="${o}" stroke-width="4"/>
+    <rect x="${x1 + 5}" y="${y1 + 4}" width="${x2 - x1 - 10}" height="3" rx="1.5" fill="${C.armorlit}"/>`;
+  const pod = (cy) => `${nozzle(102, cy, 46)}${housing(134, cy - 22, 238, cy + 22, 9)}
+    ${band(138, cy - 28, cy + 28, 12)}${cap(158, cy - 15, 228, cy + 13, 6)}
+    <path d="M193 ${cy - 13} V${cy + 11}" stroke="${C.hullline}" stroke-width="1.8"/>
+    <rect x="231" y="${cy - 2}" width="5" height="4" rx="1" fill="${C.pink}"/>`;
+  add(gUnder, `${pod(352)}${pod(672)}`);
+  add(gOver, `${nozzle(94, 512, 70)}
+    ${housing(130, 474, 280, 550, 12)}
+    ${band(134, 464, 560, 14)}${band(252, 470, 554, 9)}
+    ${cap(156, 482, 240, 506, 6)}${cap(156, 520, 240, 544, 6)}
+    <rect x="164" y="508" width="68" height="9" rx="2" fill="url(#eh-grate)" stroke="${o}" stroke-width="1.5"/>
+    <rect x="238" y="508" width="9" height="8" rx="2" fill="${C.pink}" stroke="${o}" stroke-width="1.5"/>`);
+  // the bridge block in the front notch (drawn under the hull; the part past the armor shows)
+  const nose = (dy) => pts([[1420, 470 + dy], [1502, 470 + dy], [1528, 488 + dy], [1536, 512 + dy], [1528, 536 + dy], [1502, 554 + dy], [1420, 554 + dy]]);
+  add(gUnder, `<polygon points="${nose(7)}" fill="${C.armordark}" stroke="${o}" stroke-width="4" stroke-linejoin="round"/>
+    <polygon points="${nose(0)}" fill="${C.armor}" stroke="${o}" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M1424 475 L1500 475 L1522 490" fill="none" stroke="${C.armorlit}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    ${band(1462, 466, 558, 10)}
+    ${cap(1476, 484, 1500, 540, 5)}
+    <path d="M1504 492 Q1528 498 1530 512 Q1528 526 1504 532 Z" fill="${C.screen}" stroke="${o}" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M1509 499 Q1521 502 1524 510" fill="none" stroke="${C.cyan}" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
+    <line x1="1512" y1="482" x2="1530" y2="466" stroke="${o}" stroke-width="2.5"/>
+    <circle cx="1531" cy="465" r="3.5" fill="${C.pink}" stroke="${o}" stroke-width="1.5"/>`);
   const plumes = [...gSky.querySelectorAll('.eh-plume')];
   const base = plumes.map((p) => ({ cx: +p.getAttribute('cx'), rx: +p.getAttribute('rx') }));
   ANIM.push((t) => {
@@ -317,71 +336,208 @@ function drawEngines(gs, gSky) {
   });
 }
 
-/* ==== SECTION: Hull (brain silhouette with gyri) ==== */
-const HULL_TOP = [[232, 512], [208, 474], [184, 410], [176, 330], [198, 250], [248, 186], [330, 134], [440, 104],
-  [580, 90], [740, 88], [890, 96], [1030, 116], [1160, 152], [1272, 208], [1362, 284], [1418, 370], [1440, 446],
-  [1434, 490], [1414, 512]];
-function drawHull(g) {
-  const base = resample(spline(HULL_TOP, 14), 3);
-  const total = base[base.length - 1].s, R = rng(11);
-  // Lobes (gyri) along the top half; the bottom half mirrors it
-  const lobes = []; let s = 0;
-  while (s < total) { const L = 92 + R() * 44; lobes.push({ s0: s, L, A: 13 + R() * 7 }); s += L; }
-  const k = total / s; lobes.forEach((l) => { l.s0 *= k; l.L *= k; });
-  const GAP = .09;
-  let li = 0;
-  const off = base.map((p) => {
-    while (li < lobes.length - 1 && p.s >= lobes[li + 1].s0) li++;
-    const l = lobes[li], u = (p.s - l.s0) / l.L;
-    if (u < GAP || u > 1 - GAP) return 0;
-    return l.A * Math.pow(Math.sin(Math.PI * (u - GAP) / (1 - 2 * GAP)), .42);
+/* ==== SECTION: Hull (one rounded outline, built in layers) ====
+   Like the reference image: one rounded outer shape (a brain seen from above, fuller at the back, with shallow
+   notches at the back and front), with the rooms inside it. The hull is built in layers that step in toward
+   the rooms, so the corners between the rooms and the outline fill with hull. Bottom up:
+     armor   a dark rim past the outline (thicker below, for the 3/4 view), blue light panels, pink running lights
+     plates  the outer layer: angular plates along the outline, with gentle bumps and small gaps between them
+     middle  a layer stepped in from the outline (MID) that fills the corners, with seams, slots, lights and hatches
+     inner   a raised layer that hugs the rooms (HUG past each room's floor), clipped inside the middle layer
+   The side engines and the bridge sit between the plates and the middle layer (see Engines). HULL_SHAPE
+   describes the outline; the top half is sampled and the bottom half mirrors it. */
+const HULL_SHAPE = {
+  CX: 830, CY: 512,
+  FRONT: 645, BACK: 685,          // reach of the outline ahead of and behind CX
+  H_FRONT: 410, H_BACK: 460,      // half-height near the front and near the back (fuller at the back)
+  ROUND: 2.2,                     // 2 = an ellipse; higher fills the shoulders
+  NOTCH_BACK: 30, NOTCH_FRONT: 22, NOTCH_W: 58   // shallow notches on the center line (main engine, bridge)
+};
+const HULL = {
+  FACET: 78,      // straight facets along the outline, about this long
+  ARMOR: 12,      // armor rim past the outline
+  UNDER: 16,      // extra armor shown below bottom-facing edges
+  DROP: 8,        // side faces shown below each layer
+  PLATE_IN: -30,  // inner edge of the outer plates
+  MID: -26,       // middle layer's outer edge
+  HUG: 54,        // inner layer: reach past each room's floor (the wall tops end at 29.5)
+  GAP: 10, CHAMFER: 7
+};
+// Outer plates along the top half, back notch → front notch: [share of the length, outward step].
+// Steps of 10–13 are the gentle bumps; small steps leave the armor (and its light panels) showing.
+const HULL_BUMPS = [[.65, 4], [1, 16], [.75, 2], [1.15, 17], [.8, 2], [1.2, 16], [.8, 2], [1.1, 17], [.75, 3], [.6, 12]];
+
+// shapes the inner layer wraps: [shape (top half), symmetric already?]; each room's convex outline, offset by HUG
+const HUG_SHAPES = [
+  [() => ROOMS[0].poly.concat(ROOMS[2].poly.map(mirror)), false],   // engine room and reactor
+  [() => ROOMS[1].poly.concat(ROOMS[3].poly.map(mirror)), false],   // life support and shield bay
+  [() => CC_POLY, true],
+  [() => [[300, 462], [1080, 462], [1080, 562], [300, 562]], true]   // corridor
+];
+function convexHull(points) {        // monotone chain; clockwise on screen (y down)
+  const p = points.map((q) => q.slice()).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const half = (list) => { const h = []; list.forEach((q) => { while (h.length > 1 && cross(h[h.length - 2], h[h.length - 1], q) <= 0) h.pop(); h.push(q); }); return h; };
+  return half(p).slice(0, -1).concat(half(p.slice().reverse()).slice(0, -1));
+}
+function offsetPoly(poly, dd) {      // mitered outward offset of a convex clockwise polygon
+  const n = poly.length;
+  const N = poly.map((a, i) => { const b = poly[(i + 1) % n], l = Math.hypot(b[0] - a[0], b[1] - a[1]); return [(b[1] - a[1]) / l, -(b[0] - a[0]) / l]; });
+  return poly.map((v, i) => {
+    const a = N[(i - 1 + n) % n], b = N[i], k = dd / (1 + a[0] * b[0] + a[1] * b[1]);
+    return [v[0] + (a[0] + b[0]) * k, v[1] + (a[1] + b[1]) * k];
   });
-  const at = (sv) => base[Math.min(base.length - 1, Math.max(0, Math.round(sv / total * (base.length - 1))))];
+}
+function hullCurve() {             // the top half of the outline: evenly spaced points with arc length and outward normal
+  const S = HULL_SHAPE, e = 2 / S.ROUND, dense = [];
+  for (let i = 0; i <= 600; i++) {
+    const t = Math.PI + Math.PI * i / 600, c = Math.cos(t), s = Math.sin(t);
+    const w = (1 - c) / 2, b = S.H_FRONT + (S.H_BACK - S.H_FRONT) * Math.pow(w, .8);
+    let x = S.CX + (c < 0 ? S.BACK : S.FRONT) * Math.sign(c) * Math.pow(Math.abs(c), e);
+    const y = S.CY + b * Math.sign(s) * Math.pow(Math.abs(s), e);
+    x += (c < 0 ? S.NOTCH_BACK : -S.NOTCH_FRONT) * Math.exp(-(((y - S.CY) / S.NOTCH_W) ** 2));
+    dense.push([x, Math.min(y, S.CY)]);
+  }
+  const cum = [0];
+  for (let i = 1; i < dense.length; i++) cum.push(cum[i - 1] + Math.hypot(dense[i][0] - dense[i - 1][0], dense[i][1] - dense[i - 1][1]));
+  const total = cum[cum.length - 1], n = Math.round(total / 2), out = [];
+  let j = 0;
+  for (let k = 0; k <= n; k++) {
+    const sv = total * k / n;
+    while (j < cum.length - 2 && cum[j + 1] < sv) j++;
+    const u = (sv - cum[j]) / ((cum[j + 1] - cum[j]) || 1);
+    out.push({ x: dense[j][0] + (dense[j + 1][0] - dense[j][0]) * u, y: dense[j][1] + (dense[j + 1][1] - dense[j][1]) * u, s: sv });
+  }
+  out.forEach((q, i) => {           // clockwise on screen, so the outward normal is (ty, -tx)
+    const a = out[Math.max(0, i - 1)], b = out[Math.min(out.length - 1, i + 1)];
+    const tx = b.x - a.x, ty = b.y - a.y, l = Math.hypot(tx, ty) || 1;
+    q.nx = ty / l; q.ny = -tx / l;
+  });
+  out[0].ny = out[out.length - 1].ny = 0;   // the notches sit on the center line
+  return out;
+}
+
+function drawHull(gLow, gHigh) {
+  const o = C.outline, base = hullCurve(), n = base.length - 1, total = base[n].s;
+  const at = (s) => base[Math.round(Math.max(0, Math.min(total, s)) / total * n)];
+  const off = (p, d) => [p.x + p.nx * d, Math.min(p.y + p.ny * d, SHIP_H / 2)];
+  const stops = (s0, s1, step) => { const k = Math.max(1, Math.round((s1 - s0) / step)); return Array.from({ length: k + 1 }, (_, i) => s0 + (s1 - s0) * i / k); };
+  const flip = (a, m) => m ? a.map(mirror) : a;
+  const both = (fn) => fn(false) + fn(true);
   const close = (top) => top.concat(top.slice(1, -1).reverse().map(mirror));
-  const path = (arr) => 'M' + arr.map((p) => f1(p[0]) + ' ' + f1(p[1])).join('L') + 'Z';
-  const lobed = base.map((p, i) => [p.x + p.nx * off[i], p.y + p.ny * off[i]]);
-  const armor = base.map((p) => [p.x + p.nx * 9, p.y + p.ny * 9]);
+  const d = (a, z) => 'M' + a.map((p) => f1(p[0]) + ' ' + f1(p[1])).join('L') + (z === false ? '' : 'Z');
+  const tilt = (s, m) => { const p = at(s), a = Math.atan2(p.nx, -p.ny) * 180 / Math.PI; return f1(m ? -a : a); };
+  const facets = stops(0, total, HULL.FACET);
+  const layer = (dd) => close(facets.map((v) => off(at(v), dd)));
+  // a layer: its side face (dropped copy), then its top, both outlined
+  const slab = (poly, fill, side) => `<path d="${d(poly.map(([x, y]) => [x, y + HULL.DROP]))}" fill="${side}" stroke="${o}" stroke-width="4" stroke-linejoin="round"/>` +
+    `<path d="${d(poly)}" fill="${fill}" stroke="${o}" stroke-width="4" stroke-linejoin="round"/>`;
+  const nearFloor = (x, y, r) => FLOORS.some((f) => inPoly(x, y, f.poly) || f.poly.some((q, i) => {
+    const b = f.poly[(i + 1) % f.poly.length], vx = b[0] - q[0], vy = b[1] - q[1];
+    const u = Math.max(0, Math.min(1, ((x - q[0]) * vx + (y - q[1]) * vy) / (vx * vx + vy * vy)));
+    return Math.hypot(x - q[0] - u * vx, y - q[1] - u * vy) < r;
+  }));
 
-  let lights = '', grooves = '', hi = '';
-  const both = (fn) => { fn(false); fn(true); };
-  const P = (x, y, m) => m ? [x, SHIP_H - y] : [x, y];
-  lobes.forEach((l, j) => {
-    // highlight along each lobe's outer edge
-    const seg = base.filter((p) => p.s > l.s0 + l.L * .18 && p.s < l.s0 + l.L * .82);
+  // plate extents along the outline
+  const wsum = HULL_BUMPS.reduce((a, p) => a + p[0], 0);
+  let s = 0;
+  const plates = HULL_BUMPS.map(([w, step]) => {
+    const L = total * w / wsum, p = { s0: s + HULL.GAP / 2, s1: s + L - HULL.GAP / 2, o: step };
+    s += L;
+    p.ss = stops(p.s0 + HULL.CHAMFER, p.s1 - HULL.CHAMFER, HULL.FACET);
+    return p;
+  });
+  const along = (p, dd) => p.ss.map((v) => off(at(v), dd));
+  const platePoly = (p) => [off(at(p.s0), p.o - HULL.CHAMFER), ...along(p, p.o), off(at(p.s1), p.o - HULL.CHAMFER),
+    off(at(p.s1), HULL.PLATE_IN), ...along(p, HULL.PLATE_IN).reverse(), off(at(p.s0), HULL.PLATE_IN)];
+
+  // 1. Armor: underside, rim, fins with pink running lights in the gaps, blue panels outside the stepped-in plates
+  const armor = close(stops(0, total, 24).map((v) => off(at(v), HULL.ARMOR)));
+  let fins = '', run = '', panels = '';
+  plates.slice(0, -1).forEach((a, i) => {
+    const b = plates[i + 1], sg = (a.s1 + b.s0) / 2, hi = Math.max(a.o, b.o) + 6, h = HULL.GAP / 2 + 3;
+    const fin = [off(at(sg - h - 7), HULL.ARMOR - 4), off(at(sg - h), hi), off(at(sg + h), hi), off(at(sg + h + 7), HULL.ARMOR - 4)];
+    fins += both((m) => `<path d="${d(flip(fin, m))}"/>`);
+    run += both((m) => { const c = flip([off(at(sg), hi - 3)], m)[0]; return `<rect x="-4.5" y="-2" width="9" height="4" rx="2" transform="translate(${f1(c[0])} ${f1(c[1])}) rotate(${tilt(sg, m)})"/>`; });
+  });
+  plates.forEach((p) => {
+    if (p.o > 6) return;
+    const a = stops(p.s0 + 16, p.s1 - 16, 24).map((v) => off(at(v), (p.o + HULL.ARMOR) / 2 + .5));
+    panels += both((m) => `<path d="${d(flip(a, m), false)}" stroke-dasharray="${p.s1 - p.s0 > 160 ? '30 8' : '14 7'}"/>`);
+  });
+  add(gLow, `<path d="${d(armor.map(([x, y]) => [x, y + HULL.UNDER]))}" fill="${C.armordark}" stroke="${o}" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="${d(armor)}" fill="${C.armor}" stroke="${o}" stroke-width="4.5" stroke-linejoin="round"/>
+    <g fill="${C.armor}" stroke="${o}" stroke-width="3" stroke-linejoin="round">${fins}</g>
+    <g fill="none" stroke-linecap="round"><g stroke="${o}" stroke-width="7">${panels}</g><g stroke="${C.hullblue}" stroke-width="3.6">${panels}</g></g>
+    <g fill="${C.pink}" stroke="${o}" stroke-width="1.2">${run}</g>`);
+
+  // 2. Outer plates: side face, top, light rim along the outer edge, a seam along and seams across, rivets
+  let ps = '', pt = '', rims = '', seams = '', bolts = '';
+  plates.forEach((p) => {
+    const poly = platePoly(p), L = p.s1 - p.s0;
     both((m) => {
-      if (seg.length > 2) hi += `<polyline points="${pts(seg.map((p) => { const o = off[base.indexOf(p)] - 4.5; return P(p.x + p.nx * o, p.y + p.ny * o, m); }))}"/>`;
-    });
-    if (j === 0) return;
-    // a light in the gap between lobes, and a sulcus groove running inward from it
-    const b = at(l.s0);
-    if (l.s0 < 30 || total - l.s0 < 30) return;
-    const col = j % 2 ? C.hullblue : C.pink;
-    const ang = Math.atan2(b.ny, b.nx) * 180 / Math.PI;
-    both((m) => {
-      const c = P(b.x + b.nx * 6, b.y + b.ny * 6, m), a2 = m ? -ang : ang;
-      lights += `<rect x="-6" y="-2.6" width="12" height="5.2" rx="2.6" fill="${col}" stroke="${C.outline}" stroke-width="1.2" transform="translate(${f1(c[0])} ${f1(c[1])}) rotate(${f1(a2)})"/>`;
-    });
-    // sulcus: one fold per gap, running in from the gap and then along the lobe (deeper over the big rear lobes)
-    const rearLobe = b.x < 300;
-    const d = rearLobe ? 44 + R() * 26 : 24 + R() * 12;
-    const dir = R() < .5 ? 1 : -1, hook = (rearLobe ? .5 : .32 + R() * .2) * (dir > 0 ? l.L : lobes[j - 1].L);
-    const along = base.filter((p) => (p.s - l.s0) * dir > 10 && (p.s - l.s0) * dir < hook).sort((a, c) => (a.s - c.s) * dir);
-    both((m) => {
-      const line = [P(b.x - b.nx, b.y - b.ny, m), P(b.x - b.nx * (d - 6), b.y - b.ny * (d - 6), m)]
-        .concat(along.map((p) => P(p.x - p.nx * d, p.y - p.ny * d, m)));
-      grooves += `<polyline points="${pts(line)}"/>`;
+      const q = flip(poly, m);
+      ps += `<path d="${d(q.map(([x, y]) => [x, y + HULL.DROP]))}"/>`;
+      pt += `<path d="${d(q)}"/>`;
+      rims += `<path d="${d(flip(along(p, p.o - 4), m), false)}"/>`;
+      seams += `<path d="${d(flip([off(at(p.s0 + 2), p.o - 14), ...along(p, p.o - 14), off(at(p.s1 - 2), p.o - 14)], m), false)}"/>`;
+      const cuts = Math.max(1, Math.round(L / 110));
+      for (let j = 1; j < cuts; j++) {
+        const v = p.s0 + L * j / cuts;
+        seams += `<path d="${d(flip([off(at(v), p.o - 14), off(at(v), HULL.PLATE_IN + 4)], m), false)}"/>`;
+      }
+      [p.s0 + 9, p.s1 - 9].forEach((v) => { const c = flip([off(at(v), p.o - 8)], m)[0]; bolts += `<circle cx="${f1(c[0])}" cy="${f1(c[1])}" r="1.4"/>`; });
+      return '';
     });
   });
+  add(gLow, `<g fill="${C.hullside}" stroke="${o}" stroke-width="4" stroke-linejoin="round">${ps}</g>
+    <g fill="${C.hull}" stroke="${o}" stroke-width="4" stroke-linejoin="round">${pt}</g>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="${C.hullrim}" stroke-width="3.4">${rims}</g>
+      <g stroke="${C.hullseam}" stroke-width="2">${seams}</g></g>
+    <g fill="${C.hullrivet}">${bolts}</g>`);
 
-  add(g, `<path d="${path(close(armor))}" fill="${C.armor}" stroke="${C.outline}" stroke-width="4.5" stroke-linejoin="round"/>
-    <g>${lights}</g>
-    <path d="${path(close(lobed))}" fill="url(#eh-plating)" stroke="${C.outline}" stroke-width="5" stroke-linejoin="round"/>
-    <g fill="none" stroke="${C.hulllit}" stroke-width="3" stroke-linecap="round" opacity=".9">${hi}</g>
-    <g fill="none" stroke="${C.outline}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">${grooves}</g>`);
-  // hull details: vents near the engines
-  add(g, `<g stroke="${C.outline}" stroke-width="1.5">
-    <rect x="216" y="420" width="12" height="34" rx="2" fill="url(#eh-grate)"/><rect x="216" y="570" width="12" height="34" rx="2" fill="url(#eh-grate)"/>
-  </g>`);
+  // 3. Middle layer: stepped in from the outline, filling the corners; seams, slots, rivets, lights, hatches
+  const hugs = HUG_SHAPES.flatMap(([shape, sym]) => {
+    const p = offsetPoly(convexHull(shape()), HULL.HUG);
+    return sym ? [p] : [p, p.map(mirror)];
+  });
+  const underHug = (x, y) => hugs.some((q) => inPoly(x, y, q));
+  let midRim = both((m) => `<path d="${d(flip(facets.map((v) => off(at(v), HULL.MID - 4)), m), false)}"/>`);
+  let mSeams = '', slots = '', dots = '', rivets = '', k = 0;
+  for (let v = 30; v < total - 30; v += 40) {
+    const c = off(at(v), HULL.MID - 16);
+    if (underHug(c[0], c[1]) || nearFloor(c[0], c[1], W_BAND + 14)) continue;
+    const kind = k++ % 4;
+    both((m) => {
+      const q = flip([c], m)[0], tr = `translate(${f1(q[0])} ${f1(q[1])}) rotate(${tilt(v, m)})`;
+      if (kind === 0) mSeams += `<path d="${d(flip([off(at(v), HULL.MID - 4), off(at(v), HULL.MID - 30)], m), false)}"/>`;
+      else if (kind === 1) slots += `<g transform="${tr}"><rect x="-11" y="-3.2" width="22" height="6.4" rx="3.2"/><rect x="-7.5" y="-1" width="15" height="2" rx="1" fill="${C.armorlit}" stroke="none"/></g>`;
+      else if (kind === 2) rivets += `<g transform="${tr}"><circle cx="-7" r="1.6"/><circle r="1.6"/><circle cx="7" r="1.6"/></g>`;
+      else dots += `<circle cx="${f1(q[0])}" cy="${f1(q[1])}" r="2.6" fill="${k % 8 === 0 ? C.cyan : C.pink}"/>`;
+      return '';
+    });
+  }
+  // hull hatches in the open stretch between life support and the command center
+  const hatch = (y) => `<g transform="translate(1166 ${y})">
+      <rect x="-40" y="-14" width="80" height="28" rx="6" fill="${C.hullside}" stroke="${o}" stroke-width="2.5"/>
+      <rect x="-34" y="-9" width="42" height="18" rx="3" fill="url(#eh-grate)" stroke="${o}" stroke-width="1.5"/>
+      <rect x="13" y="-9" width="21" height="18" rx="3" fill="${C.armor}" stroke="${o}" stroke-width="1.5"/>
+      <circle cx="19" cy="0" r="2.6" fill="${C.cyan}"/><circle cx="28" cy="0" r="2.6" fill="${C.pink}"/></g>`;
+  add(gHigh, `${slab(layer(HULL.MID), C.hull, C.hullside)}
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="${C.hullrim}" stroke-width="3">${midRim}</g>
+      <g stroke="${C.hullseam}" stroke-width="2.2">${mSeams}</g></g>
+    <g fill="${C.armor}" stroke="${o}" stroke-width="1.4">${slots}</g>
+    <g fill="${C.hullrivet}">${rivets}</g>
+    <g stroke="${o}" stroke-width="1.3">${dots}</g>
+    ${hatch(206)}${hatch(SHIP_H - 206)}`);
+
+  // 4. Inner layer: hugs the rooms (one outline around all of them: outlines first, then fills), raised above
+  //    the middle layer with its own side face, and kept inside the middle layer's edge
+  add(DEFS, `<clipPath id="eh-hugclip"><path d="${d(layer(HULL.MID - 8))}"/></clipPath>`);
+  const P = (q) => `<polygon points="${pts(q)}"/>`;
+  const union = (fill, dy) => `<g transform="translate(0 ${dy})"><g fill="${o}" stroke="${o}" stroke-width="8" stroke-linejoin="miter">${hugs.map(P).join('')}</g>` +
+    `<g fill="${fill}">${hugs.map(P).join('')}</g></g>`;
+  add(gHigh, `<g clip-path="url(#eh-hugclip)">${union(C.hullside, HULL.DROP)}${union(C.hull, 0)}</g>`);
 }
 
 /* ==== SECTION: Wall tops, floors and wall faces ==== */
@@ -463,24 +619,24 @@ const label = (x, y, text, color) => `<g transform="translate(${x} ${y})"><rect 
 /* ==== SECTION: Engine room (anti-gravity thruster) ====
    Each room draws into gs (static layer, painted once) and gd (front layer, for anything that moves). */
 function drawEngineRoom(gs, gd) {
-  const graph = screen(392, 202, 52, 16, `<polyline id="eh-eng-graph" fill="none" stroke="${C.cyan}" stroke-width="1"/>` +
+  const graph = screen(452, 202, 52, 16, `<polyline id="eh-eng-graph" fill="none" stroke="${C.cyan}" stroke-width="1"/>` +
     `<g fill="${C.cyan}"><rect x="42" y="10" width="2" height="4"/><rect x="45" y="7" width="2" height="7"/><rect x="48" y="4" width="2" height="10"/></g>` +
     `<text x="3" y="6" font-size="4" fill="${C.cyanhi}">AG-THRUST OK</text>`);
-  const radar = screen(530, 202, 52, 16, `<circle cx="9" cy="8" r="6" fill="none" stroke="${C.cyan}" stroke-width=".8" opacity=".7"/>` +
+  const radar = screen(532, 202, 52, 16, `<circle cx="9" cy="8" r="6" fill="none" stroke="${C.cyan}" stroke-width=".8" opacity=".7"/>` +
     `<line id="eh-eng-radar" x1="9" y1="8" x2="15" y2="8" stroke="${C.cyanhi}" stroke-width="1"/>` +
     `<g fill="${C.cyan}"><rect x="19" y="3" width="29" height="1.6" rx=".8" opacity=".7"/><rect x="19" y="7" width="21" height="1.6" rx=".8" opacity=".5"/><rect x="19" y="11" width="25" height="1.6" rx=".8" opacity=".6"/></g>`);
   let cells = '';
-  [288, 320, 352].forEach((y, i) => {
-    cells += `<g transform="translate(325 ${y})"><rect width="26" height="28" rx="5" fill="url(#eh-metalDark)" stroke="${C.outline}" stroke-width="2"/>` +
+  [304, 332, 360].forEach((y, i) => {
+    cells += `<g transform="translate(330 ${y})"><rect width="26" height="28" rx="5" fill="url(#eh-metalDark)" stroke="${C.outline}" stroke-width="2"/>` +
       `<rect x="5" y="4" width="16" height="20" rx="3" fill="${C.outline}"/><rect class="eh-eng-lvl" data-i="${i}" x="7" y="6" width="12" height="16" rx="1.5" fill="${C.amber}"/></g>`;
   });
-  add(gs, `${grate(482, 204, 30, 12)}${warnSign(343, 240)}
-    ${pipe('M384 224 L600 224', 6)}
-    <g fill="${C.armor}"><rect x="420" y="219" width="5" height="10"/><rect x="500" y="219" width="5" height="10"/><rect x="570" y="219" width="5" height="10"/></g>
-    <g transform="translate(446 224)"><circle r="5" fill="none" stroke="${C.red}" stroke-width="1.8"/><path d="M-5 0 H5 M0 -5 V5" stroke="${C.red}" stroke-width="1.2"/></g>
-    <rect x="320" y="282" width="36" height="102" rx="3" fill="${C.floorbg}"/>
+  add(gs, `${warnSign(398, 226)}
+    ${pipe('M456 224 L600 224', 6)}
+    <g fill="${C.armor}"><rect x="510" y="219" width="5" height="10"/><rect x="574" y="219" width="5" height="10"/></g>
+    <g transform="translate(464 224)"><circle r="5" fill="none" stroke="${C.red}" stroke-width="1.8"/><path d="M-5 0 H5 M0 -5 V5" stroke="${C.red}" stroke-width="1.2"/></g>
+    <rect x="324" y="298" width="38" height="94" rx="3" fill="${C.floorbg}"/>
     <circle cx="480" cy="318" r="80" fill="url(#eh-glowBlue)"/>
-    ${pipe('M356 318 L430 318', 7)}${pipe('M480 228 L480 262', 6)}${pipe('M584 330 C 560 330, 548 322, 530 320', 6)}
+    ${pipe('M360 318 L430 318', 7)}${pipe('M480 228 L480 262', 6)}${pipe('M584 330 C 560 330, 548 322, 530 320', 6)}
     <g fill="${C.hazard}" stroke="${C.outline}" stroke-width="1.2"><rect x="372" y="312" width="5" height="12" rx="1"/><rect x="398" y="312" width="5" height="12" rx="1"/><rect x="474" y="240" width="12" height="5" rx="1"/></g>
     <g transform="translate(380 326)"><rect width="14" height="10" rx="2" fill="${C.metaldark2}" stroke="${C.outline}" stroke-width="1.2"/><rect x="3" y="3" width="8" height="2" fill="${C.hazard}"/></g>
     <g transform="translate(608 262)"><circle r="15" fill="url(#eh-metal)" stroke="${C.outline}" stroke-width="2"/><circle r="10" fill="${C.water}" stroke="${C.outline}" stroke-width="1.2"/>
@@ -491,9 +647,9 @@ function drawEngineRoom(gs, gd) {
     ${crate(590, 326, 38, 34)}${metalCrate(598, 364, 28, 22)}
     ${grate(356, 392, 40, 12)}${grate(548, 392, 40, 12)}
     ${lightBar(410, 404, 22, 3)}${lightBar(536, 404, 22, 3)}`);
-  add(gd, `${graph}${wallEye(466, 210)}${radar}${cells}`);
+  add(gd, `${graph}${wallEye(518, 210)}${radar}${cells}`);
   drawThruster(gd, 480, 318);
-  block({ r: [320, 280, 360, 388] }, { r: [580, 244, 640, 392] }, { c: [480, 318, 58] }, { r: [380, 200, 604, 230] });
+  block({ r: [320, 298, 364, 392] }, { r: [580, 244, 640, 392] }, { c: [480, 318, 58] }, { r: [448, 200, 604, 230] });
 
   const gr = ref('eng-graph'), radarLine = ref('eng-radar'), lv = [...gd.querySelectorAll('.eh-eng-lvl')];
   ANIM.push((t) => {
@@ -642,7 +798,7 @@ function drawReactor(gs, gd) {
     ${pipe('M384 684 C 410 684, 420 700, 440 712', 6)}${pipe('M600 700 C 580 700, 560 712, 536 718', 6)}
     ${label(486, 793, 'RX-2', C.rx2)}
     <rect x="324" y="652" width="62" height="64" rx="4" fill="${C.floorbg}" opacity=".7"/>${barrels}
-    ${grate(390, 786, 36, 14)}${grate(548, 786, 36, 14)}${lightBar(440, 818, 22, 3)}${lightBar(532, 818, 22, 3)}`);
+    ${grate(548, 786, 36, 14)}${lightBar(458, 818, 22, 3)}${lightBar(532, 818, 22, 3)}`);
   add(gd, `${screen(544, 616, 58, 15, `<text x="3" y="6" font-size="4" fill="${C.rx2}">RX-2 TEMP</text>` +
       `<g transform="translate(44 8)"><circle r="5.5" fill="none" stroke="${C.rx2}" stroke-width=".8"/><line id="eh-rx-needle" x2="0" y2="-4.5" stroke="${C.rx1}" stroke-width="1"/></g>` +
       `<g fill="${C.rx2}"><rect x="3" y="9" width="18" height="1.6" rx=".8"/><rect x="3" y="12" width="12" height="1.6" rx=".8" opacity=".6"/></g>`)}
@@ -731,8 +887,12 @@ function drawShieldBay(gs, gd) {
   });
 }
 
-/* ==== SECTION: Command center (hyperdrive, main terminal, crew stations, B.F. 9000) ==== */
-function drawCommand(gs, gd) {
+/* ==== SECTION: Command center (hyperdrive, main terminal, crew stations, B.F. 9000) ====
+   Drawn in step 1 coordinates inside groups shifted right by CC_DX (add CC_DX to any x here to get the
+   floor-plan x). Blockers are listed in the same coordinates and shifted when registered. */
+function drawCommand(gs0, gd0) {
+  const shift = `transform="translate(${CC_DX} 0)"`;
+  const gs = add(gs0, `<g id="eh-cc-static" ${shift}></g>`), gd = add(gd0, `<g id="eh-cc-front" ${shift}></g>`);
   let clamps = '';
   [1137, 1158, 1179, 1200, 1221].forEach((x) => {
     clamps += `<rect x="${x - 4}" y="330" width="8" height="64" rx="3" fill="url(#eh-metalDark)" stroke="${C.outline}" stroke-width="1.5"/>` +
@@ -803,8 +963,9 @@ function drawCommand(gs, gd) {
       <circle id="eh-bf-pupil" r="5" fill="${C.eye1}" opacity=".85"/>
       <circle cx="-5" cy="-6" r="3" fill="${C.white}" opacity=".7"/>
     </g>`);
-  block({ r: [1090, 324, 1268, 410] }, { r: [1114, 484, 1168, 542] }, { r: [1106, 630, 1254, 712] },
-    { r: [1306, 368, 1366, 444] }, { r: [1314, 476, 1366, 548] }, { r: [1306, 580, 1366, 656] });
+  [[1090, 324, 1268, 410], [1114, 484, 1168, 542], [1106, 630, 1254, 712],
+    [1306, 368, 1366, 444], [1314, 476, 1366, 548], [1306, 580, 1366, 656]]
+    .forEach(([x1, y1, x2, y2]) => block({ r: [x1 + CC_DX, y1, x2 + CC_DX, y2] }));
 
   const flow = ref('hd-flow'), charge = ref('hd-charge'), holo = ref('holo'), cursor = ref('term-cursor'), blink = ref('cc-blink');
   const eye = ref('bf-eye'), pupil = ref('bf-pupil');
@@ -832,14 +993,14 @@ function drawCommand(gs, gd) {
 function drawCorridor(gs, gd) {
   let lights = '', chev = '';
   [322, 388, 580, 640, 700, 760, 940, 1000].forEach((x) => { lights += lightBar(x, 554, 22, 3); });
-  [978, 1002, 1026].forEach((x) => { chev += `<path class="eh-chev" d="M${x} 500 L${x + 10} 512 L${x} 524" fill="none" stroke="${C.cyan}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".25"/>`; });
-  add(gs, `${pipe('M296 471 L436 471', 5)}${pipe('M534 471 L806 471', 5)}${pipe('M904 471 L1046 471', 5)}
+  [998, 1022, 1046].forEach((x) => { chev += `<path class="eh-chev" d="M${x} 500 L${x + 10} 512 L${x} 524" fill="none" stroke="${C.cyan}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".25"/>`; });
+  add(gs, `${pipe('M296 471 L436 471', 5)}${pipe('M534 471 L806 471', 5)}${pipe('M904 471 L1066 471', 5)}
     <g fill="${C.armor}"><rect x="340" y="467" width="4" height="9"/><rect x="600" y="467" width="4" height="9"/><rect x="700" y="467" width="4" height="9"/><rect x="960" y="467" width="4" height="9"/></g>
     ${grate(330, 500, 64, 24)}${grate(620, 500, 120, 24)}${lights}
     <g transform="translate(270 476)"><rect width="18" height="72" rx="3" fill="url(#eh-metalDark)" stroke="${C.outline}" stroke-width="2"/>
       <rect x="4" y="5" width="10" height="62" rx="2" fill="url(#eh-hazard)"/><circle cx="9" cy="36" r="3" fill="${C.redoff}" stroke="${C.outline}" stroke-width="1"/></g>
-    <rect x="1042" y="440" width="14" height="30" rx="3" fill="${C.wall}" stroke="${C.outline}" stroke-width="2"/>
-    <rect x="1042" y="554" width="14" height="30" rx="3" fill="${C.wall}" stroke="${C.outline}" stroke-width="2"/>`);
+    <rect x="${1042 + CC_DX}" y="440" width="14" height="30" rx="3" fill="${C.wall}" stroke="${C.outline}" stroke-width="2"/>
+    <rect x="${1042 + CC_DX}" y="554" width="14" height="30" rx="3" fill="${C.wall}" stroke="${C.outline}" stroke-width="2"/>`);
   add(gd, chev);
   const ch = [...gd.querySelectorAll('.eh-chev')];
   ANIM.push((t) => ch.forEach((c, i) => c.setAttribute('opacity', f1(.15 + .35 * Math.max(0, Math.sin(t * 3 - i * .9))))));
@@ -872,56 +1033,87 @@ function drawDoors(g) {
   });
 }
 
-/* ==== SECTION: Player (the sample's astronaut) ==== */
+/* ==== SECTION: Player (the Cadet: a chibi astronaut) ====
+   Drawn facing right for the side views; facing left is the same figure mirrored. The origin is between the
+   feet, so the foot box and collisions don't depend on the art. Parts shown per view:
+     down (front): visor, chest panel, both arms     up (back): backpack, helmet vent, both arms
+     left/right (profile): side visor, backpack in profile, the near arm over the torso, the far arm behind it */
 function drawPlayer(g) {
   const o = C.outline;
+  const limb = (x, y, w, h, fill) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w / 2}" fill="${fill}" stroke="${o}" stroke-width="2.2"/>`;
   add(g, `<g id="eh-player"><g transform="scale(${SETTINGS.PLAYER_SCALE})">
-    <ellipse cx="0" cy="2" rx="17" ry="6" fill="${C.black}" opacity=".35"/>
-    <rect id="eh-legL" x="-10" y="-8" width="9" height="12" rx="3" fill="${C.suitleg}" stroke="${o}" stroke-width="2.5"/>
-    <rect id="eh-legR" x="1" y="-8" width="9" height="12" rx="3" fill="${C.suitleg}" stroke="${o}" stroke-width="2.5"/>
-    <g id="eh-torso">
-      <rect id="eh-armL" x="-19" y="-28" width="8" height="16" rx="4" fill="${C.suitarm}" stroke="${o}" stroke-width="2.5"/>
-      <rect id="eh-armR" x="11" y="-28" width="8" height="16" rx="4" fill="${C.suitarm}" stroke="${o}" stroke-width="2.5"/>
-      <rect x="-13" y="-31" width="26" height="25" rx="8" fill="${C.suit}" stroke="${o}" stroke-width="2.5"/>
-      <g id="eh-front"><rect x="-13" y="-17" width="26" height="4" fill="${C.amber}"/>
-        <rect x="-5" y="-27" width="10" height="7" rx="2" fill="${C.cyan}" stroke="${o}" stroke-width="1.5"/></g>
-      <g id="eh-back" style="display:none"><rect x="-11" y="-30" width="22" height="20" rx="5" fill="${C.pack}" stroke="${o}" stroke-width="2.5"/>
-        <rect x="-6" y="-26" width="12" height="4" fill="${C.amber}"/><circle cx="0" cy="-16" r="2" fill="${C.cyan}"/></g>
-      <g transform="translate(0 -44)">
-        <line x1="8" y1="-12" x2="11" y2="-21" stroke="${o}" stroke-width="2.5"/>
-        <circle cx="11" cy="-22" r="3" fill="${C.pink}" stroke="${o}" stroke-width="1.5"/>
-        <circle r="16" fill="${C.helmet}" stroke="${o}" stroke-width="2.5"/>
-        <g id="eh-visor"><rect id="eh-visorR" x="-11" y="-6" width="22" height="15" rx="7" fill="url(#eh-visorG)" stroke="${o}" stroke-width="2"/>
-          <rect id="eh-visorHi" x="-7" y="-3" width="7" height="3" rx="1.5" fill="${C.visorhi}" opacity=".8"/></g>
+    <ellipse cx="0" cy="1.5" rx="14" ry="4.5" fill="${C.black}" opacity=".35"/>
+    <g id="eh-fig">
+      <g id="eh-legB">${limb(-4, -10, 8, 11, C.suitleg)}</g>
+      <g id="eh-legF">${limb(-4, -10, 8, 11, C.suitleg)}</g>
+      <g id="eh-torso">
+        <g id="eh-armFar">${limb(-1, -23, 7, 12, C.suitshade)}</g>
+        <g id="eh-packSide"><rect x="-18" y="-27" width="11" height="17" rx="3.5" fill="${C.pack}" stroke="${o}" stroke-width="2.2"/>
+          <circle cx="-13.5" cy="-15" r="1.6" fill="${C.cyan}"/></g>
+        <g id="eh-armL">${limb(-16, -24, 7, 11, C.suitarm)}</g>
+        <g id="eh-armR">${limb(9, -24, 7, 11, C.suitarm)}</g>
+        <rect x="-11" y="-27" width="22" height="20" rx="9" fill="${C.suit}" stroke="${o}" stroke-width="2.4"/>
+        <g id="eh-chest"><rect x="-10.4" y="-14" width="20.8" height="3" fill="${C.amber}"/>
+          <rect x="-5" y="-23" width="10" height="6.5" rx="1.6" fill="${C.cyan}" stroke="${o}" stroke-width="1.3"/>
+          <rect x="-3" y="-21.5" width="4" height="1.4" rx=".7" fill="${C.cyanpale}"/></g>
+        <g id="eh-pack"><rect x="-9.5" y="-27" width="19" height="17" rx="5" fill="${C.pack}" stroke="${o}" stroke-width="2.2"/>
+          <rect x="-5.5" y="-23.5" width="11" height="3" rx="1" fill="${C.amber}"/><circle cx="0" cy="-15" r="2" fill="${C.cyan}"/></g>
+        <g id="eh-armNear">${limb(-3.5, -23, 7, 12, C.suitarm)}</g>
+        <g id="eh-head">
+          <g id="eh-antenna"><line x1="7" y1="-60" x2="10.5" y2="-67.5" stroke="${o}" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="11" cy="-68.5" r="2.9" fill="${C.pink}" stroke="${o}" stroke-width="1.5"/></g>
+          <circle cy="-44" r="19" fill="${C.helmet}" stroke="${o}" stroke-width="2.5"/>
+          <path d="M-14.5 -50 A16 16 0 0 1 -6 -59" fill="none" stroke="${C.white}" stroke-width="2.4" stroke-linecap="round" opacity=".85"/>
+          <g id="eh-visorF"><rect x="-14" y="-52" width="28" height="17" rx="8.5" fill="url(#eh-visorG)" stroke="${o}" stroke-width="2"/>
+            <path d="M-9.5 -45 Q-9 -48.5 -4.5 -49" fill="none" stroke="${C.visorhi}" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>
+            <circle cx="6.5" cy="-47.5" r="1.3" fill="${C.visorhi}" opacity=".75"/></g>
+          <g id="eh-visorS"><path d="M-1 -48 Q-1 -52 4 -52 L12 -52 Q18.5 -52 18.5 -44 Q18.5 -36 12 -36 L4 -36 Q-1 -36 -1 -40 Z" fill="url(#eh-visorG)" stroke="${o}" stroke-width="2"/>
+            <path d="M3 -44.5 Q3.5 -48.5 7.5 -49" fill="none" stroke="${C.visorhi}" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>
+            <circle cx="14" cy="-48" r="1.2" fill="${C.visorhi}" opacity=".75"/></g>
+          <g id="eh-helmBack"><rect x="-7" y="-36" width="14" height="5" rx="2.5" fill="${C.hullline}" stroke="${o}" stroke-width="1.4"/>
+            <rect x="-4" y="-34.2" width="8" height="1.4" rx=".7" fill="${C.outline}" opacity=".5"/></g>
+        </g>
       </g>
     </g>
   </g></g>`);
 }
 const PL = { x: SETTINGS.START.x, y: SETTINGS.START.y, dir: SETTINGS.START.dir, walk: 0, moving: false };
 let PR = null;   // player element refs
+const PLAYER_PARTS = {   // which parts each view shows
+  chest: ['down'], pack: ['up'], helmBack: ['up'], visorF: ['down'], visorS: ['left', 'right'],
+  packSide: ['left', 'right'], armNear: ['left', 'right'], armFar: ['left', 'right'], armL: ['up', 'down'], armR: ['up', 'down']
+};
 function posePlayer(t) {
-  if (!PR) PR = { g: ref('player'), torso: ref('torso'), legL: ref('legL'), legR: ref('legR'), armL: ref('armL'), armR: ref('armR'),
-    front: ref('front'), back: ref('back'), visor: ref('visor'), visorR: ref('visorR'), visorHi: ref('visorHi') };
-  const sw = PL.moving ? Math.sin(PL.walk) : 0;
-  const bob = PL.moving ? Math.abs(Math.sin(PL.walk)) * -2 : Math.sin(t * 2) * .6;
-  const side = PL.dir === 'left' || PL.dir === 'right';
-  PR.g.setAttribute('transform', `translate(${f1(PL.x)} ${f1(PL.y)})`);
-  PR.torso.setAttribute('transform', `translate(0 ${bob.toFixed(2)})`);
-  PR.legL.setAttribute('transform', side ? `translate(${f1(sw * 5)} 0)` : `translate(0 ${f1(sw * 3)})`);
-  PR.legR.setAttribute('transform', side ? `translate(${f1(-sw * 5)} 0)` : `translate(0 ${f1(-sw * 3)})`);
-  PR.armL.setAttribute('transform', `translate(0 ${f1(-sw * 3)})`);
-  PR.armR.setAttribute('transform', `translate(0 ${f1(sw * 3)})`);
-  PR.front.style.display = PL.dir === 'down' ? '' : 'none';
-  PR.back.style.display = PL.dir === 'up' ? '' : 'none';
-  if (PL.dir === 'up') PR.visor.style.display = 'none';
-  else {
-    PR.visor.style.display = '';
-    const dx = PL.dir === 'left' ? -7 : PL.dir === 'right' ? 7 : 0, w = side ? 14 : 22;
-    PR.visorR.setAttribute('x', f1(dx - w / 2)); PR.visorR.setAttribute('width', w);
-    PR.visorHi.setAttribute('x', f1(dx - w / 2 + 4));
+  if (!PR) {
+    PR = { g: ref('player'), fig: ref('fig'), torso: ref('torso'), legB: ref('legB'), legF: ref('legF'), armL: ref('armL'), armR: ref('armR'),
+      armNear: ref('armNear'), armFar: ref('armFar'), antenna: ref('antenna'), dir: '' };
+    PR.parts = Object.keys(PLAYER_PARTS).map((k) => [ref(k), PLAYER_PARTS[k]]);
+    PR.legFill = [PR.legB.firstElementChild, PR.legF.firstElementChild];
   }
-  PR.armL.style.display = PL.dir === 'right' ? 'none' : '';
-  PR.armR.style.display = PL.dir === 'left' ? 'none' : '';
+  const dir = PL.dir, side = dir === 'left' || dir === 'right';
+  if (dir !== PR.dir) {               // swap the parts only when the facing changes
+    PR.dir = dir;
+    PR.parts.forEach(([el, views]) => { el.style.display = views.includes(dir) ? '' : 'none'; });
+    PR.antenna.setAttribute('transform', dir === 'down' ? '' : 'scale(-1 1)');   // it sits on the right as seen from the front
+    PR.legFill[0].setAttribute('fill', side ? C.suitshade : C.suitleg);          // the far leg is shaded in profile
+  }
+  // a short, bouncy walk: the body hops on every step and squashes a little as each foot lands
+  const sw = PL.moving ? Math.sin(PL.walk) : 0, hop = PL.moving ? Math.abs(sw) : 0;
+  const bob = PL.moving ? -hop * 3.4 : Math.sin(t * 2) * .6, sq = PL.moving ? (1 - hop) * .05 : 0;
+  PR.g.setAttribute('transform', `translate(${f1(PL.x)} ${f1(PL.y)})`);
+  PR.fig.setAttribute('transform', side ? `scale(${dir === 'left' ? -1 : 1} 1)${PL.moving ? ' rotate(4)' : ''}` : '');
+  PR.torso.setAttribute('transform', `translate(0 ${bob.toFixed(2)}) scale(${(1 + sq).toFixed(3)} ${(1 - sq).toFixed(3)})`);
+  if (side) {
+    PR.legB.setAttribute('transform', `translate(${f1(-1.5 - sw * 4.5)} 0)`);
+    PR.legF.setAttribute('transform', `translate(${f1(1.5 + sw * 4.5)} 0)`);
+    PR.armNear.setAttribute('transform', `rotate(${f1(sw * 32)} 0 -21)`);      // swings opposite the near leg
+    PR.armFar.setAttribute('transform', `rotate(${f1(-sw * 32)} 2.5 -21)`);
+  } else {
+    PR.legB.setAttribute('transform', `translate(-5 ${f1(-Math.max(0, sw) * 2.6)})`);
+    PR.legF.setAttribute('transform', `translate(5 ${f1(-Math.max(0, -sw) * 2.6)})`);
+    PR.armL.setAttribute('transform', `translate(0 ${f1(sw * 2)})`);
+    PR.armR.setAttribute('transform', `translate(0 ${f1(-sw * 2)})`);
+  }
 }
 
 /* ==== SECTION: Walkable grid ====
@@ -1001,7 +1193,7 @@ function movePlayer(dt) {
   }
   PL.dir = Math.abs(vx) > Math.abs(vy) ? (vx > 0 ? 'right' : 'left') : (vy > 0 ? 'down' : 'up');
   PL.moving = PL.x !== x0 || PL.y !== y0;
-  if (PL.moving) PL.walk += dt * 11;
+  if (PL.moving) PL.walk += dt * 13;   // step rate (short, quick steps)
 }
 // Blocked head-on: if an opening is within 14 units to one side (a doorway), drift toward it.
 function nudge(axis, d) {
@@ -1088,8 +1280,10 @@ function devTick() {
 function build() {
   drawDefs();
   drawSpace(layer('space', SVG_BG), layer('sky', SVG_SKY));
-  drawEngines(layer('engines'), SVG_SKY.firstChild);
-  drawHull(layer('hull'));
+  // hull plates, then the side engines and bridge, then the hull's inner layers, then the main engine
+  const gHullLow = layer('hull'), gUnder = layer('engines-under'), gHullHigh = layer('hull-inner');
+  drawHull(gHullLow, gHullHigh);
+  drawEngines(gUnder, layer('engines'), SVG_SKY.firstChild);
   drawFloors(layer('walls'), layer('floors'));
   const gs = layer('props'), gd = layer('machines', SVG_FRONT);
   drawCorridor(gs, gd);
@@ -1128,5 +1322,5 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // Test hooks for automated checks, only with ?dev
-if (DEV) window.__eh = { PL, DOORS, keys, setDoor, free, areaAt, SETTINGS, ANIM };
+if (DEV) window.__eh = { PL, DOORS, keys, setDoor, free, areaAt, posePlayer, SETTINGS, ANIM };
 })();

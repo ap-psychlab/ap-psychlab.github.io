@@ -8,10 +8,14 @@
   --eh-space: #070912; --eh-spacelit: #10153A; --eh-nebula1: #4A2D6B; --eh-nebula2: #1F3F66;
   --eh-star: #F4F1FF; --eh-starwarm: #FFE6B8; --eh-starcool: #BCD4FF;
   --eh-black: #000000; --eh-white: #FFFFFF;
-  --eh-bhring: #FFF1D0; --eh-bhdisk1: #FFE6A8; --eh-bhdisk2: #FFB44A; --eh-bhdisk3: #F2683A; --eh-bhdisk4: #B83A6A;
+  --eh-bhring: #FFF1D0; --eh-bhhot: #FFF7E2; --eh-bhdisk1: #FFE6A8; --eh-bhdisk2: #FFB44A; --eh-bhdisk3: #F2683A;
+  --eh-bhdisk4: #B83A6A; --eh-bhdeep: #8E2430;
   /* Hull, wall tops and outlines */
   --eh-outline: #151826;
-  --eh-hull: #E6D9C2; --eh-hulllit: #F6EEDF; --eh-hullline: #D3C4AA; --eh-hullrivet: #BFAE92; --eh-hullpanel: #DCCFB6;
+  --eh-hull: #E6D9C2; --eh-hulllit: #F6EEDF; --eh-hullline: #D3C4AA; --eh-hullrivet: #BFAE92;
+  --eh-hullside: #C9B697;   /* the hull's side face (3/4 view) */
+  --eh-hullrim: #FBF5EA;    /* light rim along the plates' outer edge */
+  --eh-hullseam: #B2A185;   /* panel seams on the hull */
   --eh-wall: #EFE5D3; --eh-wallshade: #CDBB9C;
   --eh-armor: #2A2F42; --eh-armorlit: #3D4660; --eh-armordark: #1C2030;
   /* Floors and wall faces */
@@ -38,7 +42,7 @@
   --eh-hd1: #FFE3F6; --eh-hd2: #FF7AD9; --eh-hd3: #C23FA8; --eh-hd4: #3A1438;
   --eh-eye1: #FFD0C4; --eh-eye2: #FF4B3A; --eh-eye3: #A3181B;
   /* Astronaut */
-  --eh-suit: #F3EEE4; --eh-suitarm: #EFE9DD; --eh-suitleg: #D9D2C4; --eh-helmet: #F7F3EA; --eh-pack: #8D97AE;
+  --eh-suit: #F3EEE4; --eh-suitarm: #EFE9DD; --eh-suitleg: #D9D2C4; --eh-suitshade: #BDB4A4; --eh-helmet: #F7F3EA; --eh-pack: #8D97AE;
   --eh-visor1: #2D5C8A; --eh-visor2: #173252; --eh-visor3: #0F2038; --eh-visorhi: #BFE8FF;
   /* Test tools (?dev) */
   --eh-devfloor: #7EE08A; --eh-devdoor: #E2B13F;
