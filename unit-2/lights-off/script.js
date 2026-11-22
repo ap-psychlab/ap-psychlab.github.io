@@ -6,8 +6,9 @@
  *             uses its own seeded stream, so its puzzles repeat whatever came before
  * Public option:
  *   ?mode=tutorial | practice | timed   open in that mode (default: practice)
- * Test option (while comparing layouts):
- *   ?layout=a   open in layout A (tabs under the title bar); default B (modes inside the bar)
+ *
+ * Title bar, ⓘ, sound and the settings popover come from ../../shared/ui.js (APPSYCH_UI).
+ * Sound is off on every page load; tone() checks APPSYCH_UI.sound.on.
  *
  * Dev tools (?dev): Turn all off, Time left 10 s, Show fewest-moves solution, Show algorithm
  * steps, Solve one step, Solve all (algorithm), Load mental set board, tutorial Jump to step,
@@ -310,7 +311,7 @@
   }
 
   /* ---------- Sound (Web Audio) ---------- */
-  var soundOn = true, actx = null;
+  var UI = window.APPSYCH_UI || null, actx = null;
   function audio() {
     try {
       if (!actx) { var AC = window.AudioContext || window.webkitAudioContext; if (AC) actx = new AC(); }
@@ -319,7 +320,7 @@
     return actx;
   }
   function tone(freq, delay, dur, vol) {
-    if (!soundOn) return;
+    if (!UI || !UI.sound.on) return;
     var a = audio(); if (!a) return;
     var t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
     o.type = 'sine'; o.frequency.setValueAtTime(freq, t);
@@ -1112,28 +1113,9 @@
   $('tutLink').addEventListener('click', function () { setMode('tutorial'); say('Tutorial.'); $('tutTitle').focus({ preventScroll: true }); });
   $('modeTimed').addEventListener('click', function () { if (mode !== 'timed') { setMode('timed'); say('Timed mode.'); } });
 
-  /* ---------- Sound toggle (speaker icon) ---------- */
-  $('soundBtn').addEventListener('click', function () {
-    soundOn = !soundOn;
-    this.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-    this.title = soundOn ? 'Sound on' : 'Sound off';
-    say(soundOn ? 'Sound on.' : 'Sound off.');
-    if (soundOn) clickSound();
-  });
-
-  /* ---------- Settings (gear): light color and, for now, the layout ---------- */
-  function openSettings(open) {
-    $('settings').hidden = !open;
-    $('settingsBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) { var b = $('settings').querySelector('[aria-pressed="true"]'); if (b) b.focus(); }
-  }
-  $('settingsBtn').addEventListener('click', function () { openSettings($('settings').hidden); });
-  document.addEventListener('click', function (e) {
-    if (!$('settings').hidden && !e.target.closest('.settings-wrap')) openSettings(false);
-  });
-  $('settings').addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { openSettings(false); $('settingsBtn').focus(); }
-  });
+  /* ---------- Sound (the title bar's speaker, shared/ui.js) and settings ---------- */
+  // ui.js toggles the button and announces the change; play a click so the player hears it.
+  if (UI) UI.sound.onChange(function (on) { if (on) clickSound(); });
 
   // Light color: hand-tuned presets in style.css (body.glow-<name>); yellow is the default.
   var COLORS = ['yellow', 'green', 'blue', 'pink', 'purple'];
@@ -1145,20 +1127,6 @@
   swatchBtns.forEach(function (b) {
     b.addEventListener('click', function () { var c = b.getAttribute('data-color'); setLightColor(c); say('Light color: ' + c + '.'); });
   });
-
-  // Layout A (tabs under the title bar) or B (modes inside the bar). Temporary, for comparing;
-  // ?layout=a opens in A.
-  var layoutBtns = Array.prototype.slice.call(document.querySelectorAll('[data-layout]'));
-  function setLayout(l) {
-    l = l === 'a' ? 'a' : 'b';
-    document.body.classList.toggle('layout-a', l === 'a');
-    document.body.classList.toggle('layout-b', l === 'b');
-    layoutBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-layout') === l ? 'true' : 'false'); });
-  }
-  layoutBtns.forEach(function (b) {
-    b.addEventListener('click', function () { setLayout(b.getAttribute('data-layout')); say('Layout ' + b.getAttribute('data-layout').toUpperCase() + '.'); });
-  });
-  setLayout((params.get('layout') || '').toLowerCase());
 
   /* ---------- Debug tools (?dev) ---------- */
   var devMarks = [], devShow = false;

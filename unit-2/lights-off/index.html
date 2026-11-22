@@ -3,49 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lights Off</title>
+<title>Lights Off · AP Psych Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../shared/theme.css">
 <link rel="stylesheet" href="style.css">
+<script src="../../shared/data/topics.js" defer></script>
+<script src="../../shared/data/demos.js" defer></script>
+<script src="../../shared/ui.js" defer></script>
 <script src="script.js" defer></script>
 </head>
-<body class="layout-b">
-<header class="topbar">
+<body>
+<header class="topbar wide" data-demo="lights-off">
   <div class="topbar-inner">
-    <div class="brand">
-      <h1>Lights Off</h1>
-      <p class="tagline">Press a light to flip it and its neighbors. Turn every light off.</p>
-    </div>
+    <div class="brand"><h1>Lights Off</h1></div>
     <div class="modes" role="group" aria-label="Game mode">
       <button class="mode" type="button" id="modeTutorial" aria-pressed="false">Tutorial</button>
       <button class="mode" type="button" id="modePractice" aria-pressed="true">Practice</button>
       <button class="mode" type="button" id="modeTimed" aria-pressed="false">Timed<span class="mode-extra"> (90 s)</span></button>
     </div>
     <div class="tools">
-      <button class="icon-btn" type="button" id="soundBtn" aria-pressed="true" aria-label="Sound" title="Sound on">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M11 5 6 9H3v6h3l5 4z"/><path class="snd-on" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="snd-on" d="M18.5 5.5a9 9 0 0 1 0 13"/><path class="snd-off" d="m16 9 6 6"/><path class="snd-off" d="m22 9-6 6"/></svg>
-      </button>
-      <div class="settings-wrap">
-        <button class="icon-btn" type="button" id="settingsBtn" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-        </button>
-        <div class="settings card" id="settings" role="dialog" aria-label="Settings" hidden>
-          <h2>Settings</h2>
-          <p class="set-label" id="colorLabel">Light color</p>
-          <div class="swatches" role="group" aria-labelledby="colorLabel">
-            <button class="swatch" type="button" data-color="yellow" aria-pressed="true"><span class="dot dot-yellow" aria-hidden="true"></span>Yellow</button>
-            <button class="swatch" type="button" data-color="green" aria-pressed="false"><span class="dot dot-green" aria-hidden="true"></span>Green</button>
-            <button class="swatch" type="button" data-color="blue" aria-pressed="false"><span class="dot dot-blue" aria-hidden="true"></span>Blue</button>
-            <button class="swatch" type="button" data-color="pink" aria-pressed="false"><span class="dot dot-pink" aria-hidden="true"></span>Pink</button>
-            <button class="swatch" type="button" data-color="purple" aria-pressed="false"><span class="dot dot-purple" aria-hidden="true"></span>Purple</button>
-          </div>
-          <p class="set-label" id="layoutLabel">Layout (for testing)</p>
-          <div class="segmented" role="group" aria-labelledby="layoutLabel">
-            <button type="button" data-layout="a" aria-pressed="false">A: tabs</button>
-            <button type="button" data-layout="b" aria-pressed="true">B: bar</button>
-          </div>
+      <button class="icon-btn" type="button" data-ui="sound"></button>
+      <button class="icon-btn" type="button" data-ui="settings" aria-controls="settings"></button>
+      <div class="popover" id="settings" role="dialog" aria-label="Settings" hidden>
+        <h2>Settings</h2>
+        <p class="set-label" id="colorLabel">Light color</p>
+        <div class="swatches" role="group" aria-labelledby="colorLabel">
+          <button class="swatch" type="button" data-color="yellow" aria-pressed="true"><span class="dot dot-yellow" aria-hidden="true"></span>Yellow</button>
+          <button class="swatch" type="button" data-color="green" aria-pressed="false"><span class="dot dot-green" aria-hidden="true"></span>Green</button>
+          <button class="swatch" type="button" data-color="blue" aria-pressed="false"><span class="dot dot-blue" aria-hidden="true"></span>Blue</button>
+          <button class="swatch" type="button" data-color="pink" aria-pressed="false"><span class="dot dot-pink" aria-hidden="true"></span>Pink</button>
+          <button class="swatch" type="button" data-color="purple" aria-pressed="false"><span class="dot dot-purple" aria-hidden="true"></span>Purple</button>
         </div>
       </div>
     </div>
@@ -70,7 +59,7 @@
         <rect class="board-bg" x="0" y="0" width="500" height="500" rx="16"/>
       </svg>
       <p class="board-note" id="boardNote" aria-hidden="true" hidden></p>
-      <p class="hint board-hint"><span class="rules">Press a light to flip it and its up, down, left and right neighbors. Turn every light off. </span>Tap a light, or use the arrow keys and Space or Enter. Hovering or focusing a light outlines what will flip.</p>
+      <p class="hint board-hint">Press a light to flip it and its up, down, left and right neighbors. Turn every light off. Tap a light, or use the arrow keys and Space or Enter. Hovering or focusing a light outlines what will flip.</p>
       <div class="legend" aria-label="Legend">
         <span><svg viewBox="0 0 100 100" aria-hidden="true"><g class="on"><rect x="2" y="2" width="96" height="96" rx="16" class="tile lit"/><circle cx="50" cy="50" r="46" class="halo"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light on</span>
         <span><svg viewBox="0 0 100 100" aria-hidden="true"><g><rect x="2" y="2" width="96" height="96" rx="16" class="tile"/><circle cx="50" cy="50" r="28" class="bulb"/><ellipse cx="41" cy="39" rx="9" ry="6" class="shine"/></g></svg>Light off</span>
