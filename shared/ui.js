@@ -18,7 +18,9 @@
  * SITE BAR — the first thing in <body>. Write the empty placeholder; ui.js fills it.
  *   <nav class="sitebar wide" aria-label="Site"></nav>     ("wide" when <main> is wide)
  *   - Contents: a "Skip to activity" link (to <main>; shown only when focused), the home link
- *     (Ψ + site name), and on the right the light/dark switch (the course menu joins it later).
+ *     (Ψ + site name), and on the right the course menu and the light/dark switch.
+ *   - The course menu lists the courses marked offered in topics.js (every course with ?dev) and
+ *     is left out while only one is offered. It needs topics.js loaded before ui.js.
  *   - The home page marks its placeholder with data-home: no home link, "Skip to activities".
  *     data-skip="…" changes the skip link's words on any other page.
  *
@@ -39,8 +41,8 @@
  *     </div>
  *   </header>
  *   - data-interactive is the interactive's id in interactives.js. The ⓘ popover shows its
- *     description, howTo, and CED topic(s) and class unit(s). Without a matching entry there
- *     is no ⓘ button.
+ *     description, howTo, its class unit(s) in the chosen course, and (in AP only) its CED
+ *     topic(s). Without a matching entry there is no ⓘ button.
  *   - ui.js gives data-ui="sound", "settings" and "fullscreen" buttons their icon, label and title.
  *
  * SOUND — off on every page load.
@@ -56,10 +58,22 @@
  *                                       tab, the device or printing; redraw canvases here
  *   Printing always uses light (the page switches for the print and back afterward).
  *
+ * COURSE — Regular ("reg"), Dual Credit ("dc") or AP ("ap"); chosen in the site bar's menu.
+ *   A ?course= link (an offered course, or any course with ?dev) wins and is saved; then the
+ *   saved choice; then AP. An unknown or not-offered ?course= is ignored.
+ *   APPSYCH_UI.course.get()             the course id now
+ *   APPSYCH_UI.course.set("reg")        what the menu does: show it and save it (false if refused)
+ *   APPSYCH_UI.course.onChange(fn)      fn(id) after every change, including one from another tab;
+ *                                       re-render anything that depends on the course here
+ *   APPSYCH_UI.course.offered()         the courses in the menu: [{ id, name, … }] (topics.js)
+ *   APPSYCH_UI.course.focusMenu()       move focus to the site bar's menu (false if there is none)
+ *   Choosing a course in the menu also updates a ?course= already in the address.
+ *
  * SAVED SETTINGS — on this device only, in localStorage under "appsych.<key>", each value saved
  *   as { v: 1, data }. Every call is safe when storage is blocked (get returns the fallback).
  *   APPSYCH_UI.store.get(key, fallback), .set(key, value) (true if saved), .remove(key)
- *   Keys: "theme"; later "course", "topics", "coursePrompt", and "<interactive-id>.<name>".
+ *   Keys: "theme", "course", "topics" (the topic picker); later "coursePrompt" and
+ *   "<interactive-id>.<name>".
  *
  * FULL SCREEN — <button class="icon-btn" data-ui="fullscreen"> in the title bar's tools.
  *   Without data-target the whole page goes full screen (title bar kept, the --w-wide limit
@@ -201,6 +215,87 @@ window.APPSYCH_UI = (function () {
   window.addEventListener('beforeprint', function () { printing = true; applyTheme('light'); });
   window.addEventListener('afterprint', function () { printing = false; applyTheme(preferredTheme()); });
 
+  /* ---------- Course ---------- */
+  var T = window.APPSYCH_TOPICS || null;  // loaded before ui.js; without it the page acts as AP
+  var DEV = /[?&]dev(=|&|$)/.test(location.search);
+  var courseFns = [], courseMenus = [];
+  function offeredCourses() { return T ? T.offeredCourses(DEV) : []; }
+  function courseAllowed(id) {
+    return offeredCourses().some(function (c) { return c.id === id; });
+  }
+  function urlCourse() {
+    var m = /[?&]course=([^&#]*)/.exec(location.search);
+    return m ? decodeURIComponent(m[1]).trim() : null;
+  }
+  function savedCourse() { var c = store.get('course', null); return courseAllowed(c) ? c : null; }
+  var defaultCourse = T ? T.defaultCourse : 'ap';
+  var currentCourse = (function () {
+    var u = urlCourse();
+    if (u && courseAllowed(u)) { store.set('course', u); return u; }  // a link's course is saved
+    return savedCourse() || defaultCourse;
+  })();
+  function courseName(id) { var c = T && T.getCourse(id); return c ? c.name : id; }
+  function courseChanged() {
+    courseMenus.forEach(function (sel) { sel.value = currentCourse; });
+    renderInfos();
+    courseFns.forEach(function (fn) { fn(currentCourse); });
+  }
+  function showCourse(id) {
+    if (id === currentCourse) return;
+    currentCourse = id;
+    courseChanged();
+  }
+  var course = {
+    get: function () { return currentCourse; },
+    set: function (id) {
+      if (!courseAllowed(id)) return false;
+      store.set('course', id);
+      // A ?course= in the address would bring the old course back on a reload.
+      if (urlCourse() !== null) {
+        try {
+          history.replaceState(null, '', location.pathname +
+            location.search.replace(/([?&]course=)[^&#]*/, '$1' + encodeURIComponent(id)) + location.hash);
+        } catch (e) { /* some browsers block this on file:// pages */ }
+      }
+      showCourse(id);
+      return true;
+    },
+    onChange: function (fn) { courseFns.push(fn); },
+    offered: offeredCourses,
+    focusMenu: function () {
+      var sel = courseMenus.filter(function (m) { return m.offsetParent !== null; })[0];
+      if (!sel) return false;
+      sel.focus();
+      return true;
+    }
+  };
+  // The menu in another tab of this site (a ?course= link keeps this page's course)
+  window.addEventListener('storage', function (e) {
+    if (e.key !== null && e.key !== PREFIX + 'course') return;
+    var u = urlCourse();
+    if (u && courseAllowed(u)) return;
+    showCourse(savedCourse() || defaultCourse);
+  });
+  function buildCourseMenu() {
+    var list = offeredCourses();
+    if (list.length < 2) return null;  // nothing to choose yet
+    var label = el('label', { 'class': 'sb-course' }, '<span class="sb-course-label">Course</span>');
+    var sel = el('select', { 'class': 'sb-select' });
+    list.forEach(function (c) {
+      var o = el('option', { value: c.id });
+      o.textContent = c.name;
+      sel.appendChild(o);
+    });
+    sel.value = currentCourse;
+    sel.addEventListener('change', function () {
+      if (course.set(sel.value)) announce('Course: ' + courseName(sel.value) + '.');
+      else sel.value = currentCourse;
+    });
+    courseMenus.push(sel);
+    label.appendChild(sel);
+    return label;
+  }
+
   /* ---------- Site bar ---------- */
   function buildSitebar(nav) {
     if (nav.dataset.uiBuilt) return;
@@ -221,7 +316,8 @@ window.APPSYCH_UI = (function () {
         ICONS.psi.replace('<svg ', '<svg class="sb-psi" ') + '<span class="sb-name">AP Psych Lab</span>'));
     }
     var tools = el('div', { 'class': 'sb-tools' });
-    // (The course menu goes here, before the switch: Site Redesign step 4c.)
+    var menu = buildCourseMenu();
+    if (menu) tools.appendChild(menu);
     var btn = el('button', { 'class': 'icon-btn sb-theme', type: 'button' });
     btn.addEventListener('click', function () {
       var next = currentTheme() === 'dark' ? 'light' : 'dark';
@@ -404,23 +500,33 @@ window.APPSYCH_UI = (function () {
   });
 
   /* ---------- The ⓘ popover ---------- */
+  // Class unit(s) in the chosen course; CED topic(s) in AP only.
   function topicLines(item) {
-    var T = window.APPSYCH_TOPICS, lines = [];
+    var lines = [];
     if (item.review) return ['Review game: works with any unit. Choose topics in the game.'];
     if (!T || !item.ced || !item.ced.length) return lines;
-    var units = T.teachingUnits.filter(function (u) {
-      return u.groups.some(function (g) { return T.matchesCodes(item, g.codes); });
-    }).map(function (u) { return 'Unit ' + u.number + ': ' + u.name; });
+    var units = T.unitsOf(item, currentCourse).map(function (u) { return 'Unit ' + u.letter + ': ' + u.name; });
+    if (units.length) lines.push('Class ' + (units.length > 1 ? 'units: ' : 'unit: ') + units.join('; '));
+    else lines.push('Not part of a ' + courseName(currentCourse) + ' unit.');
+    if (currentCourse !== 'ap') return lines;  // the CED belongs to AP
     var topics = [];
     T.cedUnits.forEach(function (u) {
       u.topics.forEach(function (t) {
         if (T.matchesCodes(item, [t.code])) topics.push(t.code + ' ' + t.name);
       });
     });
-    if (units.length) lines.push('Class ' + (units.length > 1 ? 'units: ' : 'unit: ') + units.join('; '));
     if (topics.length) lines.push('CED ' + (topics.length > 1 ? 'topics: ' : 'topic: ') + topics.join('; '));
     return lines;
   }
+  var infos = [];  // [{ pop, item }], re-rendered when the course changes
+  function infoHtml(item) {
+    var html = '<p>' + esc(item.description) + '</p>';
+    if (item.howTo && item.howTo.length) {
+      html += '<h3>How to play</h3><ul>' + item.howTo.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>';
+    }
+    return html + topicLines(item).map(function (l) { return '<p class="info-topic">' + esc(l) + '</p>'; }).join('');
+  }
+  function renderInfos() { infos.forEach(function (i) { i.pop.innerHTML = infoHtml(i.item); }); }
   function buildInfo(bar, item, n) {
     var brand = bar.querySelector('.brand');
     if (!brand) return;
@@ -429,13 +535,8 @@ window.APPSYCH_UI = (function () {
       'class': 'icon-btn info', type: 'button', 'aria-controls': id,
       'aria-label': 'About ' + item.title, title: 'About this ' + (item.review ? 'game' : 'activity')
     }, ICONS.info);
-    var html = '<p>' + esc(item.description) + '</p>';
-    if (item.howTo && item.howTo.length) {
-      html += '<h3>How to play</h3><ul>' + item.howTo.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>';
-    }
-    var topics = topicLines(item);
-    if (topics.length) html += topics.map(function (l) { return '<p class="info-topic">' + esc(l) + '</p>'; }).join('');
-    var pop = el('div', { 'class': 'popover info-pop', id: id, role: 'dialog', 'aria-label': 'About ' + item.title, hidden: '' }, html);
+    var pop = el('div', { 'class': 'popover info-pop', id: id, role: 'dialog', 'aria-label': 'About ' + item.title, hidden: '' }, infoHtml(item));
+    infos.push({ pop: pop, item: item });
     brand.appendChild(btn);
     brand.appendChild(pop);
     wirePopoverButton(btn);
@@ -470,6 +571,7 @@ window.APPSYCH_UI = (function () {
     store: store,
     theme: theme,
     fullscreen: fullscreen,
+    course: course,
     interactive: null
   };
   function init() {

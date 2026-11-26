@@ -1,5 +1,6 @@
 /* "Terms used in this question" definitions for answered questions: window.APPSYCH_TERM_HELP
- * Needs ../../shared/data/terms.js (window.APPSYCH_TERMS) loaded first.
+ * Needs ../../shared/data/topics.js and terms.js loaded first (terms are looked up with
+ * APPSYCH_TOPICS.getTerm, so retired terms are left out).
  *
  * APPSYCH_TERM_HELP.mount(container, q, shown)
  *   q:     the question
@@ -16,13 +17,9 @@
  */
 window.APPSYCH_TERM_HELP = (function () {
   "use strict";
-  var byId = null;
   function lookup(id) {
-    if (!byId) {
-      byId = {};
-      (window.APPSYCH_TERMS || []).forEach(function (t) { byId[t.id] = t; });
-    }
-    return byId[id] || null;
+    var T = window.APPSYCH_TOPICS;
+    return T ? T.getTerm(id) : null;
   }
   function make(tag, cls, text) {
     var e = document.createElement(tag);

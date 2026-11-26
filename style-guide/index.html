@@ -271,11 +271,24 @@
     <p class="hint">The dark band at the top of this page. Pages write an empty <code>&lt;nav class="sitebar" aria-label="Site"&gt;&lt;/nav&gt;</code>; ui.js fills it. Its contents line up with <code>main</code>.</p>
     <ul class="notes">
       <li>Left: the home link (Ψ + the site name). The home page's placeholder has <code>data-home</code>, so it has no home link.</li>
-      <li>Right: the light/dark switch (the course menu joins it later). Its label says what it will do: "Switch to dark mode" (moon) or "Switch to light mode" (sun).</li>
+      <li>Right: the course menu, then the light/dark switch. The switch's label says what it will do: "Switch to dark mode" (moon) or "Switch to light mode" (sun).</li>
+      <li>Course menu: a labeled <code>&lt;select&gt;</code> (Regular, Dual Credit, AP) listing the courses marked <code>offered</code> in <code>topics.js</code>, or every course with <code>?dev</code>. It's left out while only one course is offered. "Course" shows from 760px and is read to screen readers only below that. The choice is saved on the device; a <code>?course=</code> link wins and is saved too. Pages read it with <code>APPSYCH_UI.course</code>.</li>
       <li>Dark mode follows the device until the switch is used; the choice is then saved on the device and carries to every page and open tab. Switching to the device's own mode goes back to following the device.</li>
       <li>First Tab press: "Skip to activity", a link to <code>main</code> that shows only when focused.</li>
       <li>Hidden when printing; printing always uses the light colors.</li>
     </ul>
+
+    <p class="hint">Example with all three courses offered (it doesn't change the course; the real menu is in this page's site bar when 2+ courses are offered, or with <code>?dev</code>):</p>
+    <div class="sitebar sg-sitebar-example">
+      <div class="sitebar-inner">
+        <span class="sb-home"><span data-icon="psi" class="sb-psi"></span><span class="sb-name">AP Psych Lab</span></span>
+        <div class="sb-tools">
+          <label class="sb-course"><span class="sb-course-label">Course</span>
+            <select class="sb-select"><option>Regular</option><option>Dual Credit</option><option selected>AP</option></select></label>
+          <span class="icon-btn" data-icon="moon" aria-hidden="true"></span>
+        </div>
+      </div>
+    </div>
 
     <h3>Title bar</h3>
     <p class="hint">The band spans the window; its contents line up with <code>main</code>. ui.js adds the ⓘ button (its popover comes from <code>interactives.js</code>) and the sound, settings and full-screen icons. Below 760px the modes take their own row. These examples sit inside this page's column; the first one's full-screen button works (whole page).</p>

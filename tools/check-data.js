@@ -55,6 +55,12 @@ T.courses.forEach(function (c) {
   c.units.forEach(function (u) { if (!T.getUnit(u)) err("topics: course " + c.id + " names unknown unit " + u); });
   dupes(c.units).forEach(function (u) { err("topics: course " + c.id + " lists unit " + u + " twice"); });
 });
+if (T.getCourse(T.defaultCourse) && !T.getCourse(T.defaultCourse).offered) err("topics: defaultCourse " + T.defaultCourse + " is not offered");
+T.courses.forEach(function (c) {
+  if (typeof c.offered !== "boolean") err("topics: course " + c.id + ": offered must be true or false");
+  else if (c.offered && !T.courseHasTerms(c.id)) err("topics: course " + c.id + " is offered (in the course menu) but has no terms");
+  else if (!c.offered && T.courseHasTerms(c.id)) warn("Courses with terms that aren't offered in the course menu", c.id + " (set offered: true in topics.js)");
+});
 T.groups.forEach(function (g) {
   var used = T.courses.filter(function (c) { return T.courseHasGroup(c.id, g.id); });
   if (!used.length) warn("Groups in no course", g.id);

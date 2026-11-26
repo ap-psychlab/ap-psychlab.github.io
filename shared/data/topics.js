@@ -6,9 +6,13 @@
  * units          The unit catalog: { id, name, groups: [group ids, in display order] }. A unit with
  *                the same topics has the same id and name in every course; a different set of
  *                groups is a different unit (a new id). Unit ids are stable (home-page #unit links).
- * courses        { id, name, units: [unit ids, in the course's order] }, in menu order. A unit's
- *                letter (A, B, …) is its position in its course. Ids: "reg" Regular,
+ * courses        { id, name, offered, units: [unit ids, in the course's order] }, in menu order. A
+ *                unit's letter (A, B, …) is its position in its course. Ids: "reg" Regular,
  *                "dc" Dual Credit, "ap" AP. defaultCourse is "ap".
+ *                offered: true puts the course in the site bar's course menu. Set it once the
+ *                course has terms (tools/check-data.js reports an offered course with no terms,
+ *                and a course with terms that isn't offered). It's a flag here, not worked out
+ *                from terms.js, so pages that don't load the terms bank can still build the menu.
  * teachingUnits  Compatibility view of AP, for pages not yet on the course helpers:
  *                [{ number: "A" (the letter), id, name, groups: [{ id, name, codes }] }].
  * cedUnits       The CED's units and topics. Unit 0 (Science Practices) uses our own codes
@@ -124,11 +128,11 @@ window.APPSYCH_TOPICS = (function () {
   ];
 
   var courses = [
-    { id: "reg", name: "Regular", units: ["personality", "perspectives-methods", "development", "neuroscience",
+    { id: "reg", name: "Regular", offered: false, units: ["personality", "perspectives-methods", "development", "neuroscience",
       "sensation-perception", "cognition", "learning", "social", "clinical", "mes"] },
-    { id: "dc", name: "Dual Credit", units: ["perspectives-methods", "neuroscience", "learning-cognition",
+    { id: "dc", name: "Dual Credit", offered: false, units: ["perspectives-methods", "neuroscience", "learning-cognition",
       "intelligence-development", "personality-social", "clinical"] },
-    { id: "ap", name: "AP", units: ["perspectives-methods", "neuroscience", "sensation-perception", "cognition",
+    { id: "ap", name: "AP", offered: true, units: ["perspectives-methods", "neuroscience", "sensation-perception", "cognition",
       "learning", "development", "social-personality", "mes", "clinical"] }
   ];
   var defaultCourse = "ap";
@@ -204,6 +208,10 @@ window.APPSYCH_TOPICS = (function () {
   // The course object for an id, or AP when the id is missing or unknown.
   function course(id) { return courseById[id] || courseById[defaultCourse]; }
   function allGroups() { return groups.slice(); }
+  // The courses in the course menu (offered: true), in menu order; with all, every course.
+  function offeredCourses(all) {
+    return courses.filter(function (c) { return all || c.offered; });
+  }
 
   function letter(i) { return String.fromCharCode(65 + i); }
 
@@ -394,6 +402,7 @@ window.APPSYCH_TOPICS = (function () {
     getCourse: getCourse,
     course: course,
     allGroups: allGroups,
+    offeredCourses: offeredCourses,
     unitsFor: unitsFor,
     unitIn: unitIn,
     groupIdsFor: groupIdsFor,

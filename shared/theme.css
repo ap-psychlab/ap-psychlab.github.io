@@ -293,7 +293,8 @@ a { color: var(--link); }
 /* ---------- Site bar ---------- */
 /* The first thing in <body> on every page: <nav class="sitebar" aria-label="Site"></nav>
    (add class "wide" when <main> is wide). shared/ui.js fills it: a skip link, the home link
-   (left out on the home page, whose placeholder has data-home), and on the right the light/dark
+   (left out on the home page, whose placeholder has data-home), and on the right the course menu
+   (label.sb-course > select.sb-select; only while 2+ courses are offered) and the light/dark
    switch. The empty placeholder already has its height and color, so nothing shifts. */
 .sitebar {
   min-height: var(--h-sitebar);
@@ -324,6 +325,23 @@ a { color: var(--link); }
 .sb-psi { width: 17px; height: 20px; flex: none; color: var(--psi); }
 .sb-name { font: 600 18px/1 var(--font-site); white-space: nowrap; }
 .sb-tools { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+/* Course menu: "Course" shows from 760px; below that it is read to screen readers only */
+.sb-course { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--sitebar-text); }
+.sb-select {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--sitebar-line);
+  border-radius: 6px;
+  background: var(--sitebar);
+  color: var(--sitebar-text);
+  font: inherit;
+  cursor: pointer;
+}
+.sb-select:hover { background: var(--sitebar-line); }
+.sb-select option { background: var(--sitebar); color: var(--sitebar-text); }
+@media (max-width: 759px) {
+  .sb-course-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 .sitebar .icon-btn { width: 40px; height: 40px; border-color: var(--sitebar-line); color: var(--sitebar-text); }
 .sitebar .icon-btn:hover { background: var(--sitebar-line); }
 .sitebar :focus-visible { outline-color: var(--sitebar-text); }

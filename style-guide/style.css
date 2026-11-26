@@ -154,3 +154,7 @@ code {
 }
 .sg-stage:fullscreen { display: flex; flex-direction: column; justify-content: center; padding: 48px; border: 0; border-radius: 0; }
 .sg-stage:fullscreen .sg-stage-art { height: 60vh; }
+/* The course menu example (a plain copy of the site bar's markup; ui.js doesn't fill it) */
+.sg-sitebar-example { border-radius: var(--radius-card); margin-bottom: 24px; }
+.sg-sitebar-example .sb-psi svg { width: 17px; height: 20px; display: block; }
+.sg-sitebar-example .icon-btn { display: inline-flex; align-items: center; justify-content: center; }
