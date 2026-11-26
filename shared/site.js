@@ -3,7 +3,7 @@
  * course chosen in the site bar (APPSYCH_UI.course); everything re-renders when it changes.
  *
  * Views: "All activities" (every activity, each tagged with its unit), one unit (its activities
- * and "Review this unit"), or "Review games". The chosen view is the address hash (#cognition,
+ * and "Review this unit"), or "Review activities". The chosen view is the address hash (#cognition,
  * #review; none for All), so a link can open a unit. A hash the course doesn't have shows All.
  * An activity shows when it is listed (?dev: unlisted too, with an "Unlisted" badge) and is in
  * the chosen course (APPSYCH_TOPICS.interactiveInCourse), under each unit it matches (unitsOf).
@@ -78,7 +78,7 @@
       .concat(model.units.map(function (u) {
         return { id: u.id, letter: u.letter, name: u.name, count: u.items.length };
       }))
-      .concat([{ id: 'review', name: 'Review games', count: model.review.length, icon: ICON.review }]);
+      .concat([{ id: 'review', name: 'Review activities', count: model.review.length, icon: ICON.review }]);
   }
   function renderNav() {
     nav.innerHTML = views().map(function (v) {
@@ -126,23 +126,23 @@
     if (!games.length) return '';
     var q = '?groups=' + u.groups.map(function (g) { return g.id; }).join(',');
     return '<section class="review-row" aria-labelledby="reviewRowTitle"><h3 id="reviewRowTitle">Review this unit</h3>' +
-      '<p>These review games open with this unit’s topics already chosen.</p><ul class="review-links">' +
+      '<p>These review activities open with this unit’s topics already chosen.</p><ul class="review-links">' +
       games.map(function (x) { return '<li><a href="' + esc(href(x.it, q)) + '">' + esc(x.g.label) + '</a></li>'; }).join('') +
       '</ul></section>';
   }
   function viewHtml(id) {
     if (id === 'all') {
       return head(null, 'All activities', plural(model.all.length) +
-        '. Choose a unit to see just its activities and the review games for its topics.') + cards(model.all, true);
+        '. Choose a unit to see just its activities and the review activities for its topics.') + cards(model.all, true);
     }
     if (id === 'review') {
-      return head('Any unit · ' + plural(model.review.length), 'Review games',
-        'Each game lets you choose the topics to practice.') + cards(model.review, false);
+      return head('Any unit · ' + plural(model.review.length), 'Review activities',
+        'Each one lets you choose the topics to practice.') + cards(model.review, false);
     }
     var u = model.units.filter(function (x) { return x.id === id; })[0];
     var body = u.items.length ? cards(u.items, false)
       : '<div class="empty-note"><p>No activities for this unit yet.</p>' +
-        '<p>The review games below already work with its topics.</p></div>';
+        '<p>The review activities below already work with its topics.</p></div>';
     return head('Unit ' + u.letter + ' · ' + plural(u.items.length), u.name,
       'Topics: ' + u.groups.map(function (g) { return g.name; }).join(' · ')) + body + reviewRow(u);
   }
@@ -166,7 +166,7 @@
   }
   function describe(id) {
     if (id === 'all') return 'All activities: ' + plural(model.all.length) + '.';
-    if (id === 'review') return 'Review games: ' + plural(model.review.length) + '.';
+    if (id === 'review') return 'Review activities: ' + plural(model.review.length) + '.';
     var u = T.unitIn(model.course, id);
     var n = model.units.filter(function (x) { return x.id === id; })[0].items.length;
     return 'Unit ' + u.letter + ', ' + u.name + ': ' + plural(n) + '.';
