@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Style Guide · theme.css</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<title>Style Guide · AP Psych Lab</title>
+<script src="../shared/theme-init.js"></script>
+<link rel="icon" href="../shared/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../shared/apple-touch-icon.png">
 <link rel="stylesheet" href="../shared/theme.css">
 <link rel="stylesheet" href="style.css">
 <script src="../shared/data/topics.js" defer></script>
@@ -15,25 +15,27 @@
 <script src="script.js" defer></script>
 </head>
 <body>
+<nav class="sitebar" aria-label="Site" data-skip="Skip to the style guide"></nav>
 <main>
   <h1>Style Guide</h1>
-  <p class="hint">Everything on this page is drawn by <code>shared/theme.css</code>. Labels in <code>code</code> are the token or class name to use in an interactive. Press Tab to see focus outlines.</p>
+  <p class="hint">Everything on this page is drawn by <code>shared/theme.css</code>. Labels in <code>code</code> are the token or class name to use in an interactive. Use the switch in the site bar to see the page in light or dark mode. Press Tab to see focus outlines.</p>
 
   <nav class="toc" aria-label="Sections">
     <a href="#colors">Colors</a>
+    <a href="#pairs">Color pairs</a>
     <a href="#type">Typography</a>
     <a href="#buttons">Buttons</a>
     <a href="#cards">Cards</a>
     <a href="#stats">Stat tiles</a>
     <a href="#layout">Layout &amp; spacing</a>
-    <a href="#ui">Title bar &amp; controls</a>
+    <a href="#ui">Site bar, title bar &amp; controls</a>
     <a href="#a11y">Accessibility</a>
   </nav>
 
   <!-- ============ COLORS ============ -->
   <section id="colors" class="sg">
     <h2>Colors</h2>
-    <p class="hint">Hex values are read live from <code>theme.css</code>. Use them in CSS as <code>var(--token)</code>.</p>
+    <p class="hint">Every token has a light and a dark value; each swatch shows both (light on the left), read live from <code>theme.css</code>. Use them in CSS as <code>var(--token)</code>.</p>
 
     <h3>Core palette</h3>
     <div class="swatches" data-tokens="
@@ -60,21 +62,68 @@
       honey|Highlights, warm emphasis
       teal|Extra category"></div>
 
+    <h3>Site bar, banner and placeholders</h3>
+    <div class="swatches" data-tokens="
+      sitebar|Site bar
+      sitebar-text|Site bar text
+      psi|The Ψ (site bar, banner, favicon)
+      banner|Home banner
+      banner-text|Banner title
+      banner-sub|Banner subheading
+      net-a|Banner network nodes
+      net-b|Banner network nodes
+      net-c|Banner network nodes
+      ph1|Card image placeholder
+      ph2|Card image placeholder stripes
+      ph-icon|Placeholder icon"></div>
+    <p class="hint"><code>--sitebar-line</code> (borders in the site bar) and <code>--net-line</code> (network lines) are see-through white.</p>
+
     <h3>Text on fills</h3>
-    <p class="hint">Small text on light accent fills uses <code>--heading</code>. Accents are never used as small text color on light backgrounds.</p>
-    <div class="badges">
-      <span class="badge" data-fill="accent">--accent</span>
-      <span class="badge" data-fill="sage">--sage ✓ Correct</span>
-      <span class="badge" data-fill="btn2">--btn2</span>
-      <span class="badge" data-fill="honey">--honey</span>
-      <span class="badge" data-fill="blue">--blue</span>
-      <span class="badge on-dark" data-fill="error">--error ✗ Wrong (text: --bg)</span>
+    <p class="hint">Small text on an accent fill uses <code>--on-accent</code> (dark in both modes, since the accents are light fills in dark mode). Text on <code>--btn</code> and <code>--error</code> is <code>--bg</code>; on <code>--btn2</code> it's <code>--heading</code>. Accents are never small text themselves. Both modes:</p>
+    <div class="modes-pair">
+      <div class="mode-pane" data-theme="light">
+        <span class="pane-label">Light</span>
+        <div class="badges">
+          <span class="badge" data-fill="accent">--accent</span>
+          <span class="badge" data-fill="sage">--sage ✓ Correct</span>
+          <span class="badge" data-fill="honey">--honey</span>
+          <span class="badge" data-fill="blue">--blue</span>
+          <span class="badge on-dark" data-fill="btn">--btn</span>
+          <span class="badge on-btn2" data-fill="btn2">--btn2</span>
+          <span class="badge on-dark" data-fill="error">--error ✗ Wrong</span>
+        </div>
+      </div>
+      <div class="mode-pane" data-theme="dark">
+        <span class="pane-label">Dark</span>
+        <div class="badges">
+          <span class="badge" data-fill="accent">--accent</span>
+          <span class="badge" data-fill="sage">--sage ✓ Correct</span>
+          <span class="badge" data-fill="honey">--honey</span>
+          <span class="badge" data-fill="blue">--blue</span>
+          <span class="badge on-dark" data-fill="btn">--btn</span>
+          <span class="badge on-btn2" data-fill="btn2">--btn2</span>
+          <span class="badge on-dark" data-fill="error">--error ✗ Wrong</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COLOR PAIRS ============ -->
+  <section id="pairs" class="sg">
+    <h2>Color pairs</h2>
+    <p class="hint">Contrast of every text and fill pair the site uses, worked out live from the tokens in both modes. Small text needs 4.5:1; borders, icons and other graphics need 3:1.</p>
+    <div class="table-wrap">
+      <table class="pairs" id="pairsTable">
+        <thead><tr><th scope="col">Pair</th><th scope="col">Light</th><th scope="col">Dark</th><th scope="col">Needs</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
   </section>
 
   <!-- ============ TYPOGRAPHY ============ -->
   <section id="type" class="sg">
     <h2>Typography</h2>
+    <p class="hint">The fonts are served from <code>shared/fonts/</code> and set up in <code>theme.css</code>, so pages load nothing from outside the site. If a font fails, the fallback fonts in <code>--font-heading</code> and <code>--font-body</code> take over.</p>
     <div class="specimens">
       <div class="spec">
         <h1>Heading 1</h1>
@@ -103,6 +152,10 @@
       <div class="spec">
         <p class="body-sample">A <a href="#type">sample link</a> in a sentence.</p>
         <code>a</code><span class="meta">--link</span>
+      </div>
+      <div class="spec">
+        <p class="site-name-sample">AP Psych Lab</p>
+        <code>--font-site</code><span class="meta">Fraunces 600 · the site name only (site bar and home banner); the file has only these letters</span>
       </div>
     </div>
   </section>
@@ -175,8 +228,9 @@
   <section id="layout" class="sg">
     <h2>Layout &amp; spacing</h2>
     <ul class="notes">
-      <li><code>main</code>: single centered column, max-width 900px, padding 16px top, 20px sides, 24px bottom.</li>
-      <li><code>main.wide</code>: max-width 1400px, for pages with side-by-side columns. Use it with <code>.split</code> (or an interactive's own grid), not for plain text pages.</li>
+      <li><code>main</code>: single centered column, max-width <code>--w-column</code> (900px), padding 16px top, 20px sides, 24px bottom.</li>
+      <li><code>main.wide</code>: max-width <code>--w-wide</code> (1400px), for pages with side-by-side columns. Use it with <code>.split</code> (or an interactive's own grid), not for plain text pages.</li>
+      <li>The site bar and title bar read the same two variables, so they always line up with <code>main</code>.</li>
       <li>Spacing follows an 8px grid. Bars below show the common steps.</li>
       <li>Headings have 24px above and 8px below. A heading that's the first thing in its container (page, card, section) has no space above.</li>
     </ul>
@@ -202,25 +256,36 @@
 
   <!-- ============ TITLE BAR & CONTROLS ============ -->
   <section id="ui" class="sg">
-    <h2>Title bar &amp; controls</h2>
-    <p class="hint">Drawn by <code>shared/theme.css</code> and wired by <code>shared/ui.js</code> (markup and options are at the top of that file). Every interactive page starts with the title bar.</p>
+    <h2>Site bar, title bar &amp; controls</h2>
+    <p class="hint">Drawn by <code>shared/theme.css</code> and wired by <code>shared/ui.js</code> (markup, the <code>&lt;head&gt;</code> order and options are at the top of that file). Every page starts with the site bar; every interactive page has the title bar below it.</p>
 
     <h3>Page templates</h3>
     <ul class="notes">
-      <li><strong>Column</strong>: <code>&lt;header class="topbar"&gt;</code> + <code>&lt;main&gt;</code> (900px). Reading-heavy pages, quizzes, small interactives.</li>
-      <li><strong>Split</strong>: <code>&lt;header class="topbar wide"&gt;</code> + <code>&lt;main class="wide"&gt;</code> with <code>.split</code> (1400px; 2/3 play area, 1/3 side panel). Below 1000px the panel stacks, so text needed while playing also goes next to the play area.</li>
-      <li><strong>Stage</strong>: <code>&lt;header class="topbar wide"&gt;</code> + <code>&lt;main class="wide"&gt;</code> with one area (1400px). Extras open in a modal.</li>
-      <li>Load order: theme.css, style.css, then <code>shared/data/topics.js</code>, <code>shared/data/interactives.js</code>, <code>shared/ui.js</code>, script.js (all <code>defer</code>).</li>
+      <li><strong>Column</strong>: <code>&lt;nav class="sitebar"&gt;</code> + <code>&lt;header class="topbar"&gt;</code> + <code>&lt;main&gt;</code> (900px). Reading-heavy pages, quizzes, small interactives.</li>
+      <li><strong>Split</strong>: <code>&lt;nav class="sitebar wide"&gt;</code> + <code>&lt;header class="topbar wide"&gt;</code> + <code>&lt;main class="wide"&gt;</code> with <code>.split</code> (1400px; 2/3 play area, 1/3 side panel). Below 1000px the panel stacks, so text needed while playing also goes next to the play area.</li>
+      <li><strong>Stage</strong>: the same as Split, with one area (1400px). Extras open in a modal.</li>
+      <li><code>&lt;head&gt;</code>: <code>shared/theme-init.js</code> (not deferred, before the CSS), the favicon links, theme.css, style.css, then <code>shared/data/topics.js</code>, <code>shared/data/interactives.js</code>, <code>shared/ui.js</code>, script.js (all <code>defer</code>). No font links.</li>
+    </ul>
+
+    <h3>Site bar</h3>
+    <p class="hint">The dark band at the top of this page. Pages write an empty <code>&lt;nav class="sitebar" aria-label="Site"&gt;&lt;/nav&gt;</code>; ui.js fills it. Its contents line up with <code>main</code>.</p>
+    <ul class="notes">
+      <li>Left: the home link (Ψ + the site name). The home page's placeholder has <code>data-home</code>, so it has no home link.</li>
+      <li>Right: the light/dark switch (the course menu joins it later). Its label says what it will do: "Switch to dark mode" (moon) or "Switch to light mode" (sun).</li>
+      <li>Dark mode follows the device until the switch is used; the choice is then saved on the device and carries to every page and open tab. Switching to the device's own mode goes back to following the device.</li>
+      <li>First Tab press: "Skip to activity", a link to <code>main</code> that shows only when focused.</li>
+      <li>Hidden when printing; printing always uses the light colors.</li>
     </ul>
 
     <h3>Title bar</h3>
-    <p class="hint">The band spans the window; its contents line up with <code>main</code>. ui.js adds the ⓘ button (its popover comes from <code>interactives.js</code>) and the sound and settings icons. Below 760px the modes take their own row. These examples sit inside this page's column.</p>
+    <p class="hint">The band spans the window; its contents line up with <code>main</code>. ui.js adds the ⓘ button (its popover comes from <code>interactives.js</code>) and the sound, settings and full-screen icons. Below 760px the modes take their own row. These examples sit inside this page's column; the first one's full-screen button works (whole page).</p>
     <div class="sg-bars">
       <header class="topbar" data-interactive="memory-span">
         <div class="topbar-inner">
           <div class="brand"><div class="title">Memory Span Test</div></div>
           <div class="tools">
             <button class="icon-btn" type="button" data-ui="sound"></button>
+            <button class="icon-btn" type="button" data-ui="fullscreen"></button>
           </div>
         </div>
       </header>
@@ -248,16 +313,40 @@
       </header>
     </div>
     <ul class="notes">
-      <li>Left: the page's <code>h1</code> and ⓘ (description, how to play, class unit and CED topic, All demos). Center: <code>.modes</code> with <code>.mode</code> buttons (<code>aria-pressed</code>), only for demos with 2+ modes. Right: <code>data-ui="sound"</code>, then <code>data-ui="settings"</code>, each only if used.</li>
+      <li>Left: the page's <code>h1</code> and ⓘ (description, how to play, class unit and CED topic). Center: <code>.modes</code> with <code>.mode</code> buttons (<code>aria-pressed</code>), only for interactives with 2+ modes. Right: <code>data-ui="sound"</code>, then <code>data-ui="settings"</code>, then <code>data-ui="fullscreen"</code>, each only if used.</li>
       <li>Sound starts off on every page load. Scripts check <code>APPSYCH_UI.sound.on</code>.</li>
       <li>Popovers close with Escape (focus returns to the button) or a click outside.</li>
     </ul>
+
+    <h3>Full screen</h3>
+    <p class="hint">Only Stage and Column activities get it. Two kinds, chosen by the activity:</p>
+    <ul class="notes">
+      <li><strong>Whole page</strong>: <code>&lt;button class="icon-btn" data-ui="fullscreen"&gt;</code>. The site bar and title bar stay (modes, sound, settings and ⓘ still work) and the 1400px limit is lifted. For projector games. Try it on the Memory Span example above.</li>
+      <li><strong>The activity's card</strong>: add <code>data-target="&lt;id&gt;"</code>. Only that element fills the screen, on <code>--bg</code>, with an exit button in its corner; the activity's own <code>:fullscreen</code> CSS decides how it grows. Modals still show; title-bar popovers don't. Try it below.</li>
+      <li>Escape exits both; the button's label and icon follow. Hidden where the browser can't do it (iPhone Safari). <code>APPSYCH_UI.fullscreen.onChange(fn)</code> lets a canvas resize.</li>
+    </ul>
+    <div class="sg-bars">
+      <header class="topbar" data-interactive="sky-climb">
+        <div class="topbar-inner">
+          <div class="brand"><div class="title">Sky Climb</div></div>
+          <div class="tools">
+            <button class="icon-btn" type="button" data-ui="fullscreen" data-target="sgStage"></button>
+          </div>
+        </div>
+      </header>
+    </div>
+    <div class="card sg-stage" id="sgStage">
+      <p class="sg-stage-art" aria-hidden="true"></p>
+      <p><strong>Play area</strong> (<code>id="sgStage"</code>). In full screen it grows to fill the screen.</p>
+      <div class="row" style="margin-bottom:0"><button class="btn ghost" type="button" data-modal="sgModal">Open a modal</button></div>
+    </div>
 
     <h3>Icon buttons</h3>
     <div class="row" style="justify-content:flex-start">
       <div class="labeled"><button class="icon-btn" type="button" aria-label="Restart" title="Restart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button><code>restart</code></div>
       <div class="labeled"><button class="icon-btn" type="button" data-ui="sound"></button><code>data-ui="sound"</code></div>
       <div class="labeled"><button class="icon-btn" type="button" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button><code>close</code></div>
+      <div class="labeled"><button class="icon-btn" type="button" aria-label="Full screen (example)" title="Full screen" data-icon="fullscreen"></button><code>fullscreen</code></div>
     </div>
     <p class="hint"><code>.icon-btn</code>: 44px square with an <code>aria-label</code> and <code>title</code>. Icons are in <code>APPSYCH_UI.icons</code>. Restart (↺) sits next to the stats it resets.</p>
 
@@ -293,7 +382,8 @@
       <div class="labeled"><button class="btn ghost" id="focusDemo">Focus example</button><code>:focus-visible</code></div>
     </div>
     <ul class="notes">
-      <li>Focus outline: 3px <code>--heading</code>, 3px offset. Shows on keyboard focus for buttons, links, and form fields.</li>
+      <li>Focus outline: 3px <code>--heading</code>, 3px offset (<code>--sitebar-text</code> in the site bar). Shows on keyboard focus for buttons, links, and form fields.</li>
+      <li>The first Tab on every page reaches "Skip to activity", which jumps past the site bar and title bar to <code>main</code>.</li>
       <li><code>hidden</code> attribute always hides an element, even one with its own <code>display</code> setting.</li>
       <li>When a device has "reduce motion" on, button transitions and press-shrink are turned off.</li>
       <li>Don't rely on color alone: pair colors with a label, icon, or pattern.</li>

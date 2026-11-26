@@ -9,6 +9,9 @@
   --bulb-off-hi: #6A584B;
   --bulb-off-lo: #241A15;
   --bulb-rim: #7A6555;
+  /* art palette: light marks on the board (shine, "will flip" outline, focus ring), the same in
+     both modes because the board stays dark */
+  --board-light: #FAF6F0;
   /* art palette: lit bulb presets (core, mid, edge, halo, lit tile). Yellow is the default. */
   --preset-yellow-core: #FFFCE8;
   --preset-yellow-mid: #FFD84D;
@@ -121,13 +124,13 @@ body.glow-purple { --glow-core: var(--preset-purple-core); --glow-mid: var(--pre
 .tile.lit { fill: var(--tile-lit); }
 .halo { fill: url(#gHalo); opacity: 0; transition: opacity .2s; pointer-events: none; }
 .bulb { fill: url(#gOff); stroke: var(--bulb-rim); stroke-width: 2; }
-.shine { fill: var(--bg); opacity: .22; pointer-events: none; }
+.shine { fill: var(--board-light); opacity: .22; pointer-events: none; }
 .on .halo { opacity: 1; }
 .on .bulb { fill: url(#gOn); stroke: var(--glow-edge); }
 .on .shine { opacity: .85; }
 
 /* "Will flip" preview: a thin, faint outline only */
-.will-ring { fill: none; stroke: var(--bg); stroke-opacity: 0; stroke-width: 3; pointer-events: none; transition: stroke-opacity .12s; }
+.will-ring { fill: none; stroke: var(--board-light); stroke-opacity: 0; stroke-width: 3; pointer-events: none; transition: stroke-opacity .12s; }
 .will-ring.will { stroke-opacity: .5; }
 .legend .will-ring { stroke-opacity: .6; stroke-width: 8; }
 /* Algorithm step (guided mode): an inset honey ring on a dark casing, pulsing, with an arrow
@@ -144,7 +147,7 @@ body.glow-purple { --glow-core: var(--preset-purple-core); --glow-mid: var(--pre
 /* The bottom-row light being fixed: a dashed honey ring that doesn't pulse */
 .guide-src { fill: none; stroke: var(--honey); stroke-width: 4; stroke-dasharray: 10 7; }
 /* Keyboard focus: a solid light ring on the focused tile */
-.cell:focus-visible .tile { stroke: var(--bg); stroke-width: 6; }
+.cell:focus-visible .tile { stroke: var(--board-light); stroke-width: 6; }
 
 /* ---------- Legend ---------- */
 .legend {
@@ -244,7 +247,7 @@ body.glow-purple { --glow-core: var(--preset-purple-core); --glow-mid: var(--pre
 .strategy th { color: var(--heading); }
 
 .dev-bar { justify-content: flex-start; }
-.dev-mark { fill: var(--sage); stroke: var(--bg); stroke-width: 2; display: none; pointer-events: none; }
+.dev-mark { fill: var(--sage); stroke: var(--board-light); stroke-width: 2; display: none; pointer-events: none; }
 .dev-mark.show { display: inline; }
 
 

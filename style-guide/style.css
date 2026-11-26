@@ -40,10 +40,11 @@ code {
   border-radius: 999px;
   font-weight: 700;
   font-size: .9rem;
-  color: var(--heading);
+  color: var(--on-accent);
   background: var(--accent);
 }
 .badge.on-dark { color: var(--bg); }
+.badge[data-fill="btn"]   { background: var(--btn); }
 .badge[data-fill="sage"]  { background: var(--sage); }
 .badge[data-fill="btn2"]  { background: var(--btn2); }
 .badge[data-fill="honey"] { background: var(--honey); }
@@ -97,3 +98,59 @@ code {
 .sg-bars { display: grid; gap: 16px; margin-bottom: 16px; }
 .sg-bars .topbar { border: 1px solid var(--border); border-radius: var(--radius-card); }
 .sg-seg { max-width: 360px; }
+
+/* ---------- Both modes side by side ---------- */
+/* A container with data-theme="light" or "dark" gets that mode's tokens (theme.css). */
+.modes-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px; }
+.mode-pane {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 12px;
+}
+.pane-label { display: block; margin-bottom: 8px; font-size: .85rem; font-weight: 700; color: var(--muted); }
+.badge.on-btn2 { color: var(--heading); }
+
+/* Swatch chips: light value on the left, dark on the right */
+.swatch .chip { display: grid; grid-template-columns: 1fr 1fr; }
+.swatch .chip span { display: block; }
+.swatch .hex { font-variant-numeric: tabular-nums; }
+
+/* ---------- Color pairs ---------- */
+.table-wrap { overflow-x: auto; }
+.pairs { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: lining-nums tabular-nums; }
+.pairs th, .pairs td { text-align: left; vertical-align: middle; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.pairs thead th { color: var(--heading); }
+.pairs td:first-child { min-width: 180px; }
+.pair-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.pair-sample {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: .9rem;
+}
+.pair-sample.graphic { font-weight: 400; }
+.pair-sample.graphic i { display: block; width: 28px; height: 14px; border-radius: 4px; border: 3px solid currentColor; }
+.pairs td[data-theme] { background: var(--bg); color: var(--text); }
+.pair-result { color: var(--heading); }
+.pair-result.low { font-weight: 700; }
+
+/* ---------- Typography ---------- */
+.site-name-sample { margin: 0; font: 600 1.75rem/1.2 var(--font-site); color: var(--heading); }
+
+/* ---------- Full-screen example (card mode) ---------- */
+.sg-stage { text-align: center; }
+.sg-stage-art {
+  height: 120px;
+  margin: 0 0 16px;
+  border-radius: var(--radius-btn);
+  background: repeating-linear-gradient(135deg, var(--ph1) 0 16px, var(--ph2) 16px 32px);
+}
+.sg-stage:fullscreen { display: flex; flex-direction: column; justify-content: center; padding: 48px; border: 0; border-radius: 0; }
+.sg-stage:fullscreen .sg-stage-art { height: 60vh; }

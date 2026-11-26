@@ -3,9 +3,59 @@
    Link from an interactive's folder with:
    <link rel="stylesheet" href="../../shared/theme.css">
    Styles for one interactive go in its own style.css.
+
+   Fonts are served from shared/fonts/ (rules just below), so pages need no font links.
+   Light and dark: every token has a light value (:root) and a dark value ([data-theme="dark"]).
+   shared/theme-init.js sets <html data-theme> before the page paints; shared/ui.js runs the
+   switch. A container with data-theme="light" or "dark" shows that mode inside it.
    ========================================================== */
 
-:root {
+/* ---------- Fonts (SIL Open Font License: shared/fonts/OFL.txt) ---------- */
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/lato-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/lato-latin-700-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fonts/playfair-display-latin-600-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/playfair-display-latin-700-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* The site name only: cut down to the letters of "AP Psych Lab" (regenerate if the name changes) */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fonts/fraunces-600-sitename.woff2) format('woff2');
+}
+
+/* ---------- Tokens: light (also used for printing) ---------- */
+:root, [data-theme="light"] {
+  color-scheme: light;
+
   /* Core palette */
   --bg: #FAF6F0;         /* page background */
   --bg-alt: #EFE6DA;     /* alternate sections, panels */
@@ -28,14 +78,89 @@
   --honey: #D1A64A;
   --teal: #5E8C86;
 
-  /* Non-color tokens */
+  /* Small text on an accent fill (--accent, --sage, --honey, --blue, --plum, --teal):
+     dark in both modes, because the accents are light fills in dark mode */
+  --on-accent: #3B2A20;
+
+  /* Site bar, home banner, node network, card image placeholder */
+  --sitebar: #2B2724;
+  --sitebar-text: #F5F1EC;
+  --sitebar-line: rgba(245, 241, 236, .24);
+  --psi: #D4AE84;
+  --banner: #3D3733;
+  --banner-text: #FAF6F0;
+  --banner-sub: #E8DFD4;
+  --net-line: rgba(232, 223, 212, .22);
+  --net-a: #C8A27C;
+  --net-b: #A9B49A;
+  --net-c: #6B5F57;
+  --ph1: #EFE6DA;
+  --ph2: #E9DFD1;
+  --ph-icon: #B5A08A;
+
+  /* Shadows */
   --shadow: 0 1px 2px rgba(0, 0, 0, .06);
   --shadow-pop: 0 8px 24px rgba(59, 42, 32, .18);  /* popovers and modals */
   --scrim: rgba(59, 42, 32, .45);                  /* behind a modal */
+}
+
+/* ---------- Tokens: dark ---------- */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #1D2027;
+  --bg-alt: #24282F;
+  --card: #2C3039;
+  --heading: #F0F1F4;
+  --text: #CACDD4;
+  --muted: #A2A7B2;
+  --btn: #B2BCD3;
+  --btn-hover: #C8D0E2;
+  --btn2: #495061;
+  --link: #ABBDEA;
+  --accent: #C9A27A;
+  --sage: #9DB58C;
+  --error: #E8917F;
+  --border: #3C414B;
+
+  --blue: #8FB2D3;
+  --plum: #C7A0BC;
+  --honey: #D9B45E;
+  --teal: #7FBAB1;
+
+  --on-accent: #1D2027;
+
+  --sitebar: #111317;
+  --sitebar-text: #ECEEF2;
+  --sitebar-line: rgba(236, 238, 242, .16);
+  --psi: #D4AE84;
+  --banner: #16181D;
+  --banner-text: #F1F2F5;
+  --banner-sub: #CACDD4;
+  --net-line: rgba(205, 210, 222, .15);
+  --net-a: #98A2BE;
+  --net-b: #C9A27A;
+  --net-c: #3C414B;
+  --ph1: #252930;
+  --ph2: #2B2F38;
+  --ph-icon: #5D6270;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow-pop: 0 8px 24px rgba(0, 0, 0, .5);
+  --scrim: rgba(8, 9, 12, .6);
+}
+
+/* ---------- Tokens: sizes and fonts (same in both modes) ---------- */
+:root {
+  /* Page widths: main, the site bar, the title bar and the footer all read these */
+  --w-column: 900px;
+  --w-wide: 1400px;
+  --h-sitebar: 48px;
   --radius-card: 12px;
   --radius-btn: 8px;
   --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-body: 'Lato', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-site: 'Fraunces', Georgia, 'Times New Roman', serif;  /* the site name only */
 }
 
 /* ---------- Base ---------- */
@@ -49,12 +174,12 @@ body {
 }
 
 main {
-  max-width: 900px;
+  max-width: var(--w-column);
   margin: 0 auto;
   padding: 16px 20px 24px;
 }
 /* Wide pages for side-by-side layouts: <main class="wide"> */
-main.wide { max-width: 1400px; }
+main.wide { max-width: var(--w-wide); }
 
 h1, h2, h3 {
   font-family: var(--font-heading);
@@ -104,6 +229,7 @@ a { color: var(--link); }
 
 .btn.alt { background: var(--btn2); color: var(--heading); }
 .btn.alt:hover { background: var(--btn2); filter: brightness(.95); }
+[data-theme="dark"] .btn.alt:hover { filter: brightness(1.2); }
 
 .btn.ghost { background: transparent; color: var(--heading); border-color: var(--btn); }
 .btn.ghost:hover { background: var(--bg-alt); }
@@ -164,17 +290,70 @@ a { color: var(--link); }
   font-variant-numeric: lining-nums tabular-nums;
 }
 
+/* ---------- Site bar ---------- */
+/* The first thing in <body> on every page: <nav class="sitebar" aria-label="Site"></nav>
+   (add class "wide" when <main> is wide). shared/ui.js fills it: a skip link, the home link
+   (left out on the home page, whose placeholder has data-home), and on the right the light/dark
+   switch. The empty placeholder already has its height and color, so nothing shifts. */
+.sitebar {
+  min-height: var(--h-sitebar);
+  background: var(--sitebar);
+  color: var(--sitebar-text);
+  border-bottom: 1px solid var(--sitebar-line);
+}
+.sitebar-inner {
+  position: relative;
+  max-width: var(--w-column);
+  min-height: calc(var(--h-sitebar) - 1px);
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sitebar.wide .sitebar-inner { max-width: var(--w-wide); }
+.sb-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--sitebar-text);
+  text-decoration: none;
+}
+.sb-home:hover .sb-name { text-decoration: underline; text-underline-offset: 4px; }
+.sb-psi { width: 17px; height: 20px; flex: none; color: var(--psi); }
+.sb-name { font: 600 18px/1 var(--font-site); white-space: nowrap; }
+.sb-tools { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.sitebar .icon-btn { width: 40px; height: 40px; border-color: var(--sitebar-line); color: var(--sitebar-text); }
+.sitebar .icon-btn:hover { background: var(--sitebar-line); }
+.sitebar :focus-visible { outline-color: var(--sitebar-text); }
+/* "Skip to activity": hidden until it has keyboard focus */
+.sb-skip {
+  position: absolute;
+  left: 12px;
+  top: 4px;
+  z-index: 50;
+  padding: 8px 16px;
+  border-radius: var(--radius-btn);
+  background: var(--bg);
+  color: var(--heading);
+  font-weight: 700;
+  transform: translateY(-200%);
+}
+.sb-skip:focus { transform: none; }
+main:focus { outline: none; }  /* the skip link's target (tabindex="-1") */
+
 /* ---------- Title bar ---------- */
 /* Every interactive page starts with the shared title bar; shared/ui.js adds the ⓘ button and
    its popover, and the sound and settings icons. Markup and options: see the top of shared/ui.js.
-   <header class="topbar"> lines up with <main> (900px); <header class="topbar wide"> with
-   <main class="wide"> (1400px). */
+   <header class="topbar"> lines up with <main> (--w-column); <header class="topbar wide"> with
+   <main class="wide"> (--w-wide). */
 .topbar {
   background: var(--bg-alt);
   border-bottom: 1px solid var(--border);
 }
 .topbar-inner {
-  max-width: 900px;
+  max-width: var(--w-column);
   margin: 0 auto;
   padding: 8px 20px;
   display: grid;
@@ -183,7 +362,7 @@ a { color: var(--link); }
   align-items: center;
   gap: 8px 16px;
 }
-.topbar.wide .topbar-inner { max-width: 1400px; }
+.topbar.wide .topbar-inner { max-width: var(--w-wide); }
 .topbar .brand { grid-area: brand; display: flex; align-items: center; gap: 8px; min-width: 0; position: relative; }
 .topbar h1, .topbar .title { margin: 0; font: 700 1.6rem/1.2 var(--font-heading); color: var(--heading); }
 .topbar .tools { grid-area: tools; justify-self: end; display: flex; gap: 8px; position: relative; }
@@ -313,7 +492,6 @@ a { color: var(--link); }
 
 /* ⓘ popover contents (built by ui.js) */
 .info-topic { font-size: .9rem; }
-.info-home { display: inline-block; margin-top: 8px; font-weight: 700; }
 
 /* ---------- Modals ---------- */
 /* <dialog class="modal" id="rules" aria-labelledby="rulesTitle">
@@ -343,6 +521,27 @@ a { color: var(--link); }
 .modal-head h2 { margin: 0; }
 .modal-body { padding: 16px; }
 .modal-body > :last-child { margin-bottom: 0; }
+
+/* ---------- Full screen ---------- */
+/* <button class="icon-btn" data-ui="fullscreen"> in the title bar's tools (Stage and Column only).
+   Whole page (the default): the title bar stays and the --w-wide limit is lifted.
+   Card mode (data-target="<id>"): that element fills the screen; ui.js adds .fs-target to it
+   and a corner exit button (.fs-exit). The activity's own :fullscreen rules decide how it grows. */
+:root:fullscreen { --w-wide: none; }
+:root:-webkit-full-screen { --w-wide: none; }
+.fs-target:fullscreen { background: var(--bg); color: var(--text); overflow: auto; }
+.fs-target:-webkit-full-screen { background: var(--bg); color: var(--text); overflow: auto; width: 100%; height: 100%; }
+.fs-target::backdrop { background: var(--bg); }
+.fs-exit { position: absolute; top: 8px; right: 8px; z-index: 30; background: var(--bg); }
+.fs-exit:hover { background: var(--card); }
+
+/* ---------- Print ---------- */
+/* Printing always uses the light colors (ui.js switches to light for the print); no site bar. */
+@media print {
+  .sitebar, .fs-exit { display: none !important; }
+  /* No fades: the page switches to light just before printing */
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
 
 /* ---------- Accessibility ---------- */
 /* Visually hidden text for screen readers (live regions, labels) */
