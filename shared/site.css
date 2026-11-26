@@ -1,0 +1,347 @@
+/* ==========================================================
+   AP Psych Lab — home page and 404 page (loaded after theme.css)
+   Banner, unit sidebar and its phone menu, activity cards, the "Review this unit" row, the
+   first-visit course question and the footer. Colors are theme.css tokens only.
+   Contents line up with the site bar: max-width --w-wide (the footer: --w-column unless "wide"),
+   20px side padding.
+   ========================================================== */
+
+/* ---------- Banner ---------- */
+.banner {
+  position: relative;
+  overflow: hidden;
+  background: var(--banner);
+}
+.banner-inner {
+  position: relative;
+  max-width: var(--w-wide);
+  margin: 0 auto;
+  padding: 32px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.banner-psi {
+  flex: none;
+  display: block;
+  width: 75px;
+  height: 90px;
+  color: var(--psi);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 11;
+}
+.banner-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.banner h1 {
+  margin: 0;
+  font: 600 52px/1.05 var(--font-site);
+  color: var(--banner-text);
+}
+.banner p { margin: 0; font-size: 19px; line-height: 1.4; color: var(--banner-sub); }
+/* The node network: background art on the right, faded toward the title, clipped by the band */
+.banner-net {
+  position: absolute;
+  top: 50%;
+  right: -24px;
+  width: 700px;
+  height: 220px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 45%);
+  mask-image: linear-gradient(to right, transparent, #000 45%);
+}
+.banner-net .net-lines { stroke: var(--net-line); stroke-width: 2; }
+.banner-net .na { fill: var(--net-a); }
+.banner-net .nb { fill: var(--net-b); }
+.banner-net .nc { fill: var(--net-c); }
+@media (max-width: 759px) {
+  .banner-inner { padding: 20px; gap: 12px; }
+  .banner-psi { width: 56px; height: 67px; }
+  .banner-text { gap: 6px; }
+  .banner h1 { font-size: 32px; line-height: 1.1; }
+  .banner p { font-size: 15px; }
+  .banner-net {
+    right: -200px;
+    width: 420px;
+    height: 132px;
+    -webkit-mask-image: linear-gradient(to right, transparent 25%, #000 70%);
+    mask-image: linear-gradient(to right, transparent 25%, #000 70%);
+  }
+}
+
+/* ---------- Layout: unit sidebar + cards ---------- */
+.home {
+  max-width: var(--w-wide);
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+.home-main { max-width: none; margin: 0; padding: 0; min-width: 0; }
+.home-main > :first-child { margin-top: 0; }
+
+/* Sidebar */
+.units {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+.unit-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-btn);
+  background: transparent;
+  color: var(--heading);
+  font: 400 15px/1.3 var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+.unit-btn:hover { background: var(--card); }
+.unit-btn[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
+.unit-btn:focus-visible { outline-offset: 0; }
+.unit-letter {
+  flex: 0 0 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--heading);
+  border: 1px solid var(--btn2);
+  font-size: 13px;
+  font-weight: 700;
+}
+.unit-btn svg {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.unit-name { flex: 1 1 auto; }
+.unit-count { font-size: 13px; font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
+
+/* Phone and tablet: the sidebar becomes a menu above the cards */
+.unit-pick { background: var(--bg-alt); border-bottom: 1px solid var(--border); }
+.unit-pick-inner {
+  max-width: var(--w-wide);
+  margin: 0 auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.unit-pick label { font-size: 14px; font-weight: 700; color: var(--heading); }
+.unit-pick select {
+  min-height: 48px;
+  max-width: 480px;
+  padding: 0 12px;
+  border: 1px solid var(--btn);
+  border-radius: var(--radius-btn);
+  background: var(--bg);
+  color: var(--heading);
+  font: 400 16px var(--font-body);
+}
+@media (min-width: 1000px) {
+  .unit-pick { display: none; }
+}
+@media (max-width: 999px) {
+  .home { grid-template-columns: minmax(0, 1fr); padding-top: 24px; }
+  .units { display: none; }
+}
+
+/* ---------- A view: heading, cards ---------- */
+.view { display: flex; flex-direction: column; gap: 24px; }
+.view-head h2 { margin: 0; font-size: 32px; font-weight: 700; line-height: 1.15; }
+.view-head p { margin: 8px 0 0; font-size: 15px; line-height: 1.45; }
+.view-head .eyebrow {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+@media (max-width: 759px) {
+  .view-head h2 { font-size: 26px; }
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+.act {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.act:hover { border-color: var(--btn); box-shadow: var(--shadow-hover); }
+.act:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+.act-img {
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border);
+  background: repeating-linear-gradient(135deg, var(--ph1) 0 12px, var(--ph2) 12px 24px);
+  color: var(--ph-icon);
+}
+.act-img svg {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.act-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.act-body { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 16px; }
+.act-body h3 { margin: 0; font-size: 19px; line-height: 1.25; }
+.act-body p { margin: 0; font-size: 15px; line-height: 1.45; }
+.act-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--btn2);
+  color: var(--heading);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.badge.unlisted { border-style: dashed; border-color: var(--error); }
+.act-unit { font-size: 13px; font-weight: 700; color: var(--text); }
+
+/* A unit with no activities yet */
+.empty-note {
+  padding: 20px;
+  background: var(--bg);
+  border: 1px dashed var(--btn2);
+  border-radius: var(--radius-card);
+}
+.empty-note p { margin: 0; font-size: 15px; }
+.empty-note p:first-child { font-weight: 700; color: var(--heading); }
+.empty-note p + p { margin-top: 4px; }
+
+/* "Review this unit": the topic-picker games with the unit's topics in the link */
+.review-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+.review-row h3 { margin: 0; font-size: 20px; }
+.review-row p { margin: 0; font-size: 15px; line-height: 1.45; }
+.review-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.review-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-btn);
+  background: var(--btn2);
+  color: var(--heading);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.review-links a:hover { box-shadow: inset 0 0 0 2px var(--btn); }
+
+/* ---------- First-visit course question (under the site bar's course menu) ---------- */
+.sitebar[data-home] .sb-tools { position: relative; }
+.course-ask {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  width: 300px;
+  max-width: calc(100vw - 40px);
+  padding: 16px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-pop);
+}
+/* The arrow points up at the course menu */
+.course-ask::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: var(--arrow-right, 72px);  /* set by site.js to point at the menu */
+  width: 12px;
+  height: 12px;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+.course-ask-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.course-ask-title { margin: 6px 0 0; font: 600 1.1rem/1.2 var(--font-heading); color: var(--heading); }
+.course-ask-text { margin: 4px 0 12px; font-size: .9rem; }
+.course-ask .icon-btn { width: 36px; height: 36px; border-color: var(--border); color: var(--heading); }
+.course-ask .icon-btn:hover { background: var(--card); }
+.course-ask .icon-btn svg { width: 20px; height: 20px; }
+.course-ask :focus-visible { outline-color: var(--heading); }
+.course-ask-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.course-ask-choices .btn { flex: 1 1 auto; padding: 0 12px; }
+
+/* ---------- Footer (home page and 404) ---------- */
+.site-footer { background: var(--card); border-top: 1px solid var(--border); }
+.site-footer-inner { max-width: var(--w-column); margin: 0 auto; padding: 16px 20px; }
+.site-footer.wide .site-footer-inner { max-width: var(--w-wide); }
+.site-footer p { margin: 0; font-size: .95rem; }
+
+/* ---------- 404 page ---------- */
+.notfound { padding-top: 48px; padding-bottom: 64px; }
+.notfound .btn { display: inline-flex; align-items: center; text-decoration: none; }
+
+/* Sticky footer: short pages still end at the bottom of the window */
+.page-fill { min-height: 100vh; display: flex; flex-direction: column; }
+.page-fill > .home, .page-fill > main { flex: 1 0 auto; width: 100%; }
+
+@media print {
+  .banner-net, .unit-pick, .units, .course-ask { display: none !important; }
+  .home { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .act { transition: none; }
+}

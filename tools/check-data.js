@@ -146,12 +146,19 @@ QS.forEach(function (q) {
 });
 
 /* ---------- interactives.js ---------- */
+// Card badge types; the labels are in shared/site.js (TYPES). Keep the two lists the same.
+var TYPE_IDS = ["experiment", "simulation", "game", "puzzle", "lesson", "quiz", "class-game", "reference"];
 dupes(ITEMS.map(function (it) { return it.id; })).forEach(function (id) { err("interactives: duplicate id " + id); });
 ITEMS.forEach(function (it) {
   var where = "interactives: " + it.id + ": ";
   if (["listed", "unlisted"].indexOf(it.status) < 0) err(where + "status must be listed or unlisted");
   if (["column", "split", "stage"].indexOf(it.template) < 0) err(where + "unknown template " + it.template);
+  if (TYPE_IDS.indexOf(it.type) < 0) err(where + "type must be one of " + TYPE_IDS.join(", "));
   if (!/\/$/.test(it.path || "")) err(where + "path must end in /");
+  if (it.image) {
+    if (!fs.existsSync(path.join(root, it.path || "", it.image))) err(where + "image file " + it.image + " not found");
+    if (!it.alt) err(where + "image needs alt text");
+  }
   if (!fs.existsSync(path.join(root, it.path || "", "index.html"))) warn("Interactives whose folder isn't in the repo", it.id + " (" + it.path + ")");
   if (!it.review && !T.groupsOf(it).length) err(where + "ced codes match no topic group");
   if (it.courses !== undefined) {

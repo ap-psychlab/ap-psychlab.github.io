@@ -72,8 +72,8 @@
  * SAVED SETTINGS — on this device only, in localStorage under "appsych.<key>", each value saved
  *   as { v: 1, data }. Every call is safe when storage is blocked (get returns the fallback).
  *   APPSYCH_UI.store.get(key, fallback), .set(key, value) (true if saved), .remove(key)
- *   Keys: "theme", "course", "topics" (the topic picker); later "coursePrompt" and
- *   "<interactive-id>.<name>".
+ *   Keys: "theme", "course", "topics" (the topic picker), "coursePrompt" (the home page's
+ *   first-visit course question); later "<interactive-id>.<name>".
  *
  * FULL SCREEN — <button class="icon-btn" data-ui="fullscreen"> in the title bar's tools.
  *   Without data-target the whole page goes full screen (title bar kept, the --w-wide limit

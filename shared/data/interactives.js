@@ -12,9 +12,15 @@
  *                topic groups match (APPSYCH_TOPICS). Empty for review games.
  *   review       true for games that work with any unit (shown in the Review section)
  *   template     "column" (900px), "split" (1400px, 2/3 + side panel) or "stage" (1400px, one area)
- *   status       "listed" (on the home page) or "unlisted" (reachable by link only). Set
- *                "listed" only after I confirm an interactive is finished.
- *   image, alt   card image (assets/card.webp, 1200×750) and its alt text; "" until made
+ *   type         the home-page card badge, by what the student mainly does (one per interactive):
+ *                "experiment" (you're the participant), "simulation" (change inputs, watch),
+ *                "game" (goal, score, win or lose), "puzzle", "lesson" (guided, video-like),
+ *                "quiz", "class-game" (teacher-led, on the projector), "reference" (look things
+ *                up). Labels are in shared/site.js (TYPES); tools/check-data.js lists the ids.
+ *   status       "listed" (on the home page) or "unlisted" (reachable by link only; the home
+ *                page shows it with ?dev). Set "listed" only after I confirm it is finished.
+ *   image, alt   card image, relative to path ("assets/card.webp", 1200×750), and its alt text;
+ *                "" until made (the card shows a placeholder)
  *   howTo        2–3 short lines for the ⓘ popover
  *   courses      optional: course ids ("ap", "dc", "reg") to show it in, for exceptions only.
  *                Without it, an interactive shows in a course when any topic group it matches is
@@ -32,6 +38,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: ["2.5.A.1", "2.3.A.3"],
     review: false,
     template: "split",
+    type: "experiment",
     status: "listed",
     image: "", alt: "",
     howTo: [
@@ -48,6 +55,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: ["2.2.A.6"],
     review: false,
     template: "split",
+    type: "experiment",
     status: "listed",
     image: "", alt: "",
     howTo: [
@@ -64,6 +72,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: ["2.2.A.3", "2.2.A.4", "2.2.A.5"],
     review: false,
     template: "split",
+    type: "puzzle",
     status: "unlisted",
     image: "", alt: "",
     howTo: [
@@ -80,6 +89,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: ["3.8.A.1", "3.8.A.2", "3.8.A.3"],
     review: false,
     template: "stage",
+    type: "game",
     status: "unlisted",
     image: "", alt: "",
     howTo: [
@@ -96,6 +106,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: ["4.5.B.1", "4.5.B.2"],
     review: false,
     template: "stage",
+    type: "game",
     status: "unlisted",
     image: "", alt: "",
     howTo: [
@@ -112,6 +123,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: [],
     review: true,
     template: "stage",
+    type: "reference",
     status: "listed",
     image: "", alt: "",
     howTo: [
@@ -127,6 +139,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: [],
     review: true,
     template: "split",
+    type: "puzzle",
     status: "listed",
     image: "", alt: "",
     howTo: [
@@ -142,6 +155,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: [],
     review: true,
     template: "column",
+    type: "quiz",
     status: "listed",
     image: "", alt: "",
     howTo: [
@@ -158,6 +172,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: [],
     review: true,
     template: "column",
+    type: "game",
     status: "listed",
     image: "", alt: "",
     howTo: [
@@ -173,6 +188,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: [],
     review: true,
     template: "stage",
+    type: "class-game",
     status: "listed",
     image: "", alt: "",
     howTo: [
@@ -188,6 +204,7 @@ window.APPSYCH_INTERACTIVES = [
     ced: [],
     review: true,
     template: "stage",
+    type: "game",
     status: "unlisted",
     image: "", alt: "",
     howTo: [
