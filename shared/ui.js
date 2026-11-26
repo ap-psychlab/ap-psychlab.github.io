@@ -1,18 +1,18 @@
 /* AP Psych Lab — shared title bar, sound, popovers and modals: window.APPSYCH_UI
  *
- * Load after shared/data/topics.js and shared/data/demos.js, before the demo's script.js
- * (all with defer):
+ * Load after shared/data/topics.js and shared/data/interactives.js, before the interactive's
+ * script.js (all with defer):
  *   <script src="../../shared/data/topics.js" defer></script>
- *   <script src="../../shared/data/demos.js" defer></script>
+ *   <script src="../../shared/data/interactives.js" defer></script>
  *   <script src="../../shared/ui.js" defer></script>
  *   <script src="script.js" defer></script>
  *
  * TITLE BAR — the first thing in <body>. Write this; ui.js fills in the rest.
- *   <header class="topbar wide" data-demo="lights-off">   ("wide" for the Split and Stage templates)
+ *   <header class="topbar wide" data-interactive="lights-off">   ("wide" for the Split and Stage templates)
  *     <div class="topbar-inner">
  *       <div class="brand"><h1>Lights Off</h1></div>      ui.js adds the ⓘ button and its popover
  *       <div class="modes" role="group" aria-label="Game mode">   optional, only with 2+ modes;
- *         <button class="mode" type="button" aria-pressed="true">Practice</button>   the demo sets
+ *         <button class="mode" type="button" aria-pressed="true">Practice</button>   the page sets
  *         <button class="mode" type="button" aria-pressed="false">Timed</button>     aria-pressed
  *       </div>
  *       <div class="tools">                                 optional; each button only if used
@@ -22,9 +22,9 @@
  *       </div>
  *     </div>
  *   </header>
- *   - data-demo is the demo's id in demos.js. The ⓘ popover shows its description, howTo,
- *     CED topic(s) and class unit(s), and "All demos". Without a matching entry there is no
- *     ⓘ button.
+ *   - data-interactive is the interactive's id in interactives.js. The ⓘ popover shows its
+ *     description, howTo, CED topic(s) and class unit(s), and "All demos". Without a matching
+ *     entry there is no ⓘ button.
  *   - ui.js gives data-ui="sound" and data-ui="settings" buttons their icon, label and title.
  *
  * SOUND — off on every page load.
@@ -43,15 +43,15 @@
  *   A button with data-modal="<id>" opens it; a button inside with data-ui="close" closes it.
  *
  * OTHER
- *   APPSYCH_UI.demo                     this page's demos.js entry, or null
+ *   APPSYCH_UI.interactive              this page's interactives.js entry, or null
  *   APPSYCH_UI.homeUrl                  the home page's address (works from file:// too)
  *   APPSYCH_UI.announce(text)           read text aloud to screen readers (polite)
  *   APPSYCH_UI.icons                    SVG markup: info, sound, settings, restart, close
  *   APPSYCH_UI.refresh()                wire popover buttons and sound/settings icons added later
  *
- * SHARING A LINK — there are no teacher links in the ⓘ. A demo keeps its shareable choices in
- *   the address (e.g. ?mode= when a mode is chosen, ?groups= when topics are chosen), so teachers
- *   copy the address bar.
+ * SHARING A LINK — there are no teacher links in the ⓘ. An interactive keeps its shareable
+ *   choices in the address (e.g. ?mode= when a mode is chosen, ?groups= when topics are chosen),
+ *   so teachers copy the address bar.
  */
 window.APPSYCH_UI = (function () {
   var ICONS = {
@@ -192,39 +192,39 @@ window.APPSYCH_UI = (function () {
   });
 
   /* ---------- The ⓘ popover ---------- */
-  function topicLines(demo) {
+  function topicLines(item) {
     var T = window.APPSYCH_TOPICS, lines = [];
-    if (demo.review) return ['Review game: works with any unit. Choose topics in the game.'];
-    if (!T || !demo.ced || !demo.ced.length) return lines;
+    if (item.review) return ['Review game: works with any unit. Choose topics in the game.'];
+    if (!T || !item.ced || !item.ced.length) return lines;
     var units = T.teachingUnits.filter(function (u) {
-      return u.groups.some(function (g) { return T.matchesCodes(demo, g.codes); });
+      return u.groups.some(function (g) { return T.matchesCodes(item, g.codes); });
     }).map(function (u) { return 'Unit ' + u.number + ': ' + u.name; });
     var topics = [];
     T.cedUnits.forEach(function (u) {
       u.topics.forEach(function (t) {
-        if (T.matchesCodes(demo, [t.code])) topics.push(t.code + ' ' + t.name);
+        if (T.matchesCodes(item, [t.code])) topics.push(t.code + ' ' + t.name);
       });
     });
     if (units.length) lines.push('Class ' + (units.length > 1 ? 'units: ' : 'unit: ') + units.join('; '));
     if (topics.length) lines.push('CED ' + (topics.length > 1 ? 'topics: ' : 'topic: ') + topics.join('; '));
     return lines;
   }
-  function buildInfo(bar, demo, n) {
+  function buildInfo(bar, item, n) {
     var brand = bar.querySelector('.brand');
     if (!brand) return;
     var id = 'appsych-info' + (n ? '-' + n : '');
     var btn = el('button', {
       'class': 'icon-btn info', type: 'button', 'aria-controls': id,
-      'aria-label': 'About ' + demo.title, title: 'About this ' + (demo.review ? 'game' : 'demo')
+      'aria-label': 'About ' + item.title, title: 'About this ' + (item.review ? 'game' : 'activity')
     }, ICONS.info);
-    var html = '<p>' + esc(demo.description) + '</p>';
-    if (demo.howTo && demo.howTo.length) {
-      html += '<h3>How to play</h3><ul>' + demo.howTo.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>';
+    var html = '<p>' + esc(item.description) + '</p>';
+    if (item.howTo && item.howTo.length) {
+      html += '<h3>How to play</h3><ul>' + item.howTo.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>';
     }
-    var topics = topicLines(demo);
+    var topics = topicLines(item);
     if (topics.length) html += topics.map(function (l) { return '<p class="info-topic">' + esc(l) + '</p>'; }).join('');
     html += '<a class="info-home" href="' + esc(homeUrl) + '">All demos</a>';
-    var pop = el('div', { 'class': 'popover info-pop', id: id, role: 'dialog', 'aria-label': 'About ' + demo.title, hidden: '' }, html);
+    var pop = el('div', { 'class': 'popover info-pop', id: id, role: 'dialog', 'aria-label': 'About ' + item.title, hidden: '' }, html);
     brand.appendChild(btn);
     brand.appendChild(pop);
     wirePopoverButton(btn);
@@ -253,16 +253,16 @@ window.APPSYCH_UI = (function () {
     icons: ICONS,
     homeUrl: homeUrl,
     refresh: wireAll,
-    demo: null
+    interactive: null
   };
   function init() {
     // Normally one title bar per page (the style guide shows several examples).
-    var list = window.APPSYCH_DEMOS || [];
-    Array.prototype.forEach.call(document.querySelectorAll('header.topbar[data-demo]'), function (bar, n) {
-      var id = bar.getAttribute('data-demo');
-      var demo = list.filter(function (d) { return d.id === id; })[0] || null;
-      if (n === 0) api.demo = demo;
-      if (demo) buildInfo(bar, demo, n);
+    var entries = window.APPSYCH_INTERACTIVES || [];
+    Array.prototype.forEach.call(document.querySelectorAll('header.topbar[data-interactive]'), function (bar, n) {
+      var id = bar.getAttribute('data-interactive');
+      var item = entries.filter(function (d) { return d.id === id; })[0] || null;
+      if (n === 0) api.interactive = item;
+      if (item) buildInfo(bar, item, n);
     });
     wireAll();
   }

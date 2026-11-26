@@ -1,8 +1,8 @@
 /* ==========================================================
    AP Psych Lab — shared theme
-   Link from a demo folder with:
+   Link from an interactive's folder with:
    <link rel="stylesheet" href="../../shared/theme.css">
-   Demo-specific styles go in that demo's own style.css.
+   Styles for one interactive go in its own style.css.
    ========================================================== */
 
 :root {
@@ -165,8 +165,8 @@ a { color: var(--link); }
 }
 
 /* ---------- Title bar ---------- */
-/* Every demo page starts with the shared title bar; shared/ui.js adds the ⓘ button and its
-   popover, and the sound and settings icons. Markup and options: see the top of shared/ui.js.
+/* Every interactive page starts with the shared title bar; shared/ui.js adds the ⓘ button and
+   its popover, and the sound and settings icons. Markup and options: see the top of shared/ui.js.
    <header class="topbar"> lines up with <main> (900px); <header class="topbar wide"> with
    <main class="wide"> (1400px). */
 .topbar {
@@ -188,7 +188,7 @@ a { color: var(--link); }
 .topbar h1, .topbar .title { margin: 0; font: 700 1.6rem/1.2 var(--font-heading); color: var(--heading); }
 .topbar .tools { grid-area: tools; justify-self: end; display: flex; gap: 8px; position: relative; }
 
-/* Mode switch (only for demos with more than one mode): pill buttons with aria-pressed */
+/* Mode switch (only for interactives with more than one mode): pill buttons with aria-pressed */
 .topbar .modes {
   grid-area: modes;
   display: flex;

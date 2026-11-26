@@ -1,24 +1,25 @@
-/* AP Psych Lab — the list of demos: window.APPSYCH_DEMOS
+/* AP Psych Lab — the list of interactives: window.APPSYCH_INTERACTIVES
  *
- * One entry per demo. The home page builds its cards from this list, and each demo's ⓘ popover
- * (shared/ui.js, matched by <header class="topbar" data-demo="<id>">) shows its entry.
+ * One entry per interactive. The home page builds its cards from this list, and each
+ * interactive's ⓘ popover (shared/ui.js, matched by
+ * <header class="topbar" data-interactive="<id>">) shows its entry.
  *
  *   id           stable, lowercase-hyphenated; never change once used
  *   title        as on the page's h1
  *   description  one line: the home-page card and the ⓘ popover. Written only here.
  *   path         folder from the site root, ending in "/" (never changes once live)
- *   ced          CED codes; the home page places the demo under every class unit whose topic
- *                groups match (APPSYCH_TOPICS). Empty for review games.
+ *   ced          CED codes; the home page places the interactive under every class unit whose
+ *                topic groups match (APPSYCH_TOPICS). Empty for review games.
  *   review       true for games that work with any unit (shown in the Review section)
  *   template     "column" (900px), "split" (1400px, 2/3 + side panel) or "stage" (1400px, one area)
  *   status       "listed" (on the home page) or "unlisted" (reachable by link only). Set
- *                "listed" only after I confirm a demo is finished.
+ *                "listed" only after I confirm an interactive is finished.
  *   image, alt   card image (assets/card.webp, 1200×750) and its alt text; "" until made
  *   howTo        2–3 short lines for the ⓘ popover
  *
- * howTo is checked against each demo when it moves to the shared title bar.
+ * howTo is checked against each interactive when it moves to the shared title bar.
  */
-window.APPSYCH_DEMOS = [
+window.APPSYCH_INTERACTIVES = [
   {
     id: "memory-span",
     title: "Memory Span Test",

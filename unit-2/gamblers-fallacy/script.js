@@ -1,4 +1,4 @@
-// Outguess the Robot — gambler's fallacy demo
+// Outguess the Robot — gambler's fallacy interactive
 (function () {
   var TRIALS = 40;
   var P_RED = 0.7;        // Chip's real chance of picking red on every round
