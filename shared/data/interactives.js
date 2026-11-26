@@ -16,6 +16,10 @@
  *                "listed" only after I confirm an interactive is finished.
  *   image, alt   card image (assets/card.webp, 1200×750) and its alt text; "" until made
  *   howTo        2–3 short lines for the ⓘ popover
+ *   courses      optional: course ids ("ap", "dc", "reg") to show it in, for exceptions only.
+ *                Without it, an interactive shows in a course when any topic group it matches is
+ *                in one of that course's units; review games show in every course
+ *                (APPSYCH_TOPICS.interactiveInCourse).
  *
  * howTo is checked against each interactive when it moves to the shared title bar.
  */

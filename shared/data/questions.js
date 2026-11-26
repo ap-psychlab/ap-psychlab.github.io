@@ -7,6 +7,11 @@
  *   these under "Terms used in this question" after the answer is shown (shared/term-help.js).
  * figure (optional): data for a scatterplot, bar graph or line graph drawn by shared/figures.js;
  *   the format is described at the top of that file.
+ * courses (optional): the course ids ("ap", "dc", "reg") the question is in, for exceptions only.
+ *   Without it, a question is in a course when its term and its correct answer's term
+ *   (choiceRefs[answer], when not null) are both in that course (APPSYCH_TOPICS.questionInCourse).
+ *   It is a unit exam question when both of those terms are Unit Exam Terms there (isUnitTestQuestion).
+ * Games read questions through APPSYCH_TOPICS.questions(course). Run node tools/check-data.js after any change.
  */
 window.APPSYCH_QUESTIONS = [
   // ===== Science Practices =====

@@ -9,7 +9,7 @@
  *          naming each choice's term could give the answer away)
  *   Lists the question's own term and the term behind each shown choice (q.choiceRefs) as
  *   "Term (Question Stem, Choice A)", each a <details> that opens to the definition (and
- *   example, if any). "Question Stem" (the scenario, any graph, and the question) is added
+ *   examples, if any). "Question Stem" (the scenario, any graph, and the question) is added
  *   for the question's own term when no shown choice holds it, and for any listed term whose
  *   name or alias appears in the stem text.
  *   Items that are open stay open when the same question is re-rendered.
@@ -90,12 +90,13 @@ window.APPSYCH_TERM_HELP = (function () {
       s.appendChild(make("span", "th-where", "(" + labelText(labels[id], inStem) + ")"));
       d.appendChild(s);
       d.appendChild(make("p", "th-def", t.definition));
-      if (t.example) {
+      (t.examples || []).forEach(function (text) {
+        if (!text) return;
         var ex = make("p", "th-ex");
         ex.appendChild(make("strong", null, "Example: "));
-        ex.appendChild(document.createTextNode(t.example));
+        ex.appendChild(document.createTextNode(text));
         d.appendChild(ex);
-      }
+      });
       li.appendChild(d);
       ul.appendChild(li);
     });
