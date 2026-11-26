@@ -503,7 +503,7 @@ window.APPSYCH_UI = (function () {
   // Class unit(s) in the chosen course; CED topic(s) in AP only.
   function topicLines(item) {
     var lines = [];
-    if (item.review) return ['Review game: works with any unit. Choose topics in the game.'];
+    if (item.review) return ['Review activity: works with any unit. Choose topics in the activity.'];
     if (!T || !item.ced || !item.ced.length) return lines;
     var units = T.unitsOf(item, currentCourse).map(function (u) { return 'Unit ' + u.letter + ': ' + u.name; });
     if (units.length) lines.push('Class ' + (units.length > 1 ? 'units: ' : 'unit: ') + units.join('; '));
@@ -533,7 +533,7 @@ window.APPSYCH_UI = (function () {
     var id = 'appsych-info' + (n ? '-' + n : '');
     var btn = el('button', {
       'class': 'icon-btn info', type: 'button', 'aria-controls': id,
-      'aria-label': 'About ' + item.title, title: 'About this ' + (item.review ? 'game' : 'activity')
+      'aria-label': 'About ' + item.title, title: 'About this activity'
     }, ICONS.info);
     var pop = el('div', { 'class': 'popover info-pop', id: id, role: 'dialog', 'aria-label': 'About ' + item.title, hidden: '' }, infoHtml(item));
     infos.push({ pop: pop, item: item });

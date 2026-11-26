@@ -2,8 +2,8 @@
  * first-visit course question. Built from shared/data/interactives.js and topics.js for the
  * course chosen in the site bar (APPSYCH_UI.course); everything re-renders when it changes.
  *
- * Views: "All activities" (every activity, each tagged with its unit), one unit (its activities
- * and "Review this unit"), or "Review activities". The chosen view is the address hash (#cognition,
+ * Views: "All Activities" (every activity, each tagged with its unit), one unit (its activities
+ * and "Review this unit"), or "Review Activities". The chosen view is the address hash (#cognition,
  * #review; none for All), so a link can open a unit. A hash the course doesn't have shows All.
  * An activity shows when it is listed (?dev: unlisted too, with an "Unlisted" badge) and is in
  * the chosen course (APPSYCH_TOPICS.interactiveInCourse), under each unit it matches (unitsOf).
@@ -74,11 +74,11 @@
 
   /* ---------- Sidebar and its phone menu ---------- */
   function views() {
-    return [{ id: 'all', name: 'All activities', count: model.all.length, icon: ICON.all }]
+    return [{ id: 'all', name: 'All Activities', count: model.all.length, icon: ICON.all }]
       .concat(model.units.map(function (u) {
         return { id: u.id, letter: u.letter, name: u.name, count: u.items.length };
       }))
-      .concat([{ id: 'review', name: 'Review activities', count: model.review.length, icon: ICON.review }]);
+      .concat([{ id: 'review', name: 'Review Activities', count: model.review.length, icon: ICON.review }]);
   }
   function renderNav() {
     nav.innerHTML = views().map(function (v) {
@@ -132,11 +132,11 @@
   }
   function viewHtml(id) {
     if (id === 'all') {
-      return head(null, 'All activities', plural(model.all.length) +
+      return head(null, 'All Activities', plural(model.all.length) +
         '. Choose a unit to see just its activities and the review activities for its topics.') + cards(model.all, true);
     }
     if (id === 'review') {
-      return head('Any unit · ' + plural(model.review.length), 'Review activities',
+      return head('Any unit · ' + plural(model.review.length), 'Review Activities',
         'Each one lets you choose the topics to practice.') + cards(model.review, false);
     }
     var u = model.units.filter(function (x) { return x.id === id; })[0];
@@ -165,8 +165,8 @@
     catch (e) { /* some browsers block this on file:// pages */ }
   }
   function describe(id) {
-    if (id === 'all') return 'All activities: ' + plural(model.all.length) + '.';
-    if (id === 'review') return 'Review activities: ' + plural(model.review.length) + '.';
+    if (id === 'all') return 'All Activities: ' + plural(model.all.length) + '.';
+    if (id === 'review') return 'Review Activities: ' + plural(model.review.length) + '.';
     var u = T.unitIn(model.course, id);
     var n = model.units.filter(function (x) { return x.id === id; })[0].items.length;
     return 'Unit ' + u.letter + ', ' + u.name + ': ' + plural(n) + '.';
