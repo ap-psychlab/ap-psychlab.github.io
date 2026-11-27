@@ -3,18 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Outguess the Robot</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<title>Outguess the Robot · AP Psych Lab</title>
+<script src="../../shared/theme-init.js"></script>
+<link rel="icon" href="../../shared/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../shared/apple-touch-icon.png">
 <link rel="stylesheet" href="../../shared/theme.css">
 <link rel="stylesheet" href="style.css">
+<script src="../../shared/data/topics.js" defer></script>
+<script src="../../shared/data/interactives.js" defer></script>
+<script src="../../shared/ui.js" defer></script>
 <script src="script.js" defer></script>
 </head>
 <body>
+<nav class="sitebar wide" aria-label="Site"></nav>
+<header class="topbar wide" data-interactive="outguess-the-robot">
+  <div class="topbar-inner">
+    <div class="brand"><h1>Outguess the Robot</h1></div>
+    <div class="tools">
+      <button class="icon-btn" type="button" data-ui="sound"></button>
+    </div>
+  </div>
+</header>
+
 <main class="wide">
-  <h1>Outguess the Robot</h1>
-  <p class="hint">Chip the robot picks a color each round. Guess what it will pick: click Red or Blue, or press R / B (or the ← / → arrow keys).</p>
 
   <div class="split">
   <div class="play">
@@ -118,29 +129,29 @@
     </svg>
 
     <div class="row" id="talkRow">
-      <button class="btn" id="nextBtn">Next</button>
+      <button class="btn" type="button" id="nextBtn">Next</button>
     </div>
 
     <div class="row" id="guessRow" hidden>
-      <button class="btn pick pick-red" id="redBtn" aria-label="Guess red, key R">
+      <button class="btn pick pick-red" type="button" id="redBtn" aria-label="Guess red, key R">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>Red
       </button>
-      <button class="btn pick pick-blue" id="blueBtn" aria-label="Guess blue, key B">
+      <button class="btn pick pick-blue" type="button" id="blueBtn" aria-label="Guess blue, key B">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Blue
       </button>
     </div>
 
-    <div class="row">
-      <button class="btn alt" id="soundBtn" aria-pressed="true">Sound: On</button>
-      <button class="btn ghost" id="restartBtn" hidden>Restart</button>
-    </div>
+    <p class="hint play-hint">Chip picks a color each round. Guess what it will pick: click Red or Blue, or press R / B (or the ← / → arrow keys).</p>
 
   </div>
 
   <aside class="side" aria-label="Scores and results">
-    <div class="stats" aria-label="Scores">
-      <div class="stat"><span>Round</span><strong id="roundV">0 / 40</strong></div>
-      <div class="stat"><span>Correct</span><strong id="correctV">0</strong></div>
+    <div class="stat-row">
+      <div class="stats" aria-label="Scores">
+        <div class="stat"><span>Round</span><strong id="roundV">0 / 40</strong></div>
+        <div class="stat"><span>Correct</span><strong id="correctV">0</strong></div>
+      </div>
+      <button class="icon-btn" type="button" id="restartBtn" aria-label="Restart the game" title="Restart the game" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
     </div>
 
     <section class="card" id="historyCard">
@@ -164,5 +175,19 @@
   </aside>
   </div>
 </main>
+
+<dialog class="modal" id="restartModal" aria-labelledby="restartTitle">
+  <div class="modal-head">
+    <h2 id="restartTitle">Restart the game?</h2>
+    <button class="icon-btn" type="button" data-ui="close" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <div class="modal-body">
+    <p>Your guesses so far will be cleared, and Chip will start over from the introduction.</p>
+    <div class="row modal-actions">
+      <button class="btn" type="button" id="yesBtn">Yes, restart</button>
+      <button class="btn ghost" type="button" data-ui="close">Keep playing</button>
+    </div>
+  </div>
+</dialog>
 </body>
 </html>

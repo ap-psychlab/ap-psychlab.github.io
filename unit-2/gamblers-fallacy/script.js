@@ -1,5 +1,16 @@
-// Outguess the Robot — gambler's fallacy interactive
+/* Outguess the Robot — gambler's fallacy interactive
+ *
+ * Title bar, ⓘ, sound and the restart modal come from ../../shared/ui.js (APPSYCH_UI).
+ * Sound is off on every page load; tone() checks APPSYCH_UI.sound.on, and no AudioContext is
+ * made until sound is turned on.
+ * States: intro (Chip's opening lines), play (waiting for a guess), busy (a guess animating,
+ * about 0.8 s), debrief (Chip's closing lines), done (results shown; Next says Play again).
+ * Nothing runs on a clock while waiting for the player, so the restart modal only has to keep
+ * game keys from reaching the page while it's open.
+ * No test options (?dev only affects the site bar's course menu).
+ */
 (function () {
+  var UI = window.APPSYCH_UI;
   var TRIALS = 40;
   var P_RED = 0.7;        // Chip's real chance of picking red on every round
   var STREAK = 3;         // "after a streak" = the last 3+ picks were all red
@@ -7,14 +18,14 @@
   var $ = function (id) { return document.getElementById(id); };
   var bot = $('bot'), roll = $('roll'), say = $('say');
   var nextBtn = $('nextBtn'), redBtn = $('redBtn'), blueBtn = $('blueBtn');
-  var soundBtn = $('soundBtn'), restartBtn = $('restartBtn');
+  var restartBtn = $('restartBtn');
   var talkRow = $('talkRow'), guessRow = $('guessRow');
   var historyEl = $('history'), historyCard = $('historyCard'), results = $('results');
 
   var state = 'intro';    // intro | play | busy | debrief | done
   var script = [], line = 0;
   var picks = [], guesses = [], correct = 0;
-  var token = 0, soundOn = true, ctx = null, restartArmed = 0;
+  var token = 0, ctx = null;
   var lastQuip = { hit: -1, miss: -1 };
 
   var INTRO = [
@@ -49,11 +60,12 @@
 
   /* ---------- Sound ---------- */
   function audio() {
+    if (!UI || !UI.sound.on) { return; }
     if (!ctx) { var AC = window.AudioContext || window.webkitAudioContext; if (AC) { ctx = new AC(); } }
     if (ctx && ctx.state === 'suspended') { ctx.resume(); }
   }
   function tone(freq, start, dur, type) {
-    if (!soundOn || !ctx) { return; }
+    if (!UI || !UI.sound.on || !ctx) { return; }
     var o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + start;
     o.type = type || 'square'; o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, t);
@@ -102,6 +114,10 @@
   function updateStats() {
     $('roundV').textContent = picks.length + ' / ' + TRIALS;
     $('correctV').textContent = correct;
+    updateRestart();
+  }
+  function updateRestart() {       // only while there's a game in progress to lose
+    restartBtn.disabled = !(picks.length > 0 && state !== 'done');
   }
   function talk(lines, label) {
     script = lines; line = 0;
@@ -114,13 +130,13 @@
     state = 'intro';
     picks = []; guesses = []; correct = 0;
     historyEl.textContent = '';
-    results.hidden = true; historyCard.hidden = false; restartBtn.hidden = true;
+    results.hidden = true; historyCard.hidden = false;
     mood('idle'); show(''); rollTo(0); updateStats();
     talk(INTRO);
   }
   function startPlay() {
     state = 'play';
-    talkRow.hidden = true; guessRow.hidden = false; restartBtn.hidden = false;
+    talkRow.hidden = true; guessRow.hidden = false;
     redBtn.disabled = blueBtn.disabled = false;
     speak("Round 1. Red or blue? I've already decided. (I haven't. I decide when you click.)");
     redBtn.focus();
@@ -212,7 +228,6 @@
     var t = tally(), lines = [];
     mood('idle'); rollTo(0);
     redBtn.disabled = blueBtn.disabled = true;
-    restartBtn.hidden = true;
 
     lines.push('All ' + TRIALS + ' rounds complete. You got ' + correct + ' right. Let me run the numbers. It’s kind of my whole thing.');
     if (t.blueGuesses === 0) {
@@ -245,6 +260,7 @@
   }
   function showResults() {
     state = 'done';
+    updateRestart();
     var t = tally(), bars = $('bars'), facts = $('facts');
     bars.textContent = ''; facts.textContent = '';
     bars.appendChild(bar('Your score', correct));
@@ -271,20 +287,25 @@
   nextBtn.addEventListener('click', advance);
   redBtn.addEventListener('click', function () { guess('red'); });
   blueBtn.addEventListener('click', function () { guess('blue'); });
-  soundBtn.addEventListener('click', function () {
-    soundOn = !soundOn;
-    soundBtn.setAttribute('aria-pressed', String(soundOn));
-    soundBtn.textContent = 'Sound: ' + (soundOn ? 'On' : 'Off');
-    if (soundOn) { audio(); sfx('blip'); }
+  // Restart asks first (there is always progress to lose when the ↺ is enabled). While the
+  // modal is open, game keys are ignored; "Keep playing", Escape or the close button go back.
+  var restarting = false;
+  restartBtn.addEventListener('click', function () {
+    if (restartBtn.disabled) { return; }
+    restarting = false;
+    UI.openModal('restartModal', {
+      onClose: function () {
+        if (!restarting) { return; }
+        intro(); nextBtn.focus();
+      }
+    });
   });
-  restartBtn.addEventListener('click', function () {   // second click within 3 s confirms
-    if (Date.now() - restartArmed < 3000) { restartArmed = 0; restartBtn.textContent = 'Restart'; intro(); nextBtn.focus(); return; }
-    restartArmed = Date.now();
-    restartBtn.textContent = 'Click again to restart';
-    setTimeout(function () { restartBtn.textContent = 'Restart'; }, 3000);
-  });
+  $('yesBtn').addEventListener('click', function () { restarting = true; UI.closeModal('restartModal'); });
+  if (UI) { UI.sound.onChange(function (on) { if (on) { audio(); sfx('blip'); } }); }
   document.addEventListener('keydown', function (e) {
     if (state !== 'play' || e.ctrlKey || e.metaKey || e.altKey) { return; }
+    if (document.querySelector('dialog[open]')) { return; }
+    if (e.target.closest && e.target.closest('input, select, textarea, dialog')) { return; }
     var k = e.key.toLowerCase();
     if (k === 'r' || k === 'arrowleft') { e.preventDefault(); guess('red'); }
     else if (k === 'b' || k === 'arrowright') { e.preventDefault(); guess('blue'); }

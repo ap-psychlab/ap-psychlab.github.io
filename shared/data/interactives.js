@@ -59,7 +59,7 @@ window.APPSYCH_INTERACTIVES = [
     status: "listed",
     image: "", alt: "",
     howTo: [
-      "Each round, guess whether Chip the robot will pick red or blue.",
+      "Each round, guess whether Chip the robot will pick red or blue: click a button, or press R / B (or the ← / → arrow keys).",
       "Chip picks red 70% of the time, and every pick is independent of the last.",
       "After 40 rounds, compare your score with simply guessing red every time."
     ]

@@ -1,9 +1,11 @@
 /* Outguess the Robot — styles for this interactive (theme comes from ../../shared/theme.css) */
 
 :root {
-  /* Stimulus colors (true colors, used only for the two picks) */
+  /* Stimulus colors (true colors, used only for the two picks; the same in both modes,
+     so there is no dark block). --stim-text is the light text and marks on them. */
   --stim-red: #B71C1C;
   --stim-blue: #1749A8;
+  --stim-text: #FAF6F0;
 
   /* Chip the robot (its own palette, robot only) */
   --bot-shell-hi: #FFFFFF;
@@ -50,7 +52,7 @@
 .bubble::after  { bottom: -10px; border-width: 11px 9px 0;  border-top-color: var(--bg-alt); }
 #say { margin: 0; color: var(--heading); font-size: 1.05rem; }
 #say strong { display: block; }
-#say .red, #say .blue { padding: 0 6px; border-radius: 4px; color: var(--bg); }
+#say .red, #say .blue { padding: 0 6px; border-radius: 4px; color: var(--stim-text); }
 #say .red { background: var(--stim-red); }
 #say .blue { background: var(--stim-blue); }
 
@@ -147,10 +149,23 @@
   justify-content: center;
   gap: 8px;
 }
-.pick svg { width: 22px; height: 22px; fill: var(--bg); }
+.pick { color: var(--stim-text); }
+.pick svg { width: 22px; height: 22px; fill: var(--stim-text); }
 .pick-red, .pick-red:hover   { background: var(--stim-red); }
 .pick-blue, .pick-blue:hover { background: var(--stim-blue); }
 .pick:hover:not(:disabled) { filter: brightness(1.15); }
+
+/* ---------- Stats + restart ---------- */
+.stat-row { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; margin-bottom: 16px; }
+.stat-row .stats { margin-bottom: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stat-row .icon-btn { height: auto; border-radius: var(--radius-card); }
+.stat-row .icon-btn:disabled { opacity: .5; cursor: default; }
+.stat-row .icon-btn:disabled:hover { background: transparent; }
+
+.play-hint { margin: 8px auto 0; max-width: 520px; }
+
+/* ---------- Restart confirmation (shared modal) ---------- */
+.modal-actions { justify-content: flex-start; margin-bottom: 0; }
 
 /* ---------- History strip ---------- */
 .side .card { margin-bottom: 16px; }
@@ -165,7 +180,7 @@
   justify-content: center;
   font-weight: 700;
   font-size: .8rem;
-  color: var(--bg);
+  color: var(--stim-text);
 }
 .chip[data-c="red"]  { background: var(--stim-red); border-radius: 50%; }
 .chip[data-c="blue"] { background: var(--stim-blue); border-radius: 4px; }
