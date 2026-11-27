@@ -86,6 +86,30 @@
     if (UI && UI.icons[b.dataset.icon]) b.innerHTML = UI.icons[b.dataset.icon];
   });
 
+  // Confirm dialog example
+  var cBtn = document.getElementById('sgConfirm'), cOut = document.getElementById('sgConfirmResult');
+  if (cBtn && UI && UI.confirm) cBtn.addEventListener('click', function () {
+    UI.confirm({
+      title: 'Start a new puzzle?',
+      text: 'Your Easy and Hard puzzles in progress will be cleared.',
+      ok: 'New puzzle',
+      onAnswer: function (yes) { cOut.textContent = yes ? 'You chose New puzzle.' : 'You chose Keep playing (nothing changed).'; }
+    });
+  });
+
+  // Print example: the icon opens example options; onBefore notes that it ran, and in which mode
+  var pOut = document.getElementById('sgPrintResult');
+  if (UI && UI.print) {
+    var printGo = false;
+    UI.print.onRequest(function () {
+      UI.openModal('sgPrintModal', { onClose: function () { if (printGo) { printGo = false; window.print(); } } });
+    });
+    document.getElementById('sgPrintGo').addEventListener('click', function () { printGo = true; UI.closeModal('sgPrintModal'); });
+    UI.print.onBefore(function () {
+      pOut.textContent = 'onBefore ran at ' + new Date().toLocaleTimeString() + ', in ' + UI.theme.get() + ' mode.';
+    });
+  }
+
   // Keep the focus example outlined so the style is always visible
   var f = document.getElementById('focusDemo');
   if (f) f.classList.add('show-focus');

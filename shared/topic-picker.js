@@ -18,7 +18,8 @@
  *     openButton: buttonElement,     // opens the dialog
  *     summary: spanElement,          // optional: shows "All topics · 824 terms"
  *     intro: "Terms are drawn from the topics you check.",
- *     onChange: function (pool) {}   // after the player presses Done, and after the course changes
+ *     onChange: function (pool) {},  // after the player presses Done, and after the course changes
+ *     confirmChange: function (proceed) {}   // optional: ask before new topics clear progress
  *   });
  *   picker.pool()      // items in the selected topics (and the course; Unit Exam Terms if chosen)
  *   picker.label()     // "All topics", "Memory, Thinking", or "5 topics"
@@ -36,6 +37,18 @@
  *   ?groups=, ?ced= or ?all in the address, the saved one is restored (topics the course or
  *   this game doesn't have are dropped) and written to the address. Shared by every game.
  * Topics with no items show a count of 0 and can't be checked.
+ * Asking first (confirmChange): new topics clear the progress made from the old ones, so an
+ *   activity that saves progress passes confirmChange. On Done the dialog closes and, if the
+ *   selection changed, calls confirmChange(proceed) once focus is back on the open button; the
+ *   new selection is applied (saved, written to the address, onChange) only when the activity
+ *   calls proceed(). Until then, or if it never does, the old selection stays and nothing is
+ *   saved or written. Done with an unchanged selection just closes (no hook, no onChange).
+ *   Usual body:
+ *     if (!hasProgress()) proceed();
+ *     else APPSYCH_UI.confirm({ title: "Change topics?", text: "…will be cleared.",
+ *       ok: "Change topics", onAnswer: function (yes) { if (yes) proceed(); } });
+ *   A course change doesn't pass through it (it can come from another tab). Without
+ *   confirmChange, Done applies at once.
  */
 window.APPSYCH_TOPIC_PICKER = (function () {
   "use strict";
@@ -330,6 +343,7 @@ window.APPSYCH_TOPIC_PICKER = (function () {
     }
 
     var keepFocus = false;  // closing to focus the course menu instead of the open button
+    var pending = null;     // with confirmChange: the selection waiting for proceed()
     function open() {
       draft = { mode: selection.mode, ids: new Set(selection.ids), exam: selection.exam };
       renderHead();
@@ -350,6 +364,28 @@ window.APPSYCH_TOPIC_PICKER = (function () {
         return;
       }
       if (opts.openButton) opts.openButton.focus();
+      if (pending) ask(pending);
+    }
+    function sameSelection(a, b) {
+      if (a.mode !== b.mode || a.exam !== b.exam || a.ids.size !== b.ids.size) return false;
+      return Array.from(a.ids).every(function (id) { return b.ids.has(id); });
+    }
+    function apply(sel) {
+      selection = sel;
+      writeSelection();
+      saveSelection();
+      update();
+    }
+    function ask(sel) {
+      pending = null;
+      var forCourse = course, used = false;
+      opts.confirmChange(function proceed() {
+        // Once only, and not for a course that has changed since Done
+        if (used || course !== forCourse) return;
+        used = true;
+        apply(sel);
+        if (opts.onChange) opts.onChange(result.pool);
+      });
     }
 
     dialog.addEventListener("close", afterClose);
@@ -369,10 +405,13 @@ window.APPSYCH_TOPIC_PICKER = (function () {
       else if (act === "cancel") close();
       else if (act === "course") { keepFocus = true; close(); }
       else if (act === "done") {
-        selection = draft;
-        writeSelection();
-        saveSelection();
-        update();
+        if (opts.confirmChange) {
+          // Asked once the dialog has closed (afterClose); an unchanged selection just closes
+          pending = sameSelection(draft, selection) ? null : draft;
+          close();
+          return;
+        }
+        apply(draft);
         close();
         if (opts.onChange) opts.onChange(result.pool);
       }

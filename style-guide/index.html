@@ -291,7 +291,7 @@
     </div>
 
     <h3>Title bar</h3>
-    <p class="hint">The band spans the window; its contents line up with <code>main</code>. ui.js adds the ⓘ button (its popover comes from <code>interactives.js</code>) and the sound, settings and full-screen icons. Below 760px the modes take their own row. These examples sit inside this page's column; the first one's full-screen button works (whole page).</p>
+    <p class="hint">The band spans the window; its contents line up with <code>main</code>. ui.js adds the ⓘ button (its popover comes from <code>interactives.js</code>) and the sound, settings, print and full-screen icons. Below 760px the modes take their own row. These examples sit inside this page's column; the first one's full-screen button works (whole page).</p>
     <div class="sg-bars">
       <header class="topbar" data-interactive="memory-span">
         <div class="topbar-inner">
@@ -321,12 +321,13 @@
                 <button type="button" aria-pressed="false">Two</button>
               </div>
             </div>
+            <button class="icon-btn" type="button" data-ui="print"></button>
           </div>
         </div>
       </header>
     </div>
     <ul class="notes">
-      <li>Left: the page's <code>h1</code> and ⓘ (description, how to play, class unit and CED topic). Center: <code>.modes</code> with <code>.mode</code> buttons (<code>aria-pressed</code>), only for interactives with 2+ modes. Right: <code>data-ui="sound"</code>, then <code>data-ui="settings"</code>, then <code>data-ui="fullscreen"</code>, each only if used.</li>
+      <li>Left: the page's <code>h1</code> and ⓘ (description, how to play, class unit and CED topic). Center: <code>.modes</code> with <code>.mode</code> buttons (<code>aria-pressed</code>), only for interactives with 2+ modes. Right: <code>data-ui="sound"</code>, then <code>data-ui="settings"</code>, then <code>data-ui="print"</code>, then <code>data-ui="fullscreen"</code>, each only if used.</li>
       <li>Sound starts off on every page load. Scripts check <code>APPSYCH_UI.sound.on</code>.</li>
       <li>Popovers close with Escape (focus returns to the button) or a click outside.</li>
     </ul>
@@ -358,6 +359,7 @@
     <div class="row" style="justify-content:flex-start">
       <div class="labeled"><button class="icon-btn" type="button" aria-label="Restart" title="Restart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button><code>restart</code></div>
       <div class="labeled"><button class="icon-btn" type="button" data-ui="sound"></button><code>data-ui="sound"</code></div>
+      <div class="labeled"><button class="icon-btn" type="button" aria-label="Print (example)" title="Print…" data-icon="print"></button><code>print</code></div>
       <div class="labeled"><button class="icon-btn" type="button" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button><code>close</code></div>
       <div class="labeled"><button class="icon-btn" type="button" aria-label="Full screen (example)" title="Full screen" data-icon="fullscreen"></button><code>fullscreen</code></div>
     </div>
@@ -385,7 +387,41 @@
         <div class="row" style="justify-content:flex-start"><button class="btn" type="button" data-ui="close">Done</button></div>
       </div>
     </dialog>
-    <p class="hint">Open with <code>data-modal="id"</code> or <code>APPSYCH_UI.openModal('id')</code>; add <code>class="wide"</code> for a 1000px modal.</p>
+    <p class="hint">Open with <code>data-modal="id"</code> or <code>APPSYCH_UI.openModal('id')</code>; add <code>class="wide"</code> for a 1000px modal. Buttons at the end go in <code>&lt;div class="row modal-actions"&gt;</code>, the action first.</p>
+
+    <h3>Confirm dialog</h3>
+    <div class="row" style="justify-content:flex-start">
+      <button class="btn ghost" type="button" id="sgConfirm">New puzzle (example)</button>
+    </div>
+    <p class="hint" id="sgConfirmResult" aria-live="polite">Not answered yet.</p>
+    <ul class="notes">
+      <li>Before an action that throws away progress in hand (New puzzle, Restart ↺, changing topics), and only when something would be lost: untouched or finished work resets without asking.</li>
+      <li><code>APPSYCH_UI.confirm({ title, text, ok, onAnswer })</code>. The text says what will be lost. Buttons: the action (<code>.btn</code>) and "Keep playing" (<code>.btn.ghost</code>, the default <code>cancel</code>).</li>
+      <li>Focus starts on Keep playing. Escape, the ✕ and the backdrop count as Keep playing. <code>onAnswer(yes)</code> runs after it closes, with focus back on the button that opened it.</li>
+      <li>The activity pauses before asking and carries on unchanged after Keep playing. Topic changes ask through the topic picker's <code>confirmChange</code> option.</li>
+    </ul>
+
+    <h3>Print</h3>
+    <p class="hint">Printable activities only (word search, crossword). The print icon in the Lights Off example above shows how it works on this page.</p>
+    <ul class="notes">
+      <li><code>&lt;button class="icon-btn" data-ui="print"&gt;</code> in the title bar's tools, after settings and before full screen. ui.js adds the printer icon and "Print…".</li>
+      <li><code>APPSYCH_UI.print.onRequest(fn)</code>: the icon calls <code>fn</code>, which opens the activity's print options (here, an example modal).</li>
+      <li><code>APPSYCH_UI.print.onBefore(fn)</code>: runs just before every print, after the page switches to light, so Ctrl+P prints the activity's own layout with the last-used options. Black on white, US Letter, 0.5in margins, no site bar or title bar; the screen layout never changes.</li>
+    </ul>
+    <p class="hint" id="sgPrintResult" aria-live="polite">onBefore hasn't run yet. Press the print icon, or Ctrl+P.</p>
+    <dialog class="modal" id="sgPrintModal" aria-labelledby="sgPrintTitle">
+      <div class="modal-head">
+        <h2 id="sgPrintTitle">Print options (example)</h2>
+        <button class="icon-btn" type="button" data-ui="close" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <p>An activity's print options go here (e.g. word bank, answer key). Its Print button builds the print layout and calls <code>window.print()</code>. Here it prints this page.</p>
+        <div class="row modal-actions">
+          <button class="btn" type="button" id="sgPrintGo">Print</button>
+          <button class="btn ghost" type="button" data-ui="close">Cancel</button>
+        </div>
+      </div>
+    </dialog>
   </section>
 
   <!-- ============ ACCESSIBILITY ============ -->

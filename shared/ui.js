@@ -1,5 +1,5 @@
-/* AP Psych Lab — site bar, title bar, light/dark, saved settings, sound, full screen, popovers
- * and modals: window.APPSYCH_UI
+/* AP Psych Lab — site bar, title bar, light/dark, saved settings, sound, full screen, popovers,
+ * modals, the confirm dialog and printing: window.APPSYCH_UI
  *
  * <head> of an interactive page, in this order:
  *   <meta charset="utf-8">
@@ -36,6 +36,7 @@
  *         <button class="icon-btn" type="button" data-ui="sound"></button>
  *         <button class="icon-btn" type="button" data-ui="settings" aria-controls="settings"></button>
  *         <div class="popover" id="settings" role="dialog" aria-label="Settings" hidden>…</div>
+ *         <button class="icon-btn" type="button" data-ui="print"></button>        printable activities only
  *         <button class="icon-btn" type="button" data-ui="fullscreen"></button>   Stage/Column only
  *       </div>
  *     </div>
@@ -43,7 +44,8 @@
  *   - data-interactive is the interactive's id in interactives.js. The ⓘ popover shows its
  *     description, howTo, its class unit(s) in the chosen course, and (in AP only) its CED
  *     topic(s). Without a matching entry there is no ⓘ button.
- *   - ui.js gives data-ui="sound", "settings" and "fullscreen" buttons their icon, label and title.
+ *   - ui.js gives data-ui="sound", "settings", "print" and "fullscreen" buttons their icon, label
+ *     and title.
  *
  * SOUND — off on every page load.
  *   APPSYCH_UI.sound.on                 true or false; check before playing a sound
@@ -92,14 +94,42 @@
  *   APPSYCH_UI.openModal(id, { backdropClose: true, onClose: fn })
  *   APPSYCH_UI.closeModal(id)
  *   A button with data-modal="<id>" opens it; a button inside with data-ui="close" closes it.
+ *   Act after a modal closes in onClose (focus is back on the opener by then), not in a button's
+ *   click handler: set a flag in the button and read it in onClose.
+ *
+ * CONFIRM — the one dialog for "this will lose progress" (built on first use; no markup needed).
+ *   APPSYCH_UI.confirm({
+ *     title: "Start a new puzzle?",
+ *     text: "Your Easy and Hard puzzles in progress will be cleared.",   what will be lost
+ *     ok: "New puzzle",                  the action (.btn); default "Continue"
+ *     cancel: "Keep playing",            optional; this is the default (.btn.ghost)
+ *     onAnswer: function (yes) {}        true only after the ok button
+ *   })
+ *   - Ask only when something would be lost; untouched or finished work resets without asking.
+ *   - Focus starts on the cancel button. Escape, the ✕ and the backdrop count as cancel.
+ *   - onAnswer runs after the dialog has closed and focus is back on what opened it (move focus
+ *     to the play area there if the activity needs it). Pause before calling confirm and resume
+ *     in onAnswer, so nothing runs behind the dialog.
+ *   - Returns false (and never calls onAnswer) if a confirm is already open.
+ *
+ * PRINT — printable activities only: <button class="icon-btn" data-ui="print"> in the title bar's
+ *   tools, after settings and before full screen. ui.js gives it the printer icon and "Print…".
+ *   APPSYCH_UI.print.onRequest(fn)      the icon calls fn: open the activity's print options,
+ *                                       whose Print button builds the print layout and calls
+ *                                       window.print(). Without fn the icon just prints the page.
+ *   APPSYCH_UI.print.onBefore(fn)       fn() just before every print (the icon's or Ctrl+P), after
+ *                                       the page has switched to light: build the print layout
+ *                                       here with the last-used options, so Ctrl+P prints it too
+ *   The print layout is its own element, shown only by the activity's @media print rules (black
+ *   on white, US Letter, 0.5in margins); the screen layout never changes for printing.
  *
  * OTHER
  *   APPSYCH_UI.interactive              this page's interactives.js entry, or null
  *   APPSYCH_UI.homeUrl                  the home page's address (works from file:// too)
  *   APPSYCH_UI.announce(text)           read text aloud to screen readers (polite)
- *   APPSYCH_UI.icons                    SVG markup: info, sound, settings, restart, close, psi,
- *                                       moon, sun, fullscreen, fullscreenExit
- *   APPSYCH_UI.refresh()                wire popover buttons and sound/settings icons added later
+ *   APPSYCH_UI.icons                    SVG markup: info, sound, settings, print, restart, close,
+ *                                       psi, moon, sun, fullscreen, fullscreenExit
+ *   APPSYCH_UI.refresh()                wire popover buttons and sound/settings/print icons added later
  *
  * SHARING A LINK — there are no teacher links in the ⓘ. An interactive keeps its shareable
  *   choices in the address (e.g. ?mode= when a mode is chosen, ?groups= when topics are chosen),
@@ -112,6 +142,7 @@ window.APPSYCH_UI = (function () {
       '<path class="snd-on" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="snd-on" d="M18.5 5.5a9 9 0 0 1 0 13"/>' +
       '<path class="snd-off" d="m16 9 6 6"/><path class="snd-off" d="m22 9-6 6"/></svg>',
     settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+    print: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>',
     restart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
     close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
     // Ψ: Google's fonts have no Greek letters, so it's drawn. Color it with CSS color (--psi).
@@ -211,8 +242,14 @@ window.APPSYCH_UI = (function () {
   window.addEventListener('storage', function (e) {
     if (!printing && (e.key === null || e.key === PREFIX + 'theme')) applyTheme(preferredTheme());
   });
-  // Paper is white: print in light colors, then put the mode back.
-  window.addEventListener('beforeprint', function () { printing = true; applyTheme('light'); });
+  // Paper is white: print in light colors, then put the mode back. The activity's print layout
+  // is built after the switch (see Print below).
+  var printBeforeFns = [];
+  window.addEventListener('beforeprint', function () {
+    printing = true;
+    applyTheme('light');
+    printBeforeFns.forEach(function (fn) { fn(); });
+  });
   window.addEventListener('afterprint', function () { printing = false; applyTheme(preferredTheme()); });
 
   /* ---------- Course ---------- */
@@ -499,6 +536,66 @@ window.APPSYCH_UI = (function () {
     else { var d = t.closest('dialog'); if (d) d.close(); }
   });
 
+  /* ---------- Confirm (before losing progress) ---------- */
+  var confirmBox = null, confirmOk = false;
+  function buildConfirm() {
+    confirmBox = el('dialog', {
+      'class': 'modal confirm', id: 'appsych-confirm', role: 'alertdialog',
+      'aria-labelledby': 'appsych-confirm-title', 'aria-describedby': 'appsych-confirm-text'
+    },
+      '<div class="modal-head"><h2 id="appsych-confirm-title"></h2>' +
+      '<button class="icon-btn" type="button" data-ui="close" aria-label="Close" title="Close">' + ICONS.close + '</button></div>' +
+      '<div class="modal-body"><p id="appsych-confirm-text"></p>' +
+      '<div class="row modal-actions">' +
+      '<button class="btn" type="button" data-confirm="ok"></button>' +
+      '<button class="btn ghost" type="button" data-ui="close" data-confirm="cancel" autofocus></button>' +
+      '</div></div>');
+    confirmBox.querySelector('[data-confirm="ok"]').addEventListener('click', function () {
+      confirmOk = true;
+      confirmBox.close();
+    });
+    document.body.appendChild(confirmBox);
+  }
+  function confirmDialog(o) {
+    o = o || {};
+    var answer = typeof o.onAnswer === 'function' ? o.onAnswer : function () {};
+    if (!confirmBox) buildConfirm();
+    if (confirmBox.open) return false;
+    if (typeof confirmBox.showModal !== 'function') {  // very old browsers
+      answer(window.confirm((o.title || '') + (o.text ? '\n\n' + o.text : '')));
+      return true;
+    }
+    confirmBox.querySelector('h2').textContent = o.title || 'Are you sure?';
+    var p = confirmBox.querySelector('#appsych-confirm-text');
+    p.textContent = o.text || '';
+    p.hidden = !o.text;
+    confirmBox.querySelector('[data-confirm="ok"]').textContent = o.ok || 'Continue';
+    var cancelBtn = confirmBox.querySelector('[data-confirm="cancel"]');
+    cancelBtn.textContent = o.cancel || 'Keep playing';
+    confirmOk = false;
+    openModal('appsych-confirm', {
+      onClose: function () { var yes = confirmOk; confirmOk = false; answer(yes); }
+    });
+    cancelBtn.focus();
+    return true;
+  }
+
+  /* ---------- Print ---------- */
+  var printRequestFns = [];
+  var print = {
+    onRequest: function (fn) { printRequestFns.push(fn); },
+    onBefore: function (fn) { printBeforeFns.push(fn); }
+  };
+  function initPrint(b) {
+    if (!b.innerHTML.trim()) b.innerHTML = ICONS.print;
+    b.setAttribute('aria-label', 'Print…');
+    b.title = 'Print…';
+    b.addEventListener('click', function () {
+      if (printRequestFns.length) printRequestFns.forEach(function (fn) { fn(); });
+      else window.print();
+    });
+  }
+
   /* ---------- The ⓘ popover ---------- */
   // Class unit(s) in the chosen course; CED topic(s) in AP only.
   function topicLines(item) {
@@ -551,6 +648,9 @@ window.APPSYCH_UI = (function () {
       b.setAttribute('aria-label', 'Settings');
       b.title = 'Settings';
     });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ui="print"]'), function (b) {
+      if (!b.dataset.uiPrint) { b.dataset.uiPrint = '1'; initPrint(b); }
+    });
     Array.prototype.forEach.call(document.querySelectorAll('[data-ui="fullscreen"]'), function (b) {
       if (!b.dataset.uiFs) { b.dataset.uiFs = '1'; initFullscreen(b); }
     });
@@ -564,6 +664,8 @@ window.APPSYCH_UI = (function () {
     closePopovers: function () { closePopovers(); },
     openModal: openModal,
     closeModal: closeModal,
+    confirm: confirmDialog,
+    print: print,
     announce: announce,
     icons: ICONS,
     homeUrl: homeUrl,
