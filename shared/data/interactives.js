@@ -178,8 +178,9 @@ window.APPSYCH_INTERACTIVES = [
     status: "listed",
     image: "", alt: "",
     howTo: [
-      "Choose your topics, then climb from island to island.",
-      "Answer the practice question at each lantern on the way up to the treasure at 500 ft."
+      "Choose your topics, then click the scene and climb: ← → or A / D to run, Space, W or ↑ to jump (hold to jump higher), Shift to walk. On a phone, use the buttons below the scene.",
+      "Answer the question at each lantern ledge (click, tap, or press 1–4). The lantern you light is your checkpoint: press R or Back to last lantern to return to it.",
+      "The treasure at 500 ft holds a star for each correct answer. Full screen (top right) makes the scene bigger."
     ]
   },
   {

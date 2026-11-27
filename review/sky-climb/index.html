@@ -3,31 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sky Climb</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<title>Sky Climb · AP Psych Lab</title>
+<script src="../../shared/theme-init.js"></script>
+<link rel="icon" href="../../shared/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../shared/apple-touch-icon.png">
 <link rel="stylesheet" href="../../shared/theme.css">
 <link rel="stylesheet" href="../../shared/topic-picker.css">
 <link rel="stylesheet" href="../../shared/question-extras.css">
 <link rel="stylesheet" href="style.css">
-<script src="../../shared/data/questions.js" defer></script>
 <script src="../../shared/data/topics.js" defer></script>
 <script src="../../shared/data/terms.js" defer></script>
+<script src="../../shared/data/questions.js" defer></script>
+<script src="../../shared/data/interactives.js" defer></script>
+<script src="../../shared/ui.js" defer></script>
 <script src="../../shared/topic-picker.js" defer></script>
 <script src="../../shared/figures.js" defer></script>
 <script src="../../shared/term-help.js" defer></script>
 <script src="script.js" defer></script>
 </head>
 <body>
+<nav class="sitebar" aria-label="Site"></nav>
+<header class="topbar" data-interactive="sky-climb">
+  <div class="topbar-inner">
+    <div class="brand"><h1>Sky Climb</h1></div>
+    <div class="tools">
+      <button class="icon-btn" type="button" data-ui="fullscreen" data-target="game"></button>
+    </div>
+  </div>
+</header>
+
 <main>
-  <h1>Sky Climb</h1>
   <p class="hint">Climb the floating islands from the forest floor to the treasure at 500 ft. A question waits at each lantern ledge, and the lantern you light becomes your checkpoint. Click the scene, then use ← → (or A / D) to run and Space, W or ↑ to jump: hold for a higher jump, tap for a hop. Hold Shift to walk, and press R to return to your last lantern. On a phone, use the buttons below the scene.</p>
 
-  <section class="card game" aria-label="Game">
+  <section class="card game" id="game" aria-label="Game">
     <div class="hud">
       <div class="hud-alt"><strong id="alt">0 ft</strong><span id="zone">Forest floor</span></div>
-      <ol class="pips" id="pips" aria-label="Questions: none answered yet"></ol>
+      <div class="hud-right">
+        <ol class="pips" id="pips" aria-label="Questions: none answered yet"></ol>
+        <button class="icon-btn" type="button" id="restartBtn" aria-label="Start a new climb" title="Start a new climb" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+      </div>
     </div>
     <div id="view" tabindex="0" role="application" aria-label="Sky Climb game. Left and right arrows run, space jumps, shift walks, R returns to the last lantern.">
       <canvas id="cv" width="512" height="320"></canvas>
@@ -44,10 +58,9 @@
       <span id="topicSummary">All topics</span>
       <button class="btn alt" id="topicsBtn" type="button" aria-haspopup="dialog">Choose topics</button>
       <button class="btn ghost" id="warpBtn" type="button">Back to last lantern</button>
-      <button class="btn ghost" id="restartBtn" type="button">Start over</button>
       <button class="btn ghost" id="resultsBtn" type="button" hidden>Results</button>
     </div>
-    <p class="hint" id="note" aria-live="polite"></p>
+    <p class="hint" id="note"></p>
     <p class="hint center">Lanterns: a number is a question you haven't reached, ✓ is answered correctly, ✗ is missed.</p>
   </section>
 
@@ -105,7 +118,21 @@
     </div>
   </dialog>
 
-  <div class="sr-only" aria-live="polite" id="live"></div>
 </main>
+
+<!-- ---------- Start over? (shared modal) ---------- -->
+<dialog class="modal" id="restartModal" aria-labelledby="restartTitle" aria-describedby="restartText">
+  <div class="modal-head">
+    <h2 id="restartTitle">Start a new climb?</h2>
+    <button class="icon-btn" type="button" data-ui="close" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <div class="modal-body">
+    <p id="restartText">You'll start again on the forest floor with new islands. Your lanterns and answers on this climb won't be kept.</p>
+    <div class="row modal-actions">
+      <button class="btn" type="button" id="yesBtn">Start over</button>
+      <button class="btn ghost" type="button" data-ui="close">Keep climbing</button>
+    </div>
+  </div>
+</dialog>
 </body>
 </html>

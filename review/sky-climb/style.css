@@ -1,10 +1,9 @@
-/* Sky Climb — styles for this interactive (theme comes from ../../shared/theme.css) */
+/* Sky Climb — styles for this interactive (theme comes from ../../shared/theme.css).
+   Page UI uses theme tokens only, so it follows light and dark mode. The art palette below is
+   the same in both modes (the scene is a sunset either way). */
 
 :root {
-  /* Dims the page behind this page's dialogs */
-  --sc-backdrop: rgba(59, 42, 32, .45);
-
-  /* Game art palette (read once by script.js; never used for page UI).
+  /* Art palette (read once by script.js; never used for page UI).
      Sky: one sunset from the horizon (0 ft) up to night (500 ft). */
   --px-sky0: #FFE9AE; --px-sky1: #FFD68E; --px-sky2: #FFBC7D; --px-sky3: #FDA07A; --px-sky4: #F6837F;
   --px-sky5: #E66C8C; --px-sky6: #CB5E9A; --px-sky7: #A556A3; --px-sky8: #7E4EA3; --px-sky9: #5E479B;
@@ -41,12 +40,16 @@
 .center { text-align: center; }
 
 /* ---------- Game card ---------- */
-.game { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 16px; }
+/* --play-w: the width of the scene and the rows above and below it (grows in full screen) */
+.game { --play-w: min(100%, 768px); display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 16px; }
 .game .row { margin-bottom: 0; }
-.hud, .touch, .controls, #note { width: min(100%, 768px); }
+.hud, .touch, .controls, #note { width: var(--play-w); }
 .hud { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; }
 .hud strong { color: var(--heading); font-size: 1.25rem; font-variant-numeric: lining-nums tabular-nums; }
 .hud-alt span { margin-left: 4px; }
+.hud-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.hud-right .icon-btn:disabled { opacity: .5; cursor: default; }
+.hud-right .icon-btn:disabled:hover { background: transparent; }
 
 /* Question lanterns: number = not answered yet, check = correct, cross = missed */
 .pips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
@@ -57,11 +60,15 @@
   color: var(--heading); font-weight: 700; font-size: .75rem; line-height: 1;
   font-variant-numeric: lining-nums tabular-nums;
 }
-.pips li.correct { background: var(--sage); border-color: var(--sage); }
+@media (max-width: 420px) {              /* ten lanterns and the ↺ in one row on phones */
+  .pips { gap: 3px; }
+  .pips li { width: 20px; height: 20px; font-size: .7rem; }
+}
+.pips li.correct { background: var(--sage); border-color: var(--sage); color: var(--on-accent); }
 .pips li.wrong { border: 2px dashed var(--error); }
 
 #view {
-  position: relative; width: min(100%, 768px); aspect-ratio: 512 / 320;
+  position: relative; width: var(--play-w); aspect-ratio: 512 / 320;
   border: 1px solid var(--border); border-radius: var(--radius-btn);
   overflow: hidden; background: var(--bg-alt); touch-action: none;
 }
@@ -106,10 +113,10 @@
   border-radius: var(--radius-card);
   background: var(--bg);
   color: var(--text);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-pop);
 }
 .sc-dialog[open] { display: flex; flex-direction: column; }
-.sc-dialog::backdrop { background: var(--sc-backdrop); }
+.sc-dialog::backdrop { background: var(--scrim); }
 .sc-dlg-head, .sc-dlg-foot { padding: 12px 16px; background: var(--bg-alt); }
 .sc-dlg-head {
   border-bottom: 1px solid var(--border);
@@ -149,7 +156,7 @@
 .tag .icon { display: inline-block; width: 1.1em; }
 /* Revealed answers (labels carry the meaning; color only reinforces it) */
 .choice.is-answer { border-color: var(--sage); background: var(--bg-alt); background: color-mix(in srgb, var(--sage) 28%, var(--bg)); }
-.choice.is-answer .letter { background: var(--sage); border-color: var(--sage); }
+.choice.is-answer .letter { background: var(--sage); border-color: var(--sage); color: var(--on-accent); }
 .choice.is-wrong { border-color: var(--error); border-style: dashed; }
 .choice.is-wrong .letter { background: var(--error); border-color: var(--error); color: var(--bg); }
 .fb {
@@ -195,10 +202,30 @@
   padding: 0 8px; border-radius: 999px; font-size: .8rem; font-weight: 700; line-height: 1.8;
   color: var(--heading); background: var(--bg-alt); border: 1px solid var(--border);
 }
-.badge.correct { background: var(--sage); border-color: var(--sage); }
+.badge.correct { background: var(--sage); border-color: var(--sage); color: var(--on-accent); }
 .badge.wrong { background: var(--bg); border: 1px dashed var(--error); }
 
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+/* ---------- Restart confirmation (shared modal) ---------- */
+.modal-body p { margin: 0 0 16px; }
+.modal-actions { justify-content: flex-start; margin-bottom: 0; }
+
+/* ---------- Full screen (the game card; ui.js adds .fs-target and the corner exit button) ----------
+   The scene grows to the largest 16:10 size that leaves room for the rows around it
+   (--play-chrome: the HUD, the buttons, the notes and the card's padding). */
+#game:fullscreen {
+  --play-chrome: 176px;
+  --play-w: min(100%, calc((100vh - var(--play-chrome)) * 1.6));
+  margin: 0; border: 0; border-radius: 0; justify-content: center; overflow-y: auto;
+}
+#game:-webkit-full-screen {
+  --play-chrome: 176px;
+  --play-w: min(100%, calc((100vh - var(--play-chrome)) * 1.6));
+  margin: 0; border: 0; border-radius: 0; justify-content: center; overflow-y: auto;
+}
+@media (pointer: coarse), (max-width: 600px) {
+  #game:fullscreen, #game:-webkit-full-screen { --play-chrome: 280px; }
+}
+/* Tall screens (phones upright): room at the top for the corner exit button */
+@media (max-aspect-ratio: 4/3) {
+  #game:fullscreen, #game:-webkit-full-screen { padding-top: 64px; justify-content: flex-start; }
 }

@@ -1,7 +1,13 @@
 // Sky Climb — a platformer quiz: climb 500 ft of floating islands and answer a question at each lantern ledge.
-// Questions: ../../shared/data/questions.js; topic groups: ../../shared/data/topics.js;
-// topic dialog: ../../shared/topic-picker.js.
-// URL options: ?groups=memory,thinking or ?ced=2.3,2.4 (topics), ?dev (test tools), ?seed=7 (repeat a layout).
+// Questions: ../../shared/data/questions.js (through APPSYCH_TOPICS.questions()); topic groups:
+// ../../shared/data/topics.js; topic dialog: ../../shared/topic-picker.js (it keeps the chosen course's
+// questions); title bar, full screen, modals and announcements: ../../shared/ui.js.
+// URL options: ?groups=memory,thinking, ?ced=2.3,2.4 (AP only) and ?all (topics, written by the picker);
+// test options: ?dev (test tools; also lists every course in the course menu), ?seed=7 (repeat a layout).
+//
+// The game runs only while the scene has focus and no dialog is open, so a dialog (a question, the
+// results, "Start a new climb?", the topic picker) pauses it. A course change re-deals the questions
+// not answered yet, like a topic change; answered ones stay.
 //
 // Question rule: the climb is split into ten 50 ft bands. The first time the hero lands on a platform in a band,
 // that band's question is asked (once, even if the hero falls and comes back). The top band (450–500 ft) saves
@@ -22,6 +28,7 @@ const $ = (id) => document.getElementById(id);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const params = new URLSearchParams(location.search);
 const DEV = params.has('dev') || document.documentElement.hasAttribute('data-dev');
+const UI = window.APPSYCH_UI;
 
 /* ==== SECTION: CONFIG (physics and difficulty) ==== */
 const CONFIG = {
@@ -699,7 +706,10 @@ function newClimb() {
 }
 
 /* ==== SECTION: Questions ==== */
-const BANK = (window.APPSYCH_QUESTIONS || []).filter((q) => q.status !== "omitted"), TOPICS = window.APPSYCH_TOPICS, PICKER = window.APPSYCH_TOPIC_PICKER;
+const TOPICS = window.APPSYCH_TOPICS, PICKER = window.APPSYCH_TOPIC_PICKER;
+// Every active question; the picker keeps the chosen course's (so a course change needs no reload)
+const BANK = TOPICS ? TOPICS.questions() : [];
+const courseBank = () => { const c = UI && UI.course ? TOPICS.questions(UI.course.get()) : BANK; return c.length ? c : BANK; };
 const LETTERS = ['A', 'B', 'C', 'D'];
 const quiz = { deck: new Array(NQ).fill(null), results: new Array(NQ).fill(null), cur: -1, openedAt: 0 };
 let picker = null;
@@ -725,23 +735,27 @@ function dealDeck() {
   let fresh = shuffle(pool.filter((q) => !used.has(q.id))), repeats = false;
   for (let b = 0; b < NQ; b++) {
     if (quiz.results[b]) continue;
-    if (!fresh.length) { fresh = shuffle(pool.length ? pool : BANK); repeats = true; }
+    if (!fresh.length) { fresh = shuffle(pool.length ? pool : courseBank()); repeats = true; }
     quiz.deck[b] = makeItem(fresh.pop());
   }
   setNote(repeats ? 'These topics have only ' + pool.length + (pool.length === 1 ? ' question' : ' questions') + ', so some will repeat on the climb.' : '');
 }
-function setNote(text, warn) { const n = $('note'); n.textContent = text; n.classList.toggle('warn', !!warn); }
+function setNote(text, warn) {
+  const n = $('note'), changed = n.textContent !== text;
+  n.textContent = text; n.classList.toggle('warn', !!warn);
+  if (text && changed) say(text);
+}
 
 const qDialog = $('qDialog'), winDialog = $('winDialog');
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-function say(msg) { const live = $('live'); live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 30); }
-function showDlg(d) { if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', ''); }
-function closeDlg(d) { if (typeof d.close === 'function') d.close(); else { d.removeAttribute('open'); d.dispatchEvent(new Event('close')); } }
+function say(msg) { if (UI) UI.announce(msg); }
+// Dialogs open through the shared helper (focus returns to the opener, then onClose puts it on the scene)
+const backToScene = () => view.focus({ preventScroll: true });
 const anyDialogOpen = () => !!document.querySelector('dialog[open]');
 
 function openQuestion(b) {
   quiz.cur = b; quiz.openedAt = performance.now();
-  Input.clear(); renderQuestion(); showDlg(qDialog);
+  Input.clear(); renderQuestion(); UI.openModal('qDialog', { backdropClose: false, onClose: backToScene });
   qDialog.querySelector('.sc-dlg-body').scrollTop = 0;
   $('qTitle').focus({ preventScroll: true });
 }
@@ -801,13 +815,12 @@ $('hintBtn').addEventListener('click', () => {
   const it = quiz.deck[quiz.cur]; it.hintUsed = true; renderQuestion(); say('Hint: ' + it.q.hint);
   const first = $('choices').querySelector('button.choice'); if (first) first.focus({ preventScroll: true });
 });
-$('contBtn').addEventListener('click', () => closeDlg(qDialog));
+$('contBtn').addEventListener('click', () => UI.closeModal('qDialog'));
 // Esc can't skip a question; once it's answered, Esc works like "Keep climbing"
 qDialog.addEventListener('cancel', (e) => { const it = quiz.deck[quiz.cur]; if (!it || it.pick == null) e.preventDefault(); });
 qDialog.addEventListener('close', () => {
   const b = quiz.cur, it = quiz.deck[b]; quiz.cur = -1; hero.lock = 0; Input.clear();
   if (it && it.pick != null) { if (b === NQ - 1) startVictory(); else lightLamp(b); }
-  view.focus({ preventScroll: true });
 });
 // Number keys answer. Letters are left out on purpose: A and D also steer the hero.
 document.addEventListener('keydown', (e) => {
@@ -845,15 +858,14 @@ function showWin() {
     line('Explanation: ', it.q.explanation);
     d.appendChild(more); li.appendChild(d); list.appendChild(li);
   });
-  Input.clear(); showDlg(winDialog);
+  Input.clear(); UI.openModal('winDialog', { onClose: backToScene });
   winDialog.querySelector('.sc-dlg-body').scrollTop = 0;
   $('winH').focus({ preventScroll: true });
   say('You reached the summit. ' + right + ' of ' + items.length + ' correct.');
 }
-$('stayBtn').addEventListener('click', () => closeDlg(winDialog));
-$('againBtn').addEventListener('click', () => { closeDlg(winDialog); newClimb(); });
-winDialog.addEventListener('click', (e) => { if (e.target === winDialog) closeDlg(winDialog); });
-winDialog.addEventListener('close', () => { Input.clear(); view.focus({ preventScroll: true }); });
+$('stayBtn').addEventListener('click', () => UI.closeModal('winDialog'));
+$('againBtn').addEventListener('click', () => { UI.closeModal('winDialog'); newClimb(); say('New climb started.'); });
+winDialog.addEventListener('close', () => Input.clear());
 $('resultsBtn').addEventListener('click', () => { if (game.won && !anyDialogOpen()) showWin(); });
 
 /* ==== SECTION: Render ==== */
@@ -1005,15 +1017,21 @@ function touchBtn(id, k) {
 touchBtn('tl', 'left'); touchBtn('tr', 'right'); touchBtn('tj', 'jump');
 
 $('warpBtn').addEventListener('click', () => { if (ready) warp(); view.focus({ preventScroll: true }); });
-// "Start over" asks for a second click, so a stray click can't throw away a climb
-const restartBtn = $('restartBtn'); let restartArmed = 0;
-function disarmRestart() { clearTimeout(restartArmed); restartArmed = 0; restartBtn.textContent = 'Start over'; }
+// ↺ starts a new climb. With progress to lose it asks first (the shared modal; the game is paused
+// while it's open). "Keep climbing", Escape or the close button go back to the scene.
+const restartBtn = $('restartBtn'); let restartWanted = false;
+const hasProgress = () => game.won || game.lamps.some(Boolean) || quiz.results.some(Boolean) || hero.y > GROUND + PPF;
+function restartNow() { newClimb(); say('New climb started.'); backToScene(); }
 restartBtn.addEventListener('click', () => {
-  if (!ready) return;
-  if (!restartArmed) { restartBtn.textContent = 'Click again to start over'; restartArmed = setTimeout(disarmRestart, 4000); return; }
-  disarmRestart(); newClimb(); say('New climb started.'); view.focus({ preventScroll: true });
+  if (!ready || anyDialogOpen()) return;
+  if (!hasProgress()) { restartNow(); return; }
+  restartWanted = false; Input.clear();
+  UI.openModal('restartModal', { onClose: () => { if (restartWanted) restartNow(); else backToScene(); } });
 });
-restartBtn.addEventListener('blur', disarmRestart);
+$('yesBtn').addEventListener('click', () => { restartWanted = true; UI.closeModal('restartModal'); });
+
+// Full screen (the game card): the canvas follows the new size, and the scene takes focus so play goes on
+if (UI && UI.fullscreen) UI.fullscreen.onChange((elm) => { requestAnimationFrame(fit); if (elm && ready) backToScene(); });
 
 if (BANK.length && TOPICS && PICKER) {
   picker = PICKER.create({
@@ -1052,7 +1070,7 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 function start() {
-  buildArt(); buildRim(); newClimb(); fit(); ready = true;
+  buildArt(); buildRim(); newClimb(); fit(); ready = true; restartBtn.disabled = false;
   gateText.textContent = 'Click to play';
   last = performance.now(); requestAnimationFrame(frame);
 }
