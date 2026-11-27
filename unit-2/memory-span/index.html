@@ -3,65 +3,82 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Memory Span Test</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<title>Memory Span Test · AP Psych Lab</title>
+<script src="../../shared/theme-init.js"></script>
+<link rel="icon" href="../../shared/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../shared/apple-touch-icon.png">
 <link rel="stylesheet" href="../../shared/theme.css">
 <link rel="stylesheet" href="style.css">
+<script src="../../shared/data/topics.js" defer></script>
+<script src="../../shared/data/interactives.js" defer></script>
+<script src="../../shared/ui.js" defer></script>
 <script src="script.js" defer></script>
 </head>
 <body>
-<main class="wide">
-  <h1>Memory Span Test</h1>
-  <p class="hint">Watch the colors and tones, then repeat them in order. One color is added each round. Click the pads or press R, G, Y, B (or 1–4).</p>
-
-  <div class="split">
-  <div class="play">
-  <p id="status" role="status" aria-live="polite">Press Start to begin.</p>
-
-  <div class="grid" id="pads">
-    <button class="pad" data-c="0" disabled aria-label="Red, key R"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14"/></svg><span class="lbl">Red</span></button>
-    <button class="pad" data-c="1" disabled aria-label="Green, key G"><svg viewBox="0 0 36 36" aria-hidden="true"><rect x="5" y="5" width="26" height="26" rx="2"/></svg><span class="lbl">Green</span></button>
-    <button class="pad" data-c="2" disabled aria-label="Yellow, key Y"><svg viewBox="0 0 36 36" aria-hidden="true"><polygon points="18,3 33,32 3,32"/></svg><span class="lbl">Yellow</span></button>
-    <button class="pad" data-c="3" disabled aria-label="Blue, key B"><svg viewBox="0 0 36 36" aria-hidden="true"><polygon points="18,2 34,18 18,34 2,18"/></svg><span class="lbl">Blue</span></button>
-  </div>
-
-  <div class="row">
-    <button class="btn" id="startBtn">Start</button>
-    <button class="btn ghost" id="resetBtn" hidden>Restart</button>
-    <button class="btn alt" id="soundBtn" aria-pressed="true">Sound: On</button>
-  </div>
-
-  <div id="confirm" hidden role="alertdialog" aria-labelledby="confirmMsg">
-    <p id="confirmMsg">Restart the game? Your current run will end.</p>
-    <div class="row">
-      <button class="btn" id="yesBtn">Yes, restart</button>
-      <button class="btn ghost" id="noBtn">Keep playing</button>
+<nav class="sitebar wide" aria-label="Site"></nav>
+<header class="topbar wide" data-interactive="memory-span">
+  <div class="topbar-inner">
+    <div class="brand"><h1>Memory Span Test</h1></div>
+    <div class="tools">
+      <button class="icon-btn" type="button" data-ui="sound"></button>
     </div>
   </div>
+</header>
 
-  </div>
+<main class="wide">
+  <div class="split">
+    <div class="play">
+      <p id="status" role="status" aria-live="polite">Press Start to begin.</p>
 
-  <aside class="side" aria-label="Scores and results">
-  <div class="stats" aria-label="Scores">
-    <div class="stat"><span>Round</span><strong id="roundV">0</strong></div>
-    <div class="stat"><span>Score</span><strong id="scoreV">0</strong></div>
-    <div class="stat"><span>Session best</span><strong id="bestV">0</strong></div>
-  </div>
+      <div class="grid" id="pads">
+        <button class="pad" type="button" data-c="0" disabled aria-label="Red, key R"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14"/></svg><span class="lbl">Red</span></button>
+        <button class="pad" type="button" data-c="1" disabled aria-label="Green, key G"><svg viewBox="0 0 36 36" aria-hidden="true"><rect x="5" y="5" width="26" height="26" rx="2"/></svg><span class="lbl">Green</span></button>
+        <button class="pad" type="button" data-c="2" disabled aria-label="Yellow, key Y"><svg viewBox="0 0 36 36" aria-hidden="true"><polygon points="18,3 33,32 3,32"/></svg><span class="lbl">Yellow</span></button>
+        <button class="pad" type="button" data-c="3" disabled aria-label="Blue, key B"><svg viewBox="0 0 36 36" aria-hidden="true"><polygon points="18,2 34,18 18,34 2,18"/></svg><span class="lbl">Blue</span></button>
+      </div>
 
-  <section class="card" id="over" hidden aria-live="polite">
-    <h2>Game over</h2>
-    <p class="final"><span class="big" id="finalV">0</span></p>
-    <p id="finalMsg"></p>
-    <p class="tag">Correct sequence</p>
-    <div class="seqrow" id="correctRow"></div>
-    <p class="tag">Your entries <span class="err" id="missNote"></span></p>
-    <div class="seqrow" id="enteredRow"></div>
-    <p class="hint">Typical short-term memory span is about 7 ± 2 items. Maintenance rehearsal (silently repeating the sequence) and chunking (grouping, like “RR GG”) can stretch it. Try again using one of those strategies, and notice whether early or late items trip you up (serial position effect).</p>
-  </section>
-  </aside>
+      <div class="row">
+        <button class="btn" type="button" id="startBtn">Start</button>
+      </div>
+      <p class="hint pads-hint">Watch the colors, then repeat them in order. Click the pads or press R, G, Y, B (or 1–4). Turn on sound (the speaker, top right) to hear a tone with each color.</p>
+    </div>
+
+    <aside class="side" aria-label="Scores and results">
+      <div class="stat-row">
+        <div class="stats" aria-label="Scores">
+          <div class="stat"><span>Round</span><strong id="roundV">0</strong></div>
+          <div class="stat"><span>Score</span><strong id="scoreV">0</strong></div>
+          <div class="stat"><span>Session best</span><strong id="bestV">0</strong></div>
+        </div>
+        <button class="icon-btn" type="button" id="restartBtn" aria-label="Restart the game" title="Restart the game" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+      </div>
+
+      <section class="card" id="over" hidden aria-live="polite">
+        <h2>Game over</h2>
+        <p class="final"><span class="big" id="finalV">0</span></p>
+        <p id="finalMsg"></p>
+        <p class="tag">Correct sequence</p>
+        <div class="seqrow" id="correctRow"></div>
+        <p class="tag">Your entries <span class="err" id="missNote"></span></p>
+        <div class="seqrow" id="enteredRow"></div>
+        <p class="hint">Typical short-term memory span is about 7 ± 2 items. Maintenance rehearsal (silently repeating the sequence) and chunking (grouping, like “RR GG”) can stretch it. Try again using one of those strategies, and notice whether early or late items trip you up (serial position effect).</p>
+      </section>
+    </aside>
   </div>
 </main>
+
+<dialog class="modal" id="restartModal" aria-labelledby="restartTitle">
+  <div class="modal-head">
+    <h2 id="restartTitle">Restart the game?</h2>
+    <button class="icon-btn" type="button" data-ui="close" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <div class="modal-body">
+    <p>Your current run will end and a new one will start.</p>
+    <div class="row modal-actions">
+      <button class="btn" type="button" id="yesBtn">Yes, restart</button>
+      <button class="btn ghost" type="button" data-ui="close">Keep playing</button>
+    </div>
+  </div>
+</dialog>
 </body>
 </html>

@@ -1,11 +1,15 @@
-/* Memory Span Test — styles for this interactive (theme comes from ../shared/theme.css) */
+/* Memory Span Test — styles for this interactive only (theme, title bar, stats, modal: ../../shared/theme.css) */
 
 :root {
-  /* Stimulus colors (true colors, stimuli only) */
+  /* Stimulus colors (true colors, stimuli only; the same in light and dark mode) */
   --stim-red: #B71C1C;    --stim-red-lit: #FF5252;
   --stim-green: #1B7A3A;  --stim-green-lit: #5CF28B;
   --stim-yellow: #B38F00; --stim-yellow-lit: #FFE23D;
   --stim-blue: #1749A8;   --stim-blue-lit: #5C9DFF;
+  /* Marks drawn on the stimulus colors (pad shapes, chip letters): light on the dark pads,
+     dark on yellow and on every lit pad (each pair is at least 4.5:1) */
+  --stim-mark: #FAF6F0;
+  --stim-mark-dark: #2A1E17;
 }
 
 #status {
@@ -46,7 +50,8 @@
 .pad[data-c="2"] { border-radius: 14px 14px 14px calc(100% - 14px); transform-origin: 100% 0;   padding: 0 0 18% 18%; }
 .pad[data-c="3"] { border-radius: 14px 14px calc(100% - 14px) 14px; transform-origin: 0 0;      padding: 0 18% 18% 0; }
 
-.pad svg { width: 36px; height: 36px; fill: var(--bg); }
+.pad svg { width: 36px; height: 36px; fill: var(--stim-mark); }
+.pad[data-c="2"] svg, .pad.lit svg { fill: var(--stim-mark-dark); }
 .pad .lbl { background: var(--bg); color: var(--heading); border-radius: 8px; padding: 0 12px; line-height: 28px; }
 
 .pad[data-c="0"] { background: var(--stim-red); }    .pad[data-c="0"].lit { background: var(--stim-red-lit); }
@@ -58,17 +63,17 @@
 .pad:disabled { cursor: default; }
 .pad:not(:disabled):active { transform: scale(.97); }
 
-/* ---------- Restart confirmation ---------- */
-#confirm {
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  padding: 12px;
-  text-align: center;
-  margin-bottom: 16px;
-}
-#confirm p { margin: 0 0 8px; color: var(--heading); }
-#confirm .row { margin: 0; }
+.pads-hint { max-width: 480px; margin: 0 auto; text-align: center; }
+
+/* ---------- Stats + restart (↺ beside the stats it resets) ---------- */
+.stat-row { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; margin-bottom: 16px; }
+.stat-row .stats { margin-bottom: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stat-row .icon-btn { height: auto; border-radius: var(--radius-card); }
+.stat-row .icon-btn:disabled { opacity: .5; cursor: default; }
+.stat-row .icon-btn:disabled:hover { background: transparent; }
+
+/* ---------- Restart confirmation (shared modal) ---------- */
+.modal-actions { justify-content: flex-start; margin-bottom: 0; }
 
 /* ---------- Game-over card ---------- */
 #over { margin-bottom: 16px; }
@@ -91,13 +96,13 @@
   justify-content: center;
   font-weight: 700;
   font-size: .85rem;
-  color: var(--bg);
+  color: var(--stim-mark);
   border: 2px solid transparent;
 }
 .chip.bad { border-color: var(--error); outline: 3px solid var(--error); outline-offset: 1px; }
 .chip[data-c="0"] { background: var(--stim-red); }
 .chip[data-c="1"] { background: var(--stim-green); }
-.chip[data-c="2"] { background: var(--stim-yellow); }
+.chip[data-c="2"] { background: var(--stim-yellow); color: var(--stim-mark-dark); }
 .chip[data-c="3"] { background: var(--stim-blue); }
 
 .tag { font-size: .9rem; color: var(--heading); font-weight: 700; margin: 0; }

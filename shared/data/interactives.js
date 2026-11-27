@@ -42,9 +42,9 @@ window.APPSYCH_INTERACTIVES = [
     status: "listed",
     image: "", alt: "",
     howTo: [
-      "Watch and listen as the colors flash, then repeat the sequence in the same order.",
+      "Watch the colors flash, then repeat them in the same order: click the pads or press R, G, Y, B (or 1–4).",
       "Each round adds one more color. The game ends at your first mistake.",
-      "Your score is the longest sequence you repeated correctly."
+      "Your score is the longest sequence you repeated correctly. Turn on sound to hear a tone with each color."
     ]
   },
   {
