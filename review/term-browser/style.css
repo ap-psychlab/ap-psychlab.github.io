@@ -1,9 +1,9 @@
 /* Term Browser — styles for this interactive (theme comes from ../../shared/theme.css) */
 
-/* Segmented control for the unit system */
-.seg[aria-pressed="true"] { background: var(--btn); color: var(--bg); }
-.seg[aria-pressed="true"]:hover { background: var(--btn-hover); }
-.row .seg-group { margin: 0; }
+/* Unit system switch (shared .segmented; AP only) */
+.controls { align-items: center; }
+.view-switch { margin: 0; }
+.view-switch button { flex: 0 0 auto; padding: 0 16px; white-space: nowrap; }
 
 /* Search box (right of the unit buttons; wraps below on narrow screens) */
 .search { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 12px; }
@@ -40,7 +40,23 @@
   font: inherit; color: var(--link); background: none; border: 0; padding: 0;
   text-decoration: underline; cursor: pointer;
 }
-mark { background: var(--honey); color: var(--heading); border-radius: 2px; padding: 0 1px; }
+mark { background: var(--honey); color: var(--on-accent); border-radius: 2px; padding: 0 1px; }
+
+/* Unit Exam badge next to a term's name (only when the course has Unit Exam Terms) */
+.exam-badge {
+  display: inline-block;
+  vertical-align: 2px;
+  padding: 0 8px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--bg-alt);
+  color: var(--heading);
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.6;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
 
 /* ---------- Browser columns ----------
    Page uses <main class="wide">.
@@ -119,17 +135,12 @@ mark { background: var(--honey); color: var(--heading); border-radius: 2px; padd
   background: var(--bg-alt);
   border: 1px solid var(--border);
 }
-.chip.skill { background: var(--sage); border-color: var(--sage); }
+.chip.skill { background: var(--sage); border-color: var(--sage); color: var(--on-accent); }
 
 /* Toggles hide content with a class on the list */
 .terms.no-defs .def, .terms.no-defs .aka { display: none; }
 .terms.no-defs .def-hit .def { display: block; }
 .terms.no-codes .codes, .pick.no-codes .sub { display: none; }
-
-.visually-hidden {
-  position: absolute; width: 1px; height: 1px; overflow: hidden;
-  clip: rect(0 0 0 0); white-space: nowrap;
-}
 
 /* Phones: while searching, show the results above the unit and topic lists */
 @media (max-width: 759px) {

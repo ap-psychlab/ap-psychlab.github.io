@@ -128,7 +128,8 @@ window.APPSYCH_INTERACTIVES = [
     image: "", alt: "",
     howTo: [
       "Pick a unit, then a topic, to list its terms.",
-      "Or search: the search covers the chosen topic, else the chosen unit, else every term."
+      "Or search: the search covers the chosen topic, else the chosen unit, else every term.",
+      "In AP, you can also browse by the CED's units and show each term's CED codes."
     ]
   },
   {
