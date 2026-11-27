@@ -194,8 +194,9 @@ window.APPSYCH_INTERACTIVES = [
     status: "listed",
     image: "", alt: "",
     howTo: [
-      "Choose topics and teams, then teams take turns picking a topic and a point value.",
-      "Harder questions are worth more. Keep score for up to 12 teams."
+      "Choose topics and teams, then teams take turns picking a topic and a point value. Harder questions are worth more.",
+      "On the board, arrow keys move between tiles and Enter opens one. In a question: H hint, R reveal, 1–9 award a team, N no one.",
+      "Full screen (top right) fills the projector; keep score for up to 12 teams."
     ]
   },
   {

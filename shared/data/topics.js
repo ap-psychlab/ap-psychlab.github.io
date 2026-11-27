@@ -13,8 +13,6 @@
  *                course has terms (tools/check-data.js reports an offered course with no terms,
  *                and a course with terms that isn't offered). It's a flag here, not worked out
  *                from terms.js, so pages that don't load the terms bank can still build the menu.
- * teachingUnits  Compatibility view of AP, for pages not yet on the course helpers:
- *                [{ number: "A" (the letter), id, name, groups: [{ id, name, codes }] }].
  * cedUnits       The CED's units and topics. Unit 0 (Science Practices) uses our own codes
  *                0.1–0.7 because the CED has no Unit 0. Only AP uses the CED view.
  *
@@ -384,17 +382,11 @@ window.APPSYCH_TOPICS = (function () {
     return groupsOf(item).some(function (g) { return ids.indexOf(g) >= 0; });
   }
 
-  // Compatibility view: AP's units in the old teachingUnits shape (number = the letter).
-  var teachingUnits = unitsFor("ap").map(function (u) {
-    return { number: u.letter, id: u.id, name: u.name, groups: u.groups };
-  });
-
   return {
     groups: groups,
     units: units,
     courses: courses,
     defaultCourse: defaultCourse,
-    teachingUnits: teachingUnits,
     cedUnits: cedUnits,
     // groups, units and courses
     getGroup: getGroup,

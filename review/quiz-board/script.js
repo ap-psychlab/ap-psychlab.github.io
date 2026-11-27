@@ -1,7 +1,11 @@
 // Classroom Quiz Board — a team review game run from one computer
-// Questions: ../../shared/data/questions.js; topic groups: ../../shared/data/topics.js;
-// topic dialog: ../../shared/topic-picker.js.
-// URL options: ?groups=research-methods,ethics (class topic groups) or ?ced=2.3,2.4 (CED topics).
+// Questions: ../../shared/data/questions.js through APPSYCH_TOPICS.questions() (skips omitted);
+// the shared topic picker (../../shared/topic-picker.js) keeps only the chosen course's questions
+// and calls updateSetup when the topics or the course change. Columns follow the course's units
+// (APPSYCH_TOPICS.unitsFor). Title bar, ⓘ, sound (off on load) and full screen (whole page, for
+// the projector) come from ../../shared/ui.js. The question view is this page's own <dialog>.
+// URL options: ?groups=research-methods,ethics (class topic groups), ?ced=2.3,2.4 (CED topics,
+// AP only), ?all (Unit Exam Terms Only unchecked). ?dev only affects the site bar's course menu.
 //
 // Board rules: columns are topic groups with at least MIN_Q questions (up to MAX_COLS, chosen
 // at random). A question tagged with several groups is dealt to one column only. Rows are
@@ -10,8 +14,9 @@
 (function () {
   "use strict";
 
-  const BANK = (window.APPSYCH_QUESTIONS || []).filter((q) => q.status !== "omitted");
   const TOPICS = window.APPSYCH_TOPICS;
+  const UI = window.APPSYCH_UI;
+  const BANK = TOPICS ? TOPICS.questions() : [];
   const PICKER = window.APPSYCH_TOPIC_PICKER;
   const MAX_COLS = 6, ROWS = 5, MIN_Q = 3, MAX_TEAMS = 12, STEP = 100;
   const LETTERS = ["A", "B", "C", "D"];
@@ -34,11 +39,7 @@
   }
   const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
   const fmt = (n) => (n < 0 ? "−" : "") + Math.abs(n);   // true minus sign
-  function say(msg) {
-    const live = $("live");
-    live.textContent = "";
-    setTimeout(() => { live.textContent = msg; }, 30);
-  }
+  function say(msg) { if (UI) UI.announce(msg); }
   function badge(i) {
     const b = el("span", "tb c" + (i % 6) + (i >= 6 ? " sq" : ""), String(i + 1));
     b.setAttribute("aria-hidden", "true");
@@ -54,8 +55,8 @@
     return;
   }
 
-  // ---------- Sound (Web Audio) ----------
-  let actx = null, soundOn = true;
+  // ---------- Sound (Web Audio; off until turned on in the title bar) ----------
+  let actx = null;
   const SOUNDS = {
     open: [[523, 0, .09]],
     reveal: [[392, 0, .1], [587, .1, .18]],
@@ -64,7 +65,7 @@
     end: [[392, 0, .12], [523, .12, .12], [659, .24, .12], [784, .36, .3]]
   };
   function sfx(name) {
-    if (!soundOn) return;
+    if (!UI || !UI.sound.on) return;
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
@@ -83,11 +84,20 @@
       });
     } catch (err) { /* sound is optional */ }
   }
-  $("soundBtn").addEventListener("click", () => {
-    soundOn = !soundOn;
-    $("soundBtn").setAttribute("aria-pressed", soundOn ? "true" : "false");
-    $("soundBtn").textContent = "Sound: " + (soundOn ? "on" : "off");
-  });
+  if (UI) UI.sound.onChange((on) => { if (on) sfx("open"); });
+
+  // ---------- Full screen ----------
+  // Browsers leave full screen on Escape, which would drop the projector out of full screen every
+  // time a question is closed with Esc. Where the browser allows it (Chrome, Edge, Chromebooks),
+  // keep Escape for the page while in full screen; holding Esc, or the title-bar button, leaves.
+  if (UI && navigator.keyboard && navigator.keyboard.lock) {
+    UI.fullscreen.onChange((el) => {
+      try {
+        if (el) navigator.keyboard.lock(["Escape"]).catch(() => {});
+        else navigator.keyboard.unlock();
+      } catch (err) { /* not supported here */ }
+    });
+  }
 
   // ---------- Building a board ----------
   // Returns { cols: [{ id, name, cells: [tile|null x ROWS] }], tiles, eligible, skipped }
@@ -95,7 +105,11 @@
     const inSel = (c) => !codes || codes.some((s) => c === s || c.indexOf(s + ".") === 0);
     const groups = [];
     let skipped = 0;
-    TOPICS.teachingUnits.forEach((u) => u.groups.forEach((g) => {
+    const course = UI ? UI.course.get() : TOPICS.defaultCourse;
+    const done = new Set();
+    TOPICS.unitsFor(course).forEach((u) => u.groups.forEach((g) => {
+      if (done.has(g.id)) return;
+      done.add(g.id);
       // A question counts for a group only through a code that is also in the selection
       const qs = pool.filter((q) => (q.ced || []).some((c) => inSel(c) && TOPICS.matchesCodes({ ced: [c] }, g.codes)));
       if (qs.length >= MIN_Q) groups.push({ g: g, order: groups.length, qs: qs, own: [] });

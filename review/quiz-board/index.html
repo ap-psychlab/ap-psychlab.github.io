@@ -3,25 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Classroom Quiz Board</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<title>Classroom Quiz Board · AP Psych Lab</title>
+<script src="../../shared/theme-init.js"></script>
+<link rel="icon" href="../../shared/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../shared/apple-touch-icon.png">
 <link rel="stylesheet" href="../../shared/theme.css">
 <link rel="stylesheet" href="../../shared/topic-picker.css">
 <link rel="stylesheet" href="../../shared/question-extras.css">
 <link rel="stylesheet" href="style.css">
-<script src="../../shared/data/questions.js" defer></script>
 <script src="../../shared/data/topics.js" defer></script>
 <script src="../../shared/data/terms.js" defer></script>
+<script src="../../shared/data/questions.js" defer></script>
+<script src="../../shared/data/interactives.js" defer></script>
+<script src="../../shared/ui.js" defer></script>
 <script src="../../shared/topic-picker.js" defer></script>
 <script src="../../shared/figures.js" defer></script>
 <script src="../../shared/term-help.js" defer></script>
 <script src="script.js" defer></script>
 </head>
 <body>
+<nav class="sitebar wide" aria-label="Site"></nav>
+<header class="topbar wide" data-interactive="quiz-board">
+  <div class="topbar-inner">
+    <div class="brand"><h1>Classroom Quiz Board</h1></div>
+    <div class="tools">
+      <button class="icon-btn" type="button" data-ui="sound"></button>
+      <button class="icon-btn" type="button" data-ui="fullscreen"></button>
+    </div>
+  </div>
+</header>
+
 <main class="wide">
-  <h1>Classroom Quiz Board</h1>
   <p class="hint" id="pageHint">A team review game to run from one computer on a projector. Teams pick a topic and a point value; harder questions are worth more.</p>
 
   <!-- ---------- Setup ---------- -->
@@ -72,7 +84,6 @@
     <div class="row">
       <button class="btn ghost" id="reshuffleBtn" type="button">Reshuffle board</button>
       <button class="btn ghost" id="undoBtn" type="button" disabled>Undo last score</button>
-      <button class="btn ghost" id="soundBtn" type="button" aria-pressed="true">Sound: on</button>
       <button class="btn alt" id="endBtn" type="button">End game</button>
     </div>
   </section>
@@ -127,8 +138,6 @@
       </div>
     </div>
   </dialog>
-
-  <div class="sr-only" aria-live="polite" id="live"></div>
 </main>
 </body>
 </html>

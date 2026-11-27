@@ -1,15 +1,6 @@
 /* Classroom Quiz Board — styles for this interactive (theme comes from ../../shared/theme.css) */
 
-:root {
-  /* Dims the page behind the question view */
-  --qb-backdrop: rgba(59, 42, 32, .6);
-}
-
 .center { text-align: center; }
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
-}
 
 /* ---------- Setup ---------- */
 .setup { display: grid; gap: 16px; margin-bottom: 16px; }
@@ -95,7 +86,7 @@ legend, .legend { display: block; font-weight: 700; color: var(--heading); margi
 .board [role="row"] { display: contents; }
 .cat {
   display: flex; align-items: center; justify-content: center; text-align: center;
-  min-height: 64px; padding: 8px; border-radius: var(--radius-btn);
+  min-height: 56px; padding: 8px; border-radius: var(--radius-btn);
   background: var(--btn); color: var(--bg);
   font: 700 clamp(.85rem, .65rem + .55vw, 1.2rem)/1.2 var(--font-body);
   overflow-wrap: anywhere;
@@ -103,10 +94,12 @@ legend, .legend { display: block; font-weight: 700; color: var(--heading); margi
 .cell { display: flex; }
 .tile {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  min-height: clamp(48px, 9vh, 104px); padding: 4px; cursor: pointer;
+  /* Five rows share the height left under the site bar, title bar, scores and buttons (about
+     560px with 4 teams), so the board fits a 1366×768 window without scrolling */
+  min-height: clamp(44px, calc((100vh - 560px) / 5), 104px); padding: 4px; cursor: pointer;
   background: var(--card); color: var(--heading);
   border: 2px solid var(--border); border-radius: var(--radius-btn);
-  font: 700 clamp(1.3rem, 1rem + 1.5vw, 2.4rem)/1 var(--font-body);
+  font: 700 clamp(1.3rem, min(1rem + 1.5vw, 4.4vh), 2.4rem)/1 var(--font-body);
   font-variant-numeric: lining-nums tabular-nums;
   transition: border-color .15s, background-color .15s;
 }
@@ -118,6 +111,8 @@ legend, .legend { display: block; font-weight: 700; color: var(--heading); margi
 .tile .tused { font-size: .85rem; font-weight: 700; text-decoration: line-through; }
 .tile .twho { max-width: 100%; font-size: .8rem; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell.none { border: 2px dashed var(--border); border-radius: var(--radius-btn); opacity: .5; }
+
+#game > .row:last-child { margin-bottom: 0; }
 
 /* ---------- Final standings ---------- */
 #finalH:focus { outline: none; }
@@ -141,7 +136,7 @@ legend, .legend { display: block; font-weight: 700; color: var(--heading); margi
   background: var(--bg); color: var(--text); box-shadow: var(--shadow);
 }
 .qb-dialog[open] { display: flex; flex-direction: column; }
-.qb-dialog::backdrop { background: var(--qb-backdrop); }
+.qb-dialog::backdrop { background: var(--scrim); }
 .qb-head, .qb-foot { padding: 12px 16px; background: var(--bg-alt); }
 .qb-head { border-bottom: 1px solid var(--border); }
 .qb-head h2 {
@@ -179,7 +174,7 @@ button.choice:hover { border-color: var(--btn); }
 .cbody { flex: 1; min-width: 0; padding-top: .1em; }
 .tag { display: block; margin-top: 2px; font-size: .7em; font-weight: 700; }
 /* The correct choice: check mark and label, plus a sage fill */
-.choice.is-answer { border-color: var(--btn); background: var(--sage); }
+.choice.is-answer { border-color: var(--btn); background: var(--sage); color: var(--on-accent); }
 .choice.is-answer .letter { background: var(--bg); border-color: var(--btn); }
 .fb {
   margin: 4px 0 0 40px; padding: 8px 12px; font-size: 1.05rem; color: var(--text);
