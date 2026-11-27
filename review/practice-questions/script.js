@@ -1,7 +1,13 @@
 // Practice Questions — quiz and endless practice from the shared question bank
-// Questions: ../../shared/data/questions.js; topic groups: ../../shared/data/topics.js;
-// topic dialog: ../../shared/topic-picker.js.
-// URL options: ?groups=research-methods,ethics (class topic groups) or ?ced=2.3,2.4 (CED topics).
+// Questions: ../../shared/data/questions.js (through APPSYCH_TOPICS.questions()); topic groups:
+// ../../shared/data/topics.js; topic dialog: ../../shared/topic-picker.js (it keeps the chosen
+// course's questions); title bar, modals and announcements: ../../shared/ui.js.
+// URL options: ?mode=quiz | endless (written when a mode is chosen); ?groups=research-methods,ethics
+// (class topic groups), ?ced=2.3,2.4 (CED topics, AP only) and ?all (written by the topic picker).
+// No test options (?dev only affects the course menu).
+//
+// Modes are the title bar's pills. Switching mode goes back to setup in the new mode; if a
+// session has answers or results, a modal asks first (the clock is paused while it's open).
 //
 // Timing rule: a question's time is all the time it was on screen (across visits, not
 // counting time while the page is hidden or a dialog is open) up to the student's last
@@ -13,15 +19,18 @@
 (function () {
   "use strict";
 
-  const BANK = (window.APPSYCH_QUESTIONS || []).filter((q) => q.status !== "omitted");
   const TOPICS = window.APPSYCH_TOPICS;
   const PICKER = window.APPSYCH_TOPIC_PICKER;
+  const UI = window.APPSYCH_UI;
+  // Every active question; the picker keeps the chosen course's (so a course change needs no reload)
+  const BANK = TOPICS ? TOPICS.questions() : [];
   const MAX_QUIZ = 75;
   const LETTERS = ["A", "B", "C", "D"];
   const MODE_HINTS = {
     quiz: "Answers are scored when you submit. You can skip questions, jump around with the question list, and change answers until then.",
     endless: "See feedback after every question, with hints if you want them. Keep going until you press Finish or run out of questions."
   };
+  const MODE_NAMES = { quiz: "Quiz", endless: "Endless" };
 
   // ---------- Helpers ----------
   const $ = (id) => document.getElementById(id);
@@ -48,19 +57,7 @@
     return Math.floor(r / 60) + ":" + String(r % 60).padStart(2, "0");
   }
   const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
-  function say(msg) {
-    const live = $("live");
-    live.textContent = "";
-    setTimeout(() => { live.textContent = msg; }, 30);
-  }
-  function showDlg(d) {
-    if (typeof d.showModal === "function") d.showModal();
-    else d.setAttribute("open", "");
-  }
-  function closeDlg(d) {
-    if (typeof d.close === "function") d.close();
-    else { d.removeAttribute("open"); d.dispatchEvent(new Event("close")); }
-  }
+  const say = (msg) => { if (UI) UI.announce(msg); };
   const anyDialogOpen = () => !!document.querySelector("dialog[open]");
   const isRight = (it) => it.pick != null && it.pick === it.q.answer;
   const lastRetry = (it) => (it.retries.length ? it.retries[it.retries.length - 1] : null);
@@ -74,9 +71,9 @@
   const RESULT_TEXT = { correct: "Correct", fixed: "Correct on Retry", wrong: "Incorrect", skip: "Unanswered" };
   const RESULT_ICON = { correct: "✓", fixed: "↻", wrong: "✗", skip: "–" };
 
-  if (!BANK.length || !TOPICS || !PICKER) {
+  if (!BANK.length || !TOPICS || !PICKER || !UI) {
     const note = $("setupNote");
-    note.textContent = "The question bank didn't load. Check that shared/data/questions.js, topics.js, and shared/topic-picker.js exist.";
+    note.textContent = "The question bank didn't load. Check that shared/data/questions.js, topics.js, shared/ui.js and shared/topic-picker.js exist.";
     note.classList.add("warn");
     $("startBtn").disabled = true;
     $("topicsBtn").disabled = true;
@@ -93,8 +90,11 @@
     onChange: updateSetup
   });
   const countInput = $("countInput");
-  const countRadios = Array.from(document.querySelectorAll('input[name="count"]'));
-  const chosenMode = () => document.querySelector('input[name="mode"]:checked').value;
+  const countBtns = Array.from($("countSeg").querySelectorAll("button"));
+  const modeBtns = Array.from(document.querySelectorAll(".modes .mode"));
+  const startMode = new URLSearchParams(location.search).get("mode");
+  let mode = startMode === "endless" ? "endless" : "quiz";
+  const chosenMode = () => mode;
 
   // Returns the requested quiz length, or null if the typed number isn't valid
   function chosenCount() {
@@ -104,8 +104,8 @@
       const n = Number(raw);
       return Number.isInteger(n) && n >= 1 && n <= MAX_QUIZ ? n : null;
     }
-    const r = countRadios.find((x) => x.checked);
-    return r ? Number(r.value) : 10;
+    const b = countBtns.find((x) => x.getAttribute("aria-pressed") === "true");
+    return b ? Number(b.getAttribute("data-count")) : 10;
   }
 
   function updateSetup() {
@@ -113,8 +113,10 @@
     const pool = picker.pool().length;
     const note = $("setupNote");
     let text, ok = pool > 0, warn = false;
+    $("setupH").textContent = mode === "quiz" ? "Set up a quiz" : "Set up endless practice";
     $("modeHint").textContent = MODE_HINTS[mode];
     $("countField").hidden = mode !== "quiz";
+    $("apNote").hidden = UI.course.get() !== "ap";   // the AP exam has 75 multiple-choice questions
     if (!pool) { text = "There are no questions in these topics yet. Choose other topics."; warn = true; }
     else if (mode === "quiz") {
       const n = chosenCount();
@@ -129,13 +131,62 @@
     $("startBtn").disabled = !ok;
   }
 
-  document.querySelectorAll('input[name="mode"]').forEach((r) => r.addEventListener("change", updateSetup));
-  countRadios.forEach((r) => r.addEventListener("change", () => { countInput.value = ""; updateSetup(); }));
+  function pressCount(btn) {
+    countBtns.forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
+  }
+  countBtns.forEach((b) => b.addEventListener("click", () => { countInput.value = ""; pressCount(b); updateSetup(); }));
   countInput.addEventListener("input", () => {
-    if (countInput.value !== "" || countInput.validity.badInput) countRadios.forEach((r) => { r.checked = false; });
-    else if (!countRadios.some((r) => r.checked)) countRadios[0].checked = true;
+    if (countInput.value !== "" || countInput.validity.badInput) pressCount(null);
+    else if (!countBtns.some((b) => b.getAttribute("aria-pressed") === "true")) pressCount(countBtns[0]);
     updateSetup();
   });
+  // The picker calls updateSetup on a course change; the AP-only note needs it without a picker change too
+  UI.course.onChange(() => { if (!S) updateSetup(); });
+
+  // ---------- Modes (title bar) ----------
+  // Keep ?mode= in the address in step with the mode (replaceState: no reload, no Back entry).
+  function writeModeParam(m) {
+    try {
+      const q = new URLSearchParams(location.search);
+      q.set("mode", m);
+      history.replaceState(history.state, "", location.pathname + "?" + q.toString().replace(/=(?=&|$)/g, "") + location.hash);
+    } catch (e) { /* some browsers block this on file://; the mode still changes */ }
+  }
+  function showMode() {
+    modeBtns.forEach((b) => b.setAttribute("aria-pressed", b.getAttribute("data-mode") === mode ? "true" : "false"));
+  }
+  // Back to setup in mode m (any session is dropped)
+  function setMode(m) {
+    stopClock();
+    S = null;
+    mode = m;
+    writeModeParam(m);
+    showMode();
+    show("setup");
+    updateSetup();
+    say(MODE_NAMES[m] + ". Choose your topics and press Start.");
+  }
+  // A session with answers or results asks before it's dropped
+  const hasProgress = () => !!S && (S.phase !== "play" || !!S.round || S.items.some((it) => it.pick != null));
+  let modeWanted = null;
+  modeBtns.forEach((b) => b.addEventListener("click", () => {
+    const m = b.getAttribute("data-mode");
+    if (m === mode) return;   // already in this mode (a session in it keeps going)
+    if (!hasProgress()) { setMode(m); return; }
+    stopClock();
+    modeWanted = null;
+    const name = MODE_NAMES[m];
+    $("modeDlgH").textContent = "Switch to " + name + "?";
+    $("modeYesBtn").textContent = "Switch to " + name;
+    const what = S.mode === "quiz" ? "quiz" : "practice session";
+    $("modeDlgText").textContent = S.phase === "play"
+      ? "This ends your " + what + ". Your answers so far won't be kept."
+      : "Your results from this " + what + " won't be kept.";
+    $("modeKeepBtn").textContent = S.phase === "play" ? "Keep working" : "Keep my results";
+    $("modeYesBtn").onclick = () => { modeWanted = m; UI.closeModal("modeDialog"); };
+    UI.openModal("modeDialog", { onClose: () => { if (modeWanted) setMode(modeWanted); else startClock(); } });
+    $("modeKeepBtn").focus();
+  }));
   countInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !$("startBtn").disabled) $("startBtn").click(); });
 
   $("startBtn").addEventListener("click", () => {
@@ -465,7 +516,6 @@
   }
 
   // ---------- Question list dialog ----------
-  const listDialog = $("listDialog");
   function legendItem(cls, text, icon) {
     const li = el("li");
     const box = el("span", "qbox " + cls);
@@ -475,8 +525,10 @@
     li.appendChild(el("span", null, text));
     return li;
   }
+  let listGo = null;   // the question picked in the list, opened once the modal has closed
   function openList() {
     stopClock();
+    listGo = null;
     const review = S.phase === "review";
     const items = cur();
     const grid = $("qgrid");
@@ -496,7 +548,7 @@
       }
       b.setAttribute("aria-label", "Question " + (i + 1) + ", " + words + (i === S.index ? ", current" : ""));
       if (i === S.index) b.setAttribute("aria-current", "true");
-      b.addEventListener("click", () => { closeDlg(listDialog); go(i); });
+      b.addEventListener("click", () => { listGo = i; UI.closeModal("listDialog"); });
       li.appendChild(b);
       grid.appendChild(li);
     });
@@ -518,17 +570,15 @@
       legend.appendChild(legendItem("open", "Unanswered"));
     }
     legend.appendChild(legendItem("open cur", "Current question"));
-    showDlg(listDialog);
+    // onClose runs after ui.js puts focus back on the button, so go() can move it to the question
+    UI.openModal("listDialog", { onClose: () => { if (listGo != null) go(listGo); else startClock(); } });
     const curBox = grid.querySelector('[aria-current="true"]');
     if (curBox) curBox.focus();
   }
   $("listBtn").addEventListener("click", openList);
-  $("listCloseBtn").addEventListener("click", () => closeDlg(listDialog));
-  listDialog.addEventListener("click", (e) => { if (e.target === listDialog) closeDlg(listDialog); });
-  listDialog.addEventListener("close", startClock);
 
   // ---------- Submitting ----------
-  const submitDialog = $("submitDialog");
+  let submitNow = false;
   function trySubmit() {
     const items = cur();
     const unanswered = items.filter((it) => it.pick == null).length;
@@ -537,14 +587,12 @@
     $("subText").textContent = plural(unanswered, "question is", "questions are") + " unanswered out of " +
       items.length + ". " + (S.round ? "Unanswered retry questions stay marked as missed."
         : "Unanswered questions are counted as wrong.");
-    showDlg(submitDialog);
+    submitNow = false;
+    UI.openModal("submitDialog", { onClose: () => { if (submitNow) finish(); else startClock(); } });
     $("keepBtn").focus();
   }
   $("submitBtn").addEventListener("click", trySubmit);
-  $("keepBtn").addEventListener("click", () => closeDlg(submitDialog));
-  $("submitAnywayBtn").addEventListener("click", () => { closeDlg(submitDialog); finish(); });
-  submitDialog.addEventListener("click", (e) => { if (e.target === submitDialog) closeDlg(submitDialog); });
-  submitDialog.addEventListener("close", startClock);
+  $("submitAnywayBtn").addEventListener("click", () => { submitNow = true; UI.closeModal("submitDialog"); });
 
   $("finishBtn").addEventListener("click", finish);
 
@@ -671,5 +719,6 @@
     }
   });
 
+  showMode();
   updateSetup();
 })();

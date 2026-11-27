@@ -161,9 +161,9 @@ window.APPSYCH_INTERACTIVES = [
     status: "listed",
     image: "", alt: "",
     howTo: [
-      "Choose your topics, then a quiz (scored at the end) or endless practice (instant feedback).",
-      "After answering, open each choice's feedback and the terms used in the question.",
-      "Retry missed replays only the questions you got wrong."
+      "Choose Quiz (scored when you submit) or Endless (feedback after each question) at the top, then your topics, and press Start.",
+      "Pick an answer with a click or tap, or press 1–4 (or A–D). Once answers show, open each choice's feedback and the terms used in the question.",
+      "Retry missed replays only the questions you got wrong; your first score stays."
     ]
   },
   {

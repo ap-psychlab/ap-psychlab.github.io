@@ -3,63 +3,69 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Practice Questions</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<title>Practice Questions · AP Psych Lab</title>
+<script src="../../shared/theme-init.js"></script>
+<link rel="icon" href="../../shared/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../shared/apple-touch-icon.png">
 <link rel="stylesheet" href="../../shared/theme.css">
 <link rel="stylesheet" href="../../shared/topic-picker.css">
 <link rel="stylesheet" href="../../shared/question-extras.css">
 <link rel="stylesheet" href="style.css">
-<script src="../../shared/data/questions.js" defer></script>
 <script src="../../shared/data/topics.js" defer></script>
 <script src="../../shared/data/terms.js" defer></script>
+<script src="../../shared/data/questions.js" defer></script>
+<script src="../../shared/data/interactives.js" defer></script>
+<script src="../../shared/ui.js" defer></script>
 <script src="../../shared/topic-picker.js" defer></script>
 <script src="../../shared/figures.js" defer></script>
 <script src="../../shared/term-help.js" defer></script>
 <script src="script.js" defer></script>
 </head>
 <body>
+<nav class="sitebar" aria-label="Site"></nav>
+<header class="topbar" data-interactive="practice-questions">
+  <div class="topbar-inner">
+    <div class="brand"><h1>Practice Questions</h1></div>
+    <div class="modes" role="group" aria-label="Mode">
+      <button class="mode" type="button" id="modeQuiz" data-mode="quiz" aria-pressed="true">Quiz</button>
+      <button class="mode" type="button" id="modeEndless" data-mode="endless" aria-pressed="false">Endless</button>
+    </div>
+  </div>
+</header>
+
 <main>
-  <h1>Practice Questions</h1>
   <p class="hint">Answer multiple-choice questions from the topics you choose. Pick a choice with a click or tap, or press 1–4 (or A–D) on a keyboard.</p>
 
   <!-- ---------- Setup ---------- -->
   <section class="card setup" id="setup" aria-labelledby="setupH">
-    <h2 id="setupH">Set up a session</h2>
-
-    <fieldset class="field">
-      <legend>Mode</legend>
-      <div class="seg">
-        <label><input type="radio" name="mode" value="quiz" checked><span>Quiz</span></label>
-        <label><input type="radio" name="mode" value="endless"><span>Endless</span></label>
-      </div>
+    <div>
+      <h2 id="setupH">Set up a quiz</h2>
       <p class="field-note" id="modeHint"></p>
-    </fieldset>
+    </div>
 
     <div class="field">
-      <span class="legend">Topics</span>
+      <span class="field-label">Topics</span>
       <div class="topic-line">
         <span id="topicSummary">All topics</span>
         <button class="btn alt" id="topicsBtn" type="button" aria-haspopup="dialog">Choose topics</button>
       </div>
     </div>
 
-    <fieldset class="field" id="countField">
-      <legend>Number of questions</legend>
+    <div class="field" id="countField">
+      <span class="field-label" id="countLabel">Number of questions</span>
       <div class="count-line">
-        <div class="seg">
-          <label><input type="radio" name="count" value="10" checked><span>10</span></label>
-          <label><input type="radio" name="count" value="25"><span>25</span></label>
-          <label><input type="radio" name="count" value="50"><span>50</span></label>
-          <label><input type="radio" name="count" value="75"><span>75</span></label>
+        <div class="segmented count" id="countSeg" role="group" aria-labelledby="countLabel">
+          <button type="button" data-count="10" aria-pressed="true">10</button>
+          <button type="button" data-count="25" aria-pressed="false">25</button>
+          <button type="button" data-count="50" aria-pressed="false">50</button>
+          <button type="button" data-count="75" aria-pressed="false">75</button>
         </div>
         <label class="custom" for="countInput">or type 1–75
           <input type="number" id="countInput" min="1" max="75" step="1" inputmode="numeric" aria-describedby="setupNote">
         </label>
       </div>
-      <p class="field-note">75 matches the number of multiple-choice questions on the AP exam.</p>
-    </fieldset>
+      <p class="field-note" id="apNote">75 matches the number of multiple-choice questions on the AP exam.</p>
+    </div>
 
     <p class="setup-note" id="setupNote" aria-live="polite"></p>
     <div class="row">
@@ -120,36 +126,49 @@
       <ol class="res-list" id="resList"></ol>
     </section>
   </section>
-
-  <!-- ---------- Dialogs ---------- -->
-  <dialog class="pq-dialog" id="listDialog" aria-labelledby="listDlgH">
-    <div class="pq-dlg-head">
-      <h2 id="listDlgH">Question list</h2>
-      <p class="hint" id="listCount"></p>
-      <ul class="legend" id="listLegend"></ul>
-    </div>
-    <div class="pq-dlg-body">
-      <ol class="qgrid" id="qgrid"></ol>
-    </div>
-    <div class="pq-dlg-foot">
-      <div class="row">
-        <button class="btn ghost" id="listCloseBtn" type="button">Close</button>
-      </div>
-    </div>
-  </dialog>
-
-  <dialog class="pq-dialog small" id="submitDialog" aria-labelledby="subH" aria-describedby="subText">
-    <div class="pq-dlg-body">
-      <h2 id="subH">Submit anyway?</h2>
-      <p id="subText"></p>
-      <div class="row">
-        <button class="btn ghost" id="keepBtn" type="button">Keep working</button>
-        <button class="btn" id="submitAnywayBtn" type="button">Submit anyway</button>
-      </div>
-    </div>
-  </dialog>
-
-  <div class="sr-only" aria-live="polite" id="live"></div>
 </main>
+
+<!-- ---------- Modals (opened with APPSYCH_UI.openModal) ---------- -->
+<dialog class="modal list-modal" id="listDialog" aria-labelledby="listDlgH">
+  <div class="modal-head">
+    <h2 id="listDlgH">Question list</h2>
+    <button class="icon-btn" type="button" data-ui="close" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <div class="modal-body list-head">
+    <p class="hint" id="listCount"></p>
+    <ul class="qlegend" id="listLegend"></ul>
+  </div>
+  <div class="list-body">
+    <ol class="qgrid" id="qgrid"></ol>
+  </div>
+</dialog>
+
+<dialog class="modal" id="submitDialog" aria-labelledby="subH" aria-describedby="subText">
+  <div class="modal-head">
+    <h2 id="subH">Submit anyway?</h2>
+    <button class="icon-btn" type="button" data-ui="close" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <div class="modal-body">
+    <p id="subText"></p>
+    <div class="row modal-actions">
+      <button class="btn" id="submitAnywayBtn" type="button">Submit anyway</button>
+      <button class="btn ghost" id="keepBtn" type="button" data-ui="close">Keep working</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="modal" id="modeDialog" aria-labelledby="modeDlgH" aria-describedby="modeDlgText">
+  <div class="modal-head">
+    <h2 id="modeDlgH">Switch to Endless?</h2>
+    <button class="icon-btn" type="button" data-ui="close" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <div class="modal-body">
+    <p id="modeDlgText"></p>
+    <div class="row modal-actions">
+      <button class="btn" id="modeYesBtn" type="button">Switch to Endless</button>
+      <button class="btn ghost" id="modeKeepBtn" type="button" data-ui="close">Keep working</button>
+    </div>
+  </div>
+</dialog>
 </body>
 </html>
