@@ -62,14 +62,14 @@
   --card: #E3D5C3;       /* cards, tiles, footer */
   --heading: #3B2A20;    /* headings */
   --text: #5A4636;       /* body text */
-  --muted: #8A7565;      /* captions, helper text */
+  --muted: #6B5B4E;      /* captions, helper text */
   --btn: #6F4E37;        /* primary button (text: --bg) */
   --btn-hover: #5A3E2B;  /* primary hover */
   --btn2: #C8A27C;       /* secondary button (text: --heading) */
-  --link: #8B5E3C;       /* links */
+  --link: #7D5536;       /* links */
   --accent: #B9835A;     /* highlights, badges */
   --sage: #A9B49A;       /* soft accent, positive/correct */
-  --error: #A64B3C;      /* wrong answers, warnings */
+  --error: #974437;      /* wrong answers, warnings */
   --border: #D9C9B6;     /* borders, dividers */
 
   /* Secondary accents: only when the main accents run out */
@@ -80,7 +80,7 @@
 
   /* Small text on an accent fill (--accent, --sage, --honey, --blue, --plum, --teal):
      dark in both modes, because the accents are light fills in dark mode */
-  --on-accent: #3B2A20;
+  --on-accent: #20160F;
 
   /* Site bar, home banner, node network, card image placeholder */
   --sitebar: #2B2724;
