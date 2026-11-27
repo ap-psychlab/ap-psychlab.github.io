@@ -3,33 +3,41 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Psych Vocab Word Search</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<title>Psych Vocab Word Search · AP Psych Lab</title>
+<script src="../../shared/theme-init.js"></script>
+<link rel="icon" href="../../shared/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../shared/apple-touch-icon.png">
 <link rel="stylesheet" href="../../shared/theme.css">
 <link rel="stylesheet" href="../../shared/topic-picker.css">
 <link rel="stylesheet" href="style.css">
-<script src="../../shared/data/terms.js" defer></script>
 <script src="../../shared/data/topics.js" defer></script>
+<script src="../../shared/data/terms.js" defer></script>
+<script src="../../shared/data/interactives.js" defer></script>
+<script src="../../shared/ui.js" defer></script>
 <script src="../../shared/topic-picker.js" defer></script>
 <script src="script.js" defer></script>
 </head>
 <body>
+<nav class="sitebar wide" aria-label="Site"></nav>
+<header class="topbar wide" data-interactive="word-search">
+  <div class="topbar-inner">
+    <div class="brand"><h1>Psych Vocab Word Search</h1></div>
+  </div>
+</header>
+
 <main class="wide">
-  <h1>Psych Vocab Word Search</h1>
   <p class="hint">Use the definitions to work out which terms are hidden in the grid. Drag across a word, or tap its first and last letter. On a keyboard, use the arrow keys and press Enter at each end (Esc cancels).</p>
 
   <section class="card settings" aria-label="Puzzle settings">
     <div class="setting-row">
-      <fieldset>
-        <legend>Difficulty</legend>
-        <div class="seg">
-          <label><input type="radio" name="diff" value="easy" checked><span>Easy</span></label>
-          <label><input type="radio" name="diff" value="medium"><span>Medium</span></label>
-          <label><input type="radio" name="diff" value="hard"><span>Hard</span></label>
+      <div class="diff-setting">
+        <span class="legend" id="diffLabel">Difficulty</span>
+        <div class="segmented diff" id="diff" role="group" aria-labelledby="diffLabel">
+          <button type="button" data-diff="easy" aria-pressed="true">Easy</button>
+          <button type="button" data-diff="medium" aria-pressed="false">Medium</button>
+          <button type="button" data-diff="hard" aria-pressed="false">Hard</button>
         </div>
-      </fieldset>
+      </div>
       <div class="topic-setting">
         <span class="legend">Topics</span>
         <div class="topic-line">
@@ -71,8 +79,6 @@
     </aside>
   </div>
 
-
-  <div class="sr-only" aria-live="polite" id="live"></div>
 </main>
 </body>
 </html>

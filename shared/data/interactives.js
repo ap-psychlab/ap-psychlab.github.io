@@ -145,7 +145,8 @@ window.APPSYCH_INTERACTIVES = [
     image: "", alt: "",
     howTo: [
       "Choose your topics, then read each definition and find its term in the grid.",
-      "Terms can run in any direction."
+      "Drag across a word, or tap its first and last letter. On a keyboard, use the arrow keys and press Enter at each end.",
+      "On Easy, words run left to right, down, or diagonally. On Medium and Hard they can run in any direction, even backward."
     ]
   },
   {

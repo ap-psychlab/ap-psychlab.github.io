@@ -1,12 +1,16 @@
 // Psych Vocab Word Search — game logic
-// Terms come from ../../shared/data/terms.js; topic filtering uses ../../shared/data/topics.js.
-// URL options: ?groups=memory,thinking (class topic groups), ?ced=2.3,2.4 (CED topics),
-// ?dev (shows the overlap debug buttons and blocklist stats).
+// Terms come from ../../shared/data/terms.js through APPSYCH_TOPICS.terms() (active terms); the
+// shared topic picker keeps only the chosen course's terms and topics, and calls newPuzzle when
+// the topics or the course change. Title bar and ⓘ come from ../../shared/ui.js.
+// URL options: ?groups=memory,thinking (class topic groups), ?ced=2.3,2.4 (CED topics, AP),
+// ?all (Unit Exam Terms Only unchecked), ?dev (shows the overlap debug buttons and blocklist
+// stats; also lists every course in the site bar's menu).
 (function () {
   "use strict";
 
-  const BANK = window.APPSYCH_TERMS || [];
   const TOPICS = window.APPSYCH_TOPICS;
+  const UI = window.APPSYCH_UI;
+  const BANK = TOPICS ? TOPICS.terms() : [];
 
   // ---------- Blocklist (one-way hashed) ----------
   // Words are stored only as 32-bit FNV-1a hashes (base 36) of their uppercase letters,
@@ -224,7 +228,7 @@
   const $ = (id) => document.getElementById(id);
   const gridEl = $("grid"), cluesEl = $("clues");
   const noteEl = $("note"), foundV = $("foundV"), levelV = $("levelV");
-  const doneEl = $("done"), doneText = $("doneText"), live = $("live");
+  const doneEl = $("done"), doneText = $("doneText");
 
   // ---------- Helpers ----------
   const clean = (t) => t.toUpperCase().replace(/[^A-Z]/g, "");
@@ -236,7 +240,7 @@
     for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
     return a;
   }
-  function say(msg) { live.textContent = ""; setTimeout(() => { live.textContent = msg; }, 30); }
+  function say(msg) { if (UI) UI.announce(msg); }
   function el(tag, cls, text) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -274,7 +278,14 @@
   let size = 12, letters = [], words = [], cellEls = [], cellColor = [];
   let foundCount = 0, pending = null, cursor = { r: 0, c: 0 }, drag = null;
 
-  document.querySelectorAll('input[name="diff"]').forEach((r) => r.addEventListener("change", () => newPuzzle()));
+  const diffBtns = Array.from(document.querySelectorAll("#diff button"));
+  let diff = "easy";
+  diffBtns.forEach((b) => b.addEventListener("click", () => {
+    if (b.dataset.diff === diff) return;
+    diff = b.dataset.diff;
+    diffBtns.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    newPuzzle();
+  }));
   $("newBtn").addEventListener("click", () => newPuzzle());
   $("againBtn").addEventListener("click", () => { newPuzzle(); gridEl.focus(); });
   if (DEBUG) {
@@ -449,7 +460,6 @@
   // ---------- New puzzle ----------
   function newPuzzle(debugK) {
     debugK = debugK === 3 || debugK === 4 ? debugK : 0;
-    const diff = document.querySelector('input[name="diff"]:checked').value;
     const lvl = LEVELS[diff];
     size = lvl.size;
     const fitting = picker.pool().filter((t) => t.w.length <= size);

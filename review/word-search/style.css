@@ -2,7 +2,8 @@
    Page uses <main class="wide"> with .split: grid on the left, definitions on the right (1000px+). */
 
 :root {
-  /* Pastel highlights: one per found word (text on top uses --heading) */
+  /* Highlights, one per found word: pastels with --heading text in light mode, deeper tones
+     with the light --heading text in dark mode (block below) */
   --hl-1: #F4C2C2;
   --hl-2: #F8D8B0;
   --hl-3: #F2E8A0;
@@ -14,31 +15,29 @@
   --hl-9: #F5C6DE;
   --hl-10: #DDEBB0;
 }
+[data-theme="dark"] {
+  --hl-1: #7A3B3B;
+  --hl-2: #7A5130;
+  --hl-3: #6B5F1F;
+  --hl-4: #3F6B3A;
+  --hl-5: #2F6660;
+  --hl-6: #33557F;
+  --hl-7: #4E4A85;
+  --hl-8: #64447D;
+  --hl-9: #7D3D62;
+  --hl-10: #57692A;
+}
 
 /* ---------- Settings ---------- */
 .settings { display: grid; gap: 16px; margin-bottom: 16px; }
 .settings .row { margin-bottom: 0; }
 .setting-row { display: flex; flex-wrap: wrap; gap: 16px 32px; justify-content: center; align-items: flex-start; }
-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
-legend, .legend { display: block; font-weight: 700; color: var(--heading); margin-bottom: 8px; padding: 0; }
+.legend { display: block; font-weight: 700; color: var(--heading); margin-bottom: 8px; padding: 0; }
 .topic-line { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
 #topicSummary { color: var(--heading); }
 
-.seg {
-  display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-btn);
-  overflow: hidden; background: var(--bg);
-}
-.seg label { position: relative; }
-.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.seg span {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 44px; padding: 8px 20px; cursor: pointer;
-  color: var(--heading); font-weight: 700; font-size: .95rem;
-  border-right: 1px solid var(--border);
-}
-.seg label:last-child span { border-right: 0; }
-.seg input:checked + span { background: var(--btn2); }
-.seg input:focus-visible + span { outline: 3px solid var(--heading); outline-offset: -3px; }
+.diff { margin: 0; }
+.diff button { flex: 0 0 auto; padding: 0 20px; }
 
 .note { color: var(--muted); font-size: .9rem; margin: 0; text-align: center; }
 .note:empty { display: none; }
@@ -99,11 +98,6 @@ legend, .legend { display: block; font-weight: 700; color: var(--heading); margi
 }
 .done p { margin: 0 0 12px; }
 .done .row { margin-bottom: 0; }
-
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .clue { transition: none; }
