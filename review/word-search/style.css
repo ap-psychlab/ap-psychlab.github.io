@@ -43,17 +43,18 @@
 .note:empty { display: none; }
 
 /* ---------- Board ---------- */
+/* script.js (sizeBoard) sets --cell from the card's width and the window's height, and
+   .board-fit's width to the grid's, so the stats and the done panel line up with the grid. */
 .board { padding: 12px; }
+.board-fit { width: var(--grid-w, 100%); max-width: 100%; margin: 0 auto; }
 .board .stats { margin: 12px 0 0; }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(var(--n), 1fr);
+  grid-template-columns: repeat(var(--n), var(--cell, 1fr));
   gap: 2px;
   width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
-  touch-action: none;
+  touch-action: pinch-zoom; /* one-finger drags select; two fingers still zoom on phones */
   user-select: none;
   -webkit-user-select: none;
   border-radius: var(--radius-btn);

@@ -227,6 +227,7 @@
   // ---------- Elements ----------
   const $ = (id) => document.getElementById(id);
   const gridEl = $("grid"), cluesEl = $("clues");
+  const boardEl = $("board"), fitEl = $("boardFit"), statsEl = $("stats");
   const noteEl = $("note"), foundV = $("foundV"), levelV = $("levelV");
   const doneEl = $("done"), doneText = $("doneText");
 
@@ -505,7 +506,6 @@
   // ---------- Rendering ----------
   function renderGrid() {
     gridEl.innerHTML = "";
-    gridEl.style.setProperty("--n", size);
     cellEls = [];
     for (let r = 0; r < size; r++) {
       const row = document.createElement("div");
@@ -525,7 +525,7 @@
       gridEl.appendChild(row);
       cellEls.push(rowEls);
     }
-    sizeFont();
+    sizeBoard();
     paint();
   }
 
@@ -543,13 +543,35 @@
     });
   }
 
-  function sizeFont() {
+  // Board size: cells as big as the card's width allows, and small enough that the whole board
+  // card (grid + stats) fits the window height, but never below MIN_CELL for the height (past
+  // that the page scrolls). On narrow screens the width wins, so phones can get smaller cells.
+  const GAP = 2;            // must match .grid gap in style.css
+  const MIN_CELL = 24;      // px; step 3 tunes this for boards larger than 20
+  const FONT_SHARE = 0.65, FONT_MIN = 11, FONT_MAX = 44;
+  const FIT_SLACK = 16;     // px of window left free around the card
+  let lastCell = 0;
+  function sizeBoard() {
     if (!cellEls.length) return;
-    const cellPx = gridEl.clientWidth / size;
-    gridEl.style.fontSize = Math.max(11, Math.min(28, cellPx * 0.55)) + "px";
+    const cs = getComputedStyle(boardEl);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const borderY = boardEl.offsetHeight - boardEl.clientHeight;
+    const statsH = statsEl.offsetHeight + parseFloat(getComputedStyle(statsEl).marginTop);
+    const availW = boardEl.clientWidth - padX;
+    const availH = window.innerHeight - padY - borderY - statsH - FIT_SLACK;
+    const fit = (space) => Math.floor((space - (size - 1) * GAP) / size);
+    const cell = Math.max(1, Math.min(fit(availW), Math.max(fit(availH), MIN_CELL)));
+    if (cell === lastCell && fitEl.style.getPropertyValue("--n") === String(size)) return;
+    lastCell = cell;
+    fitEl.style.setProperty("--n", size);
+    fitEl.style.setProperty("--cell", cell + "px");
+    fitEl.style.setProperty("--grid-w", (cell * size + GAP * (size - 1)) + "px");
+    gridEl.style.fontSize = Math.max(FONT_MIN, Math.min(FONT_MAX, Math.round(cell * FONT_SHARE))) + "px";
   }
-  if ("ResizeObserver" in window) new ResizeObserver(sizeFont).observe(gridEl);
-  else window.addEventListener("resize", sizeFont);
+  if ("ResizeObserver" in window) new ResizeObserver(sizeBoard).observe(boardEl);
+  window.addEventListener("resize", sizeBoard);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeBoard);
 
   // 1 word: solid. 2: split diagonally. 3: three diagonal bands. 4+: quadrants (last 4 words).
   function cellBackground(list) {

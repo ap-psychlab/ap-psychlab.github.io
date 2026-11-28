@@ -57,17 +57,19 @@
   </section>
 
   <div class="split">
-    <section class="card board" aria-label="Word search">
-      <div class="grid" id="grid" role="grid" tabindex="0" aria-label="Letter grid. Use arrow keys to move, Enter or Space to mark the first and last letter, Escape to cancel."></div>
-      <div class="stats" aria-label="Progress">
-        <div class="stat"><span>Found</span><strong id="foundV">0 / 0</strong></div>
-        <div class="stat"><span>Level</span><strong id="levelV">Easy</strong></div>
-      </div>
-      <div class="done" id="done" hidden>
-        <h2>Puzzle complete!</h2>
-        <p id="doneText"></p>
-        <div class="row">
-          <button class="btn ghost" id="againBtn" type="button">Play another</button>
+    <section class="card board" id="board" aria-label="Word search">
+      <div class="board-fit" id="boardFit">
+        <div class="grid" id="grid" role="grid" tabindex="0" aria-label="Letter grid. Use arrow keys to move, Enter or Space to mark the first and last letter, Escape to cancel."></div>
+        <div class="stats" id="stats" aria-label="Progress">
+          <div class="stat"><span>Found</span><strong id="foundV">0 / 0</strong></div>
+          <div class="stat"><span>Level</span><strong id="levelV">Easy</strong></div>
+        </div>
+        <div class="done" id="done" hidden>
+          <h2>Puzzle complete!</h2>
+          <p id="doneText"></p>
+          <div class="row">
+            <button class="btn ghost" id="againBtn" type="button">Play another</button>
+          </div>
         </div>
       </div>
     </section>
